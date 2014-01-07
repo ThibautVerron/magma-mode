@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Welcome to dummymagma v1.0!"
+
+while true; do
+    read -p "> " line
+    echo $line
+    echo "42"
+done;
