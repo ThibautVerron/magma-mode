@@ -125,62 +125,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
     )
   )
 
-;; Let's try to get completion to work in the magma buffer, even with comint. !WIP!
 
-(defun magma-comint-list-completions-at-point ()
-  "Ask the magma process for completions at point."
-  (let* ((buf (magma-get-buffer))
-         (pmark (process-mark
-                 (get-buffer-process buf)))
-         (beg (marker-position pmark))
-         (start (save-excursion (beginning-of-line) (point)))
-         (end (save-excursion (end-of-line) (point)))
-         (str1 (buffer-substring-no-properties beg (point)))
-         (str2 (buffer-substring-no-properties (point) end)))
-    (comint-send-string buf (concat str1 "	"))
-    (when (looking-back "possibilities?[[:space:]]*" (- (point) 20))
-      (comint-send-string buf "y\n"))
-    (save-excursion
-      (beginning-of-line)
-      (delete-region start (point)))
-    (insert str2)
-    )
-  )
-
-(defun magma-comint-send-tab-at-point ()
-  (interactive)
-  (let* ((buf (current-buffer))
-         (pmark (process-mark
-                 (get-buffer-process buf)))
-         (beg (marker-position pmark))
-         (start (save-excursion (beginning-of-line) (point)))
-         (end (save-excursion (end-of-line) (point)))
-         (str1 (buffer-substring-no-properties beg (point)))
-         (str2 (buffer-substring-no-properties (point) end)))
-    (delete-region beg end)
-    (comint-send-string buf (concat str1 "\t" str2))
-      
-      ;; (search-backward str2)
-      ;; (goto-char (match-beginning 0))
-      ;; (end-of-buffer)
-
-    (comint-next-prompt 1)
-    ;;(backward-char (length str2))
-    ;; (backward-delete-char 1)
-    (comint-bol)
-    ;;(search-forward-regexp comint-prompt-regexp)
-    ;;(save-match-data
-    (forward-char (length str1))
-    (delete-char 1)
-    ;; (let* ((begnew (save-excursion (comint-bol) (point)))
-    ;;        (endnew (save-excursion (end-of-line) (point)))
-    ;;        (strnew (buffer-substring-no-properties begnew endnew)))
-    ;;   (comint-send-string buf "")
-    ;;   (insert strnew)))
-  ;;(goto-char (match-end 0))
-      ))
-
-    
    
 
 ;; Term-mode definitions
@@ -384,7 +329,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-kill 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
   (define-key magma-interactive-mode-map (kbd "RET") 'magma-comint-send-input)
-  (define-key magma-interactive-mode-map (kbd "C-<tab>") 'magma-comint-send-tab-at-point)
   )
 
 (defun magma-init-with-term ()
