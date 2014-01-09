@@ -1,9 +1,10 @@
 #!/bin/bash
 
 echo "Welcome to dummymagma v1.0!"
+echo "dummymagma : starting" &>3
 
 while true; do
     read -p "> " line
-    echo $line
-    echo "42"
+    echo "> $line"
+    echo "The answer is 42!"
 done;

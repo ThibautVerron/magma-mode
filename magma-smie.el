@@ -99,24 +99,25 @@
       (assoc ",")
       (assoc ":=")
 
-      (assoc "and")
-      (assoc "or")
-      (left "not")
-      (assoc "in")
-      (assoc "eq")
-      (assoc "ne")
-      (assoc "lt")
-      (assoc "le")
-      (assoc "gt")
-      (assoc "ge")
-      (assoc "^")
-      (assoc "*")
-      (assoc "/")
-      (assoc "cat")
-      (assoc "div")
-      (assoc "mod")
-      (assoc "-")
       (assoc "+")
+      (assoc "-")
+      (assoc "mod")
+      (assoc "div")
+      (assoc "cat")
+      (assoc "/")
+      (assoc "*")
+      (assoc "^")
+      (assoc "ge")
+      (assoc "gt")
+      (assoc "le")
+      (assoc "lt")
+      (assoc "ne")
+      (assoc "eq")
+      (assoc "in")
+      (left "not")
+      (assoc "or")
+      (assoc "and")
+      
       )
     )))
 
@@ -280,8 +281,13 @@
                 (point))))
      )))
 
-(defcustom magma-indent-basic 4 "Indentation of blocks")
-(defcustom magma-indent-args 4 "Indentation inside expressions")
+(defcustom magma-indent-basic 4 "Indentation of blocks"
+  :group 'magma
+  :type 'integer)
+(defcustom magma-indent-args 4
+  "Indentation inside expressions (currently mostly ignored)"
+  :group 'magma
+  :type 'integer)
 
 (defun magma-smie-rules (kind token)
   (pcase (cons kind token)

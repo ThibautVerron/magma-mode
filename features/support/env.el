@@ -11,7 +11,7 @@
 
 (add-to-list 'load-path magma-mode-root-path)
 
-(require 'magma-mode-init)
+(require 'magma-mode)
 (require 'espuds)
 (require 'ert)
 
@@ -19,7 +19,7 @@
  ;; Before anything has run
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
-       (f-join magma-mode-support-path "dummymagma"))
+       (f-join magma-mode-root-path "bin/dummymagma"))
  )
 
 (Before

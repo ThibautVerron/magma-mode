@@ -1,32 +1,25 @@
+;;; magma-mode.el --- Magma mode for GNU Emacs. ;
+
+;; Copyright (C) 2007-2013 Luk Bettale
+;;               2013-2013 Thibaut Verron
+;; Licensed under the GNU General Public License.
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+
+;;; Code:
+
 (provide 'magma-mode)
 
-(require 'f)
-
-(defvar magma-path (f-dirname (f-this-file)))
-
-
-(defun magma-in-literal ()
-  "Return the type of literal point is in, if any.
-The return value is `c' if in a C-style comment, `c++' if in a
-C++ style comment, `string' if in a string literal, `intrinsic'
-if in an intrinsic description or nil if somewhere else."
-  (let ((state (parse-partial-sexp (point-min) (point))))
-    (cond
-     ((and
-       (= (elt state 0) 1)
-       (= (char-after (elt state 1)) ?{)
-       (save-match-data
-         (looking-back
-          (concat
-           "\\<intrinsic\\>[^;]*"
-           (regexp-quote
-            (buffer-substring-no-properties
-             (elt state 1) (point)))))))
-      'intrinsic)
-     ((elt state 3) 'string)
-     ((elt state 4) (if (elt state 7) 'c++ 'c))
-     (t nil))))
-
+(defgroup magma nil "Major mode for editting magma-code")
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
@@ -40,87 +33,25 @@ if in an intrinsic description or nil if somewhere else."
       'magma-switch-to-interactive-buffer-same-frame)
     (define-key map "\C-co" 'magma-switch-to-interactive-buffer)
     (define-key map "\C-c\C-a" 'magma-restart)
-    (define-key map "\C-c\C-i" 'magma-restart)
+    (define-key map "\C-c\C-i" 'magma-int)
     (define-key map "\C-c\C-k" 'magma-kill)
+    (define-key map "\C-c\C-x" 'magma-send)
     map)
   "Keymap for magma-mode"
   )
 
-
-
-(define-key magma-mode-map (kbd "RET") 'magma-newline-and-indent)
-(define-key magma-mode-map (kbd "C-j") 'magma-newline-and-indent)
-(define-key magma-mode-map (kbd "C-c C-j") 'magma-special-newline-and-indent)
-(define-key magma-mode-map (kbd "C-RET") 'magma-special-newline-and-indent)
-
-(defun magma-not-in-comment-p ()
-  "Returns true only if we are not in a magma comment"
-  (let ((lit (magma-in-literal)))
-    (and (not (eq lit 'c))
-	 (not (eq lit 'c++))
-	 )
-    )
-  )
-
-(defun magma-eval-buffer-with-load ()
-  "Commande perso : évalue le buffer en envoyant \"load fichier\" si possible"
-  (interactive)
-  (let ((load-expr
-	 (save-excursion
-	   (goto-line 2)
-	   (forward-char 3)
-	   (looking-at "\\(load \".*\";\\)")
-	   (match-string 1)
-	   )
-	 ))
-    (if load-expr
-	(progn
-	  (save-buffer)
-	  (let ((cur-buffer (current-buffer)))
-	    (magma-switch-to-interactive-buffer)
-            (end-of-buffer)
-	    (insert load-expr)
-	    (term-send-input)
-	    )
-	  )
-      (magma-eval-buffer))
-    )
-  )
-
-(defun magma-eval-buffer-with-load ()
-  "Comme la précédente, mais avec comint"
-  (interactive)
-  (let ((load-expr
-	 (save-excursion
-	   (goto-line 2)
-	   (forward-char 3)
-	   (looking-at "\\(load \".*\";\\)")
-	   (match-string 1)
-	   )
-	 ))
-    (if load-expr
-        (magma-send load-expr)
-      (magma-eval-buffer))
-    )
-  )
-
-(define-key magma-mode-map (kbd "C-c C-b") 'magma-eval-buffer-with-load)
-
-
-;; Previous values were weird
-
 (defvar magma-mode-syntax-table
   (let ((st (make-syntax-table)))
-    (modify-syntax-entry ?/  ". 142"  st) ;; Fixed
-    (modify-syntax-entry ?*  ". 23b"  st) ;; Fixed
-    (modify-syntax-entry ?\n  ">"     st) ;; Fixed
-    (modify-syntax-entry ?\r  ">"     st) ;; Fixed
+    (modify-syntax-entry ?/  ". 142"  st) 
+    (modify-syntax-entry ?*  ". 23b"  st) 
+    (modify-syntax-entry ?\n  ">"     st) 
+    (modify-syntax-entry ?\r  ">"     st) 
     (modify-syntax-entry ?+  "."      st)
     (modify-syntax-entry ?-  "."      st)
     (modify-syntax-entry ?=  "."      st)
     (modify-syntax-entry ?!  "."      st)
-    (modify-syntax-entry ?<  "("      st) ;; Real change
-    (modify-syntax-entry ?>  ")"      st) ;; Real change
+    (modify-syntax-entry ?<  "("      st) 
+    (modify-syntax-entry ?>  ")"      st) 
     (modify-syntax-entry ?&  "."      st)
     (modify-syntax-entry ?#  "."      st)
     (modify-syntax-entry ?`  "."      st)
@@ -131,13 +62,7 @@ if in an intrinsic description or nil if somewhere else."
     st)
   "*Syntax table used while in `magma-mode'.")
 
-;; Also that didn't make any sense. Or did it? Yes it did. Too lazy to
-;; undo now, but make sure not to add that to the release.
-
-
-;; Here an attempt of fix for the indentation of stuff before end something
-
-(require 'magma-fancy-electric)
+(require 'magma-electric-newline)
 (require 'magma-font-lock)
 (require 'magma-smie)
 (require 'magma-interactive)
@@ -150,8 +75,6 @@ if in an intrinsic description or nil if somewhere else."
   (set-syntax-table magma-mode-syntax-table)
   (make-local-variable 'comment-start)
   (setq comment-start "/* ")
-  ;; (make-local-variable 'comment-padding)
-  ;; (setq comment-padding " * ")
   (make-local-variable 'comment-end)
   (setq comment-end " */")
   (smie-setup
@@ -165,16 +88,4 @@ if in an intrinsic description or nil if somewhere else."
 
   )
 
-(defun magma-mode-uninstall ()
-  (interactive)
-  "Unbinds some of the variables defined by magma-mode. Intended mainly
-for testing."
-  (dolist (var
-           '(magma-smie-grammar
-             magma-smie-tokens-regexp
-             magma-smie-end-tokens-regexp
-             magma-smie-operators-regexp
-             magma-smie-special1-regexp
-             magma-smie-special2-regexp))
-           (makunbound var))
-    )
+;;; magma-mode.el ends here

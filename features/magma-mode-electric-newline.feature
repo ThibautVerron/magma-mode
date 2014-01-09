@@ -1,7 +1,7 @@
 Feature: Fancy editting features
   In order to edit magma code
   As a user
-  I want to have fancy editting features
+  I want that newline has a special behavior
 
   Background:
     Given I am in buffer "*magma-test*"
