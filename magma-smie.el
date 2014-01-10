@@ -23,8 +23,10 @@
             ("if" ifbody "end if")
             ("case" expr "case:" caseinsts "end case")
             ("try" insts "catche" insts "end try")
-            ("function" id "(" funargs ")" insts "end function")
-            ("procedure" id "(" funargs ")" insts "end procedure")
+            ;; ("function" id "(" funargs ")" insts "end function")
+            ;; ("procedure" id "(" funargs ")" insts "end procedure")
+            ("function" id "fun(" funargs "fun)" insts "end function")
+            ("procedure" id "fun(" funargs "fun)" insts "end procedure")
             ("special1" specialargs)
             ("special2" specialargs "special:" specialargs)
             )
@@ -36,6 +38,8 @@
       ;; Expression
       (expr (id)
             ;;("(" expr ")")
+            ;; (expr "where" id "is" expr)
+            ;; (expr "select" expr "else" expr)
             (expr "+" expr)
             (expr "-" expr)
             (expr "*" expr)
@@ -54,8 +58,7 @@
             (expr "gt" expr)
             (expr "ge" expr)
             (expr "in" expr)
-
-            (id "(" funargs ")")
+            (funcall)
             ("[" listargs "]")
             ("<" listargs ">")
             )
@@ -67,6 +70,8 @@
                 (listargs "|" listargs))
 
       ;; What appears in a function or procedure arguments
+      ;;(funbody (id "fun(" funargs "fun)" insts))
+      (funcall (id "(" funargs ")"))
       (funargs (lfunargs)
                (lfunargs "paren:" rfunargs))
       (lfunargs (expr)
@@ -184,6 +189,51 @@
             (error (throw 'token "paren:"))))
         ))))
 
+(defun magma-looking-at-fun-openparen ()
+  "Returns t if we are currently looking at the open paren of a
+  block of function arguments."
+  (condition-case nil
+      (and (looking-at "(")
+           (save-excursion
+             (backward-word)
+             (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))
+    (error nil) ))
+
+(defun magma-looking-at-fun-closeparen ()
+  "Returns t if we are currently looking at the closing paren of a
+  block of function arguments."
+  (save-excursion
+    (forward-char)
+    (magma-looking-back-fun-closeparen)))
+  
+(defun magma-looking-back-fun-openparen ()
+  "Returns t if we are currently looking at the open paren of a
+  block of function arguments."
+  (save-excursion
+    (forward-char -1)
+    (magma-looking-at-fun-openparen)))
+
+(defun magma-looking-back-fun-closeparen ()
+  "Returns t if we are currently looking at the closing paren of a
+  block of function arguments."
+  (let ((forward-sexp-function nil))
+    (and (looking-back ")")
+         (save-excursion
+           (backward-sexp)
+           (magma-looking-at-fun-openparen)))))
+
+
+;; (defun magma-at-end-funcall-p ()
+;;   "Point is after a closing paren, returns t iff this closing
+;;   paren is the end of a funcall foo(bar...)"
+;;   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
+;;     (and (looking-back ")")
+;;          (save-excursion
+;;            (backward-sexp)
+;;            (backward-word)
+;;            (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))) 
+;;     )
+
 ;; (defun magma-identify-then ()
 ;;   "Point is on \"then\", identify whether we are in an if
 ;;   construct (returns \"ifthen\"), or in an elif
@@ -212,6 +262,12 @@
   (interactive)
   (forward-comment (point-max))
   (cond
+   ((magma-looking-at-fun-openparen)
+    (forward-char)
+    "fun(")
+   ((magma-looking-at-fun-closeparen)
+    (forward-char)
+    "fun)")
    ((looking-at magma-smie-operators-regexp)
     (goto-char (match-end 0))
     (match-string-no-properties 0))
@@ -251,6 +307,12 @@
            (move-beginning-of-line nil)
            (point))))
     (cond
+     ((magma-looking-back-fun-openparen)
+      (forward-char -1)
+      "fun(")
+     ((magma-looking-back-fun-closeparen)
+      (forward-char -1)
+      "fun)")
      ((looking-back magma-smie-operators-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
@@ -304,11 +366,17 @@
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)
 
+    ;; (`(:after . ")")
+    ;;  (when (smie-rule-parent-p "function" "procedure")
+    ;;    (smie-rule-parent magma-indent-basic)))
+    
+    ;;(`(:list-intro . ,(or `"function" `"procedure")) t)
+
     (`(:after . ,(or `"then" `"else")) (smie-rule-parent magma-indent-basic))
     (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
     
     (`(:after . ";") 0)
-
+;;    (`(:before . ";") (magma-rule-parent))
     )
   )
 

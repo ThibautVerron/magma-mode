@@ -304,3 +304,90 @@ Feature: Magma code indentation
     x := 1 +
             2 - 3;
     """
+
+  @function
+  Scenario: Indentation in functions
+    When I insert:
+    """
+    function test (x,y : z := 5)
+    x:=3+3;
+    return z;
+    end function;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    function test (x,y : z := 5)
+        x:=3+3;
+        return z;
+    end function;
+    """
+
+  @function
+  Scenario: Indentation of function calls out of nowhere
+    When I insert:
+    """
+    x := 2+2;
+    Reverse(list);
+    x := 2+2;
+    y := Reverse(list);
+    x := 2+2;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    x := 2+2;
+    Reverse(list);
+    x := 2+2;
+    y := Reverse(list);
+    x := 2+2;
+    """
+
+  @function
+  Scenario: Indentation of function calls in a block
+    When I insert:
+    """
+    for x in list do
+    x := 2+2;
+    Reverse(list);
+    x := 2+2;
+    y := Reverse(list);
+    x := 2+2;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in list do
+        x := 2+2;
+        Reverse(list);
+        x := 2+2;
+        y := Reverse(list);
+        x := 2+2;
+    end for;
+    """
+    
+  @function
+  Scenario: Indentation of function calls in a function block
+    When I insert:
+    """
+    function test(toto)
+    x := 2+2;
+    Reverse(list);
+    x := 2+2;
+    y := Reverse(list);
+    x := 2+2;
+    end function;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    function test(toto)
+        x := 2+2;
+        Reverse(list);
+        x := 2+2;
+        y := Reverse(list);
+        x := 2+2;
+    end function;
+    """
+
