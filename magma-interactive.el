@@ -371,6 +371,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
     ;; with the input line.
     (setq comint-use-prompt-regexp t)
     (setq comint-prompt-regexp magma-prompt-regexp)
+    (compilation-minor-mode 1)
     (add-to-list
      'compilation-error-regexp-alist
      '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
