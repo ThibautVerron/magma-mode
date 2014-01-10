@@ -23,8 +23,8 @@ with several magma processes.
 [magma-mode]: http://www-polsys.lip6.fr/~bettale/magma-mode/
 [SMIE]: http://www.gnu.org/software/emacs/manual/html_node/elisp/SMIE.html
 
-General purpose claims
-----------------------
+Information
+-----------
 
 This is beta software, all features are not yet fully implemented.
 For most usages, Luk Bettale's [magma-mode] offers a more complete and
@@ -36,7 +36,7 @@ Installation instructions
 1. Clone the repository in your favorite elisp folder
     
         cd <FavoriteElispFolder>
-        git clone 
+        git clone https://github.com/ThibautVerron/magma-mode.git
 
 2. Add the following to your emacs init file :
 
