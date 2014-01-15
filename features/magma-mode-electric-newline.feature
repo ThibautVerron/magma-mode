@@ -16,10 +16,9 @@ Feature: Fancy editting features
     And I go to beginning of buffer
     And I place the cursor between "is " and "a"
     And I press "RET"
-    And I place the cursor after "is "
-    And I press "C-f"
-    And I press "C-f"
-    And I press "C-k"
+    And I press "C-a"
+    And I press "C-b"
+    And I press "C-d"
     And I press "M-<SPC>"
     Then I should see:
     """
@@ -34,12 +33,9 @@ Feature: Fancy editting features
     And I go to beginning of buffer
     And I place the cursor between "is " and "a"
     And I press "C-c C-j"
-    And I place the cursor after "is "
-    And I press "C-f"
-    And I press "C-f"
-    And I press "C-f"
-    And I press "C-f"
-    And I press "C-k"
+    And I press "C-a"
+    And I press "C-b"
+    And I press "C-d"
     And I press "M-<SPC>"
     Then I should see:
     """
@@ -49,42 +45,43 @@ Feature: Fancy editting features
   Scenario: Newline in the middle of a C++ comment
     When I insert:
     """
-      // This is a comment
+    // This is a comment
     """
     And I go to beginning of buffer
     And I place the cursor between "is " and "a"
     And I press "RET"
     Then I should see:
     """
-      // This is
-      // a comment
+    // This is 
+    // a comment
     """
 
   Scenario: Newline at the end of a C++ comment
     When I insert:
     """
-      // This is a comment
+    // This is a comment
     """
     And I go to beginning of buffer
     And I place the cursor after "comment"
     And I press "RET"
+    And I press "a"
     Then I should see:
     """
-      // This is a comment
-      
+    // This is a comment
+    a
     """
 
-  Scenario: Fancy newline at the end of a C++ comment
+  Scenario: Modified newline at the end of a C++ comment
     When I insert:
     """
-      // This is a comment
+    // This is a comment
     """
     And I go to beginning of buffer
     And I place the cursor after "comment"
     And I press "C-c C-j"
     Then I should see:
     """
-      // This is a comment
-      // 
+    // This is a comment
+    // 
     """
 
