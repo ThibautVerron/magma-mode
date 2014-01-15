@@ -1,6 +1,7 @@
 (provide 'magma-interactive)
 
 (require 'comint)
+(require 'term)
 
 (defcustom magma-interactive-program "magma"
   "*Program to be launched to use magma (usually magma)"
@@ -29,13 +30,22 @@
   :group 'magma
   :type 'string)
 
-(defvar magma-interactive-mode-map
+(defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
+    ;; example definition
+    (define-key map "\t" 'completion-at-point)
+    (define-key map (kbd "RET") 'magma-comint-send-input)
+    map)
+  "Keymap for magma-interactive-mode")
+
+(defvar magma-term-interactive-mode-map
+  (let ((map (nconc (make-sparse-keymap) term-mode-map)))
     ;; example definition
     (define-key map "\t" 'completion-at-point)
     map)
   "Keymap for magma-interactive-mode")
-  
+
+
 (defvar magma-prompt-regexp "^[^ ]*> "
   "Regexp matching the magma prompt")
 
@@ -305,55 +315,53 @@ After changing this variable, restarting emacs is required (or reloading the mag
   )
 
 
+(define-derived-mode magma-comint-interactive-mode
+  comint-mode
+  "Magma-Interactive"
+  "Magma interactive mode (using comint)
+\\<magma-comint-interactive-mode-map>"
+  (setq comint-process-echoes t)
+  ;; This doesn't work because magma outputs the prompt, together
+  ;; with the input line.
+  (setq comint-use-prompt-regexp t)
+  (setq comint-prompt-regexp magma-prompt-regexp)
+  ;;(compilation-minor-mode 1)
+  ;; (add-to-list
+  ;;  'compilation-error-regexp-alist
+  ;;  '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
+  ;;    1 2 3 2 1)
+  ;;  )
+  (make-local-variable 'font-lock-defaults)
+  (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
+  )  
+
+(define-derived-mode magma-term-interactive-mode
+  term-mode
+  "Magma-Interactive"
+  "Magma interactive mode (using term)
+\\<magma-term-interactive-mode-map>"
+  (setq term-scroll-to-bottom-on-output t)
+  (make-local-variable 'font-lock-defaults)
+  (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
+  )  
+
+
 (defun magma-init-with-comint ()
-  (define-derived-mode magma-interactive-mode
-    comint-mode
-    "Magma-Interactive"
-    "Magma interactive mode (using comint)
-\\<magma-interactive-mode-map>"
-    (setq comint-process-echoes t)
-    ;; This doesn't work because magma outputs the prompt, together
-    ;; with the input line.
-    (setq comint-use-prompt-regexp t)
-    (setq comint-prompt-regexp magma-prompt-regexp)
-    (compilation-minor-mode 1)
-    (add-to-list
-     'compilation-error-regexp-alist
-     '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-       1 2 3 2 1)
-     )
-    (make-local-variable 'font-lock-defaults)
-    (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
-    )  
+  (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
   (defalias 'magma-int 'magma-comint-int)
   (defalias 'magma-kill 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
-  (define-key magma-interactive-mode-map (kbd "RET") 'magma-comint-send-input)
   )
 
 (defun magma-init-with-term ()
-  (define-derived-mode magma-interactive-mode
-    term-mode
-    "Magma-Interactive"
-    "Magma interactive mode (using term)
-\\<magma-interactive-mode-map>"
-    (setq term-scroll-to-bottom-on-output t)
-    (make-local-variable 'font-lock-defaults)
-    (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
-    )  
+  (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
   (defalias 'magma-run 'magma-term-run)
   (defalias 'magma-int 'magma-term-int)
   (defalias 'magma-kill 'magma-term-kill)
   (defalias 'magma-send 'magma-term-send)
-  (define-key magma-interactive-mode-map (kbd "RET") 'term-send-input)
   )
 
-
-(if magma-interactive-use-comint
-    (magma-init-with-comint)
-  (magma-init-with-term)
-  )
 
 
 
