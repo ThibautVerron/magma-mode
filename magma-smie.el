@@ -202,16 +202,20 @@
 (defun magma-looking-at-fun-closeparen ()
   "Returns t if we are currently looking at the closing paren of a
   block of function arguments."
-  (save-excursion
-    (forward-char)
-    (magma-looking-back-fun-closeparen)))
-  
+  (and
+   (not (eobp))
+   (save-excursion
+     (forward-char)
+     (magma-looking-back-fun-closeparen))))
+
 (defun magma-looking-back-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
-  (save-excursion
+  (and
+   (not (bobp))
+   (save-excursion
     (forward-char -1)
-    (magma-looking-at-fun-openparen)))
+    (magma-looking-at-fun-openparen))))
 
 (defun magma-looking-back-fun-closeparen ()
   "Returns t if we are currently looking at the closing paren of a
@@ -355,11 +359,12 @@
   (pcase (cons kind token)
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args)
-     (if (smie-rule-parent-p "special1" "special2")
+     (if (and (boundp 'smie--parent)
+              (smie-rule-parent-p "special1" "special2"))
          (smie-rule-parent)
        magma-indent-basic))
-    (`(,_ . ":=") (smie-rule-parent))
-
+    (`(,(or `:after `:before) . ":=") (smie-rule-parent))
+    (`(:list-intro . ":=") t)
     (`(:after . ,(or `"special1" `"special2")) 0)
     (`(:after . "special:") 0)
 
@@ -372,7 +377,8 @@
     
     ;;(`(:list-intro . ,(or `"function" `"procedure")) t)
 
-    (`(:after . ,(or `"then" `"else")) (smie-rule-parent magma-indent-basic))
+    (`(:after . ,(or `"then" `"else"))
+     (smie-rule-parent magma-indent-basic))
     (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
     
     (`(:after . ";") 0)

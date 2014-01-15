@@ -17,9 +17,10 @@
 
 ;;; Code:
 
-(provide 'magma-mode)
-
 (defgroup magma nil "Major mode for editting magma-code")
+
+(require 'cl)
+
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
@@ -86,6 +87,18 @@
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(magma-font-lock-keywords nil nil ((?_ . "w"))))
 
+  (make-local-variable 'indent-line-function)
+  (setq indent-line-function 'smie-indent-line)
+
+  (if magma-interactive-use-comint
+      (magma-init-with-comint)
+    (magma-init-with-term)
+    )
+
+
   )
+
+(provide 'magma-mode)
+
 
 ;;; magma-mode.el ends here
