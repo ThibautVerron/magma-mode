@@ -9,11 +9,14 @@
         )
       )
 
+(When "^I wait for \\([0-9]+\\) seconds?"
+  (lambda (arg)
+    (let ((duration (string-to-number arg)))
+      (sleep-for duration))))
+
 (When "^I indent the buffer"
       (lambda ()
-        (mark-whole-buffer)
-        (indent-region (point) (mark))
-        ))
+        (indent-region (point-min) (point-max))))
 
 (When "^I cut the line \\(before \".+\"\\|after \".+\"\\|between \".+\" and \".+\"\\)"
       (lambda (position)
@@ -35,3 +38,10 @@
     (let ((actual (buffer-string))
           (message "Expected \n\"\"\"\n%s\n\"\"\"\nto not be part of \n\"\"\"\n%s\n\"\"\"\nbut was."))
       (cl-assert (not (s-contains? expected actual)) nil message expected actual))))
+
+
+
+
+
+
+

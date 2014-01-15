@@ -1,25 +1,49 @@
 CASK ?= cask
 EMACS ?= emacs
 
+ECUKESFLAGS = --no-win
+
+ELFILES = magma-completion.el \
+	magma-electric-newline.el \
+	magma-font-lock.el \
+	magma-interactive.el \
+	magma-mode.el \
+	magma-smie.el
+
+STEPFILES = features/step-definitions/magma-mode-steps.el
+
+ENVFILES = features/support/env.el
+
+FEATFILES = features/magma-interaction.feature \
+	features/magma-mode-electric-newline.feature \
+	features/magma-mode.feature \
+	features/magma-mode-indentation.feature
+
+ECUKESFILES = $(STEPFILES) $(ENVFILES) $(FEATFILES)
+
 all: test
 
 test: ecukes
 
-unit:
+unit: $(ELFILES)
 	${CASK} exec ert-runner
 
-ecukes-debug:
-	${CASK} exec ecukes --only-failing --debug
+.ecukes-failing-scenarios: $(ELFILES) $(ECUKESFILES)
+	${CASK} exec ecukes $(ECUKESFLAGS)
 
-ecukes-fail:
-	${CASK} exec ecukes --only-failing
+ecukes-debug: .ecukes-failing-scenarios
+	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing --debug
 
-ecukes-all:
-	${CASK} exec ecukes
+ecukes-fail: .ecukes-failing-scenarios 
+	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing
+
+ecukes-all: $(ELFILES) $(ECUKESFILES)
+	${CASK} exec ecukes $(ECUKESFLAGS)
 
 ecukes: ecukes-fail ecukes-all
+
 
 install:
 	${CASK} install
 
-.PHONY:	all test unit ecukes install
+.PHONY:	all test unit ecukes install ecukes-all ecukes-fail ecukes-debug

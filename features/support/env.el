@@ -11,12 +11,15 @@
 
 (add-to-list 'load-path magma-mode-root-path)
 
-(require 'magma-mode)
 (require 'espuds)
 (require 'ert)
 
 (Setup
  ;; Before anything has run
+ ;;(setq condition-error-function )
+ (setq magma-interactive-use-comint t)
+ (setq magma-use-electric-newline t)
+ (require 'magma-mode)
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
        (f-join magma-mode-root-path "bin/dummymagma"))
@@ -32,4 +35,8 @@
 
 (Teardown
  ;; After when everything has been run
+ )
+
+(Fail
+ 
  )
