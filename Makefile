@@ -16,7 +16,6 @@ ENVFILES = features/support/env.el
 
 FEATFILES = features/magma-interaction.feature \
 	features/magma-mode-electric-newline.feature \
-	features/magma-mode.feature \
 	features/magma-mode-indentation.feature
 
 ECUKESFILES = $(STEPFILES) $(ENVFILES) $(FEATFILES)
