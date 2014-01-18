@@ -23,7 +23,7 @@ with several magma processes.
 ** Information
 
 This is beta software, all features are not yet fully implemented.
-For most usages, Luk Bettale's [magma-mode] offers a more complete and
+For most usages, Luk Bettale's [[magma-mode:]] offers a more complete and
 stable set of features.
 
 ** Installation instructions
