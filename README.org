@@ -6,24 +6,24 @@
 ** Basics
 
 This is a mode for editting input files for the computer algebra
-software [[magma:][Magma]] in emacs.
+software [[http://magma.maths.usyd.edu.au/magma/][Magma]] in emacs.
 
-It is based on the [[magma-mode:][magma-mode]] written by Luk Bettale.  The font-lock
+It is based on the [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
 The new features of this mode are principally a new indentation
-engine, based on [[emacs-lisp:SMIE.html][SMIE]] and a new way of interacting with a magma
+engine, based on [[http://www.gnu.org/software/emacs/manual/html_node/elisp/SMIE.html][SMIE]] and a new way of interacting with a magma
 process, through comint.
 
 On the other hand, this mode lacks a lot of features offered by Luk
-Bettale's [[magma-mode:][magma-mode]], for example the ability to easily communicate
+Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]], for example the ability to easily communicate
 with several magma processes.
 
 ** Information
 
 This is beta software, all features are not yet fully implemented.
-For most usages, Luk Bettale's [[magma-mode:]] offers a more complete and
+For most usages, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode] offers a more complete and
 stable set of features.
 
 ** Installation instructions
