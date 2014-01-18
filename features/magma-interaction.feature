@@ -8,10 +8,10 @@ Feature: Interaction with a magma process
     And the buffer is empty
     And I turn on magma-mode 
     When I press "C-c C-o"
+    And I wait for 1 second
    
   Scenario: Start a magma process
     When I press "C-x o"
-    And I wait for 1 second
     Then I should be in buffer "*magma*"
     And I should see "Welcome to dummymagma v1.0!"
     And I should see "> "
