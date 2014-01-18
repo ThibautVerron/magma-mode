@@ -30,48 +30,48 @@ stable set of features.
 
 1. Clone the repository in your favorite elisp folder
 
-#+begin_src shell-script
-   cd <FavoriteElispFolder>
-   git clone https://github.com/ThibautVerron/magma-mode.git
-#+end_src    
-
+   #+begin_src shell-script
+      cd <FavoriteElispFolder>
+      git clone https://github.com/ThibautVerron/magma-mode.git
+   #+end_src    
+   
 2. Add the following to your emacs init file :
 
-#+begin_src emacs-lisp
-   (add-to-list 'load-path "<FavoriteElispFolder>/magma-mode")
-   (require 'magma-mode "<FavoriteElispFolder>/magma-mode/magma-mode.el")
-   ;; Or simply (require 'magma-mode) if you aren't using any other magma-mode
-#+end_src
+   #+begin_src emacs-lisp
+      (add-to-list 'load-path "<FavoriteElispFolder>/magma-mode")
+      (require 'magma-mode "<FavoriteElispFolder>/magma-mode/magma-mode.el")
+      ;; Or simply (require 'magma-mode) if you aren't using any other magma-mode
+   #+end_src
 
 3. Additional setup:
 
-#+begin_src emacs-lisp 
-   ;; If you want to load the mode automatically with some file extensions
-   (setq auto-mode-alist
-   (append '(("\\.mgm$\\|\\.m$" . magma-mode))
-   auto-mode-alist))
-   
-   ;; If you need to use a different magma path
-   (setq magma-interactive-program "magma")
-   
-   ;; If you need to pass specific arguments to magma
-   (setq magma-interactive-arguments '())
-   
-   ;; At the moment, the following options need to be inserted
-   ;; *before* "(require 'magma-mode')", and you need to either
-   ;; restart emacs or reload the magma loadfile after changing
-   ;; it. It is a design flaw and should be fixed in the future.
-   
-   ;; If you want to use comint instead of term.
-   
-   (setq magma-interactive-use-comint t)
-   
-   ;; Electric return key (try RET or C-j, or C-c C-j) while in a
-   ;; string or comment. Like it or hate it, enable it or disable
-   ;; it. This is beta, might ruin the indentation of your document,
-   ;; crash emacs or eat your cat.
-   (setq magma-use-electric-newline t)
-#+end_src
+   #+begin_src emacs-lisp 
+      ;; If you want to load the mode automatically with some file extensions
+      (setq auto-mode-alist
+      (append '(("\\.mgm$\\|\\.m$" . magma-mode))
+      auto-mode-alist))
+      
+      ;; If you need to use a different magma path
+      (setq magma-interactive-program "magma")
+      
+      ;; If you need to pass specific arguments to magma
+      (setq magma-interactive-arguments '())
+      
+      ;; At the moment, the following options need to be inserted
+      ;; *before* "(require 'magma-mode')", and you need to either
+      ;; restart emacs or reload the magma loadfile after changing
+      ;; it. It is a design flaw and should be fixed in the future.
+      
+      ;; If you want to use comint instead of term.
+      
+      (setq magma-interactive-use-comint t)
+      
+      ;; Electric return key (try RET or C-j, or C-c C-j) while in a
+      ;; string or comment. Like it or hate it, enable it or disable
+      ;; it. This is beta, might ruin the indentation of your document,
+      ;; crash emacs or eat your cat.
+      (setq magma-use-electric-newline t)
+   #+end_src
 
 ** Comint vs term
 
@@ -125,14 +125,14 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
 
    Example: (the [] indicates the point)
 
-#+begin_src 
-   x := "a long sentence, really, a long sentence, [a]nd even a few more words";
-   
-   <RET> --->
-   
-   x := "a long sentence, really, a long sentence, "
-   cat "and even a few more words";
-#+end_src
+   #+begin_src 
+      x := "a long sentence, really, a long sentence, [a]nd even a few more words";
+      
+      <RET> --->
+      
+      x := "a long sentence, really, a long sentence, "
+      cat "and even a few more words";
+   #+end_src
     
 
    This shouldn't change the way your code is evaluated.
@@ -142,22 +142,22 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
 
-#+begin_src    
-   // Comment []
-   
-   <C-RET> --->
-   
-   // Comment 
-   // []
-#+end_src
+   #+begin_src    
+      // Comment []
+      
+      <C-RET> --->
+      
+      // Comment 
+      // []
+   #+end_src
 
    and in a string, it will insert an explicit newline character:
 
-#+begin_src 
-   x := "a long sentence, really, a long sentence, [a]nd even a few more words";
-   
-   <RET> --->
-   
-   x := "a long sentence, really, a long sentence, \\n"
-   cat "and even a few more words";"
-#+end_src
+   #+begin_src 
+      x := "a long sentence, really, a long sentence, [a]nd even a few more words";
+      
+      <RET> --->
+      
+      x := "a long sentence, really, a long sentence, \\n"
+      cat "and even a few more words";"
+   #+end_src
