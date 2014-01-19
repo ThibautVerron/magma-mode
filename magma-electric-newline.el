@@ -41,7 +41,7 @@ if in an intrinsic description or nil if somewhere else."
   "Inserts a newline in a magma string"
   (progn
     (insert "\"")
-    (newline-and-indent)
+    (magma-newline-and-indent)
     (insert "cat \"")
     (if (looking-at-end-of-line)
 	(progn 
@@ -60,10 +60,10 @@ if in an intrinsic description or nil if somewhere else."
     )
   )
 
-(defun magma-special-newline-when-in-cpp-comment ()
+(defun magma-special-newline-when-in-c-comment ()
   "Inserts a newline in a C++-like comment"
   (progn
-    (newline-and-indent)
+    (magma-newline-and-indent)
     (insert "// ")
     )
   )
@@ -71,9 +71,9 @@ if in an intrinsic description or nil if somewhere else."
 (defun magma-newline-when-in-c-comment ()
   "Insert a newline in a C-like comment, preserving the comment
   structure if we're not at the end of line"
-  (if (looking-at "[[:space:]]*[^[:space:]].*$")
-      (magma-special-newline-when-in-cpp-comment)
-    (newline-and-indent))
+  (if (looking-at "[[:space:]]*[^[:space:]\n].*$")
+      (magma-special-newline-when-in-c-comment)
+    (magma-newline-and-indent))
   )
 
 (defun magma-newline-when-in-cpp-comment ()
@@ -95,22 +95,30 @@ if in an intrinsic description or nil if somewhere else."
   )
 
 (defun magma-newline-and-indent ()
+  "Like newline-and-indent, but without deleting the trailing spaces"
+  (interactive)
+  (newline)
+  (magma-indent-line)
+  )
+
+(defun magma-insert-newline ()
   "Inserts a newline depending on where the point is"
   (interactive)
   (cl-case (magma-in-literal)
     ('string (magma-newline-when-in-string))
     ('c (magma-newline-when-in-c-comment))
     ('c++ (magma-newline-when-in-cpp-comment))
-    (t (newline-and-indent))
+    (t (magma-newline-and-indent))
     )
   )
 
-(defun magma-special-newline-and-indent ()
+(defun magma-insert-special-newline ()
   "Inserts a special newline depending on where the point is"
   (interactive)
   (cl-case (magma-in-literal)
     ('string (magma-special-newline-when-in-string))
-    ('c++ (magma-special-newline-when-in-cpp-comment))
+    ('c (magma-special-newline-when-in-c-comment))
+    ('c++ (magma-newline-when-in-cpp-comment))
     (t (magma-newline-and-indent))
     )
   )
@@ -124,12 +132,12 @@ if in an intrinsic description or nil if somewhere else."
 
 (if magma-use-electric-newline
     (progn
-      (define-key magma-mode-map (kbd "RET") 'magma-newline-and-indent)
-      (define-key magma-mode-map (kbd "C-j") 'magma-newline-and-indent)
+      (define-key magma-mode-map (kbd "RET") 'magma-insert-newline)
+      (define-key magma-mode-map (kbd "C-j") 'magma-insert-newline)
       (define-key magma-mode-map (kbd "C-c C-j")
-        'magma-special-newline-and-indent)
-      (define-key magma-mode-map (kbd "C-RET")
-        'magma-special-newline-and-indent)
+        'magma-insert-special-newline)
+      (define-key magma-mode-map (kbd "C-<return>")
+        'magma-insert-special-newline)
       )
   (progn
     (define-key magma-mode-map (kbd "RET") nil)

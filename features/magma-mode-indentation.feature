@@ -58,6 +58,7 @@ Feature: Magma code indentation
     end for;
     """
     
+    @wishlist
   Scenario: Indentation of C comments in blocks
     When I insert:
     """
@@ -108,7 +109,7 @@ Feature: Magma code indentation
     And I cut the line before "tete"
     Then I should see:
     """
-    x := [  tutu,
+    x := [  tutu, 
             tete]
     """
     
@@ -133,7 +134,7 @@ Feature: Magma code indentation
     And I cut the line before "cat"
     Then I should see:
     """
-    print "toto"
+    print "toto" 
           cat "tata";
     """
     
@@ -146,7 +147,7 @@ Feature: Magma code indentation
     And I cut the line before "tata"
     Then I should see:
     """
-    vprintf Test : "toto %%%%o",
+    vprintf Test : "toto %%%%o", 
             tata; 
     """
 
@@ -246,9 +247,9 @@ Feature: Magma code indentation
     And I cut the line before "+"
     Then I should see:
     """
-    x := test(y :
-              z := 3,
-              longvariablename := 5
+    x := test(y : 
+              z := 3, 
+              longvariablename := 5 
                   + t);
     """
     
@@ -262,8 +263,8 @@ Feature: Magma code indentation
     And I cut the line before "]"
     Then I should see:
     """
-    k := [x : x in l |
-          false
+    k := [x : x in l | 
+          false 
           or x eq 0
          ]
     """
