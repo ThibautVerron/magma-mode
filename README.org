@@ -134,7 +134,6 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
       cat "and even a few more words";
    #+end_src
     
-
    This shouldn't change the way your code is evaluated.
 
  - =C-RET= or =C-c C-j= (=magma-special-newline-and-indent=): inserts
