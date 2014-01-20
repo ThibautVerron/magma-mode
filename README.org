@@ -77,20 +77,20 @@ stable set of features.
 
 =Term-mode= will basically render the magma experience you would have in
 a regular terminal emulator, outside of emacs. Only the prompt can be
-written, =C-p= or =C-n= browse the history instead of scrolling the
-window, *et caetera*.
+written, =C-p= and =C-n= browse the history instead of scrolling the
+window, /et caetera/.
 
 Another specificity of term-mode is that it intercepts some prefix
 keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
 be replaced with =C-c=.
 So for example, if you need to switch from your magma code buffer to the magma process buffer, then switch back, you'll first press =C-x o= (=other-window=), then =C-c o=.
 
-This can be changed by turning on =term-line-mode= (=C-c C-j=), but this changes the behavior of =term-mode= way beyond the mere interception of signals. To change back to the regular behavior, turn on =term-char-mode= (=C-x C-k=).
+This can be changed by turning on =term-line-mode= (=C-c C-j=), but this changes the behavior of =term-mode= way beyond the mere interception of signal keys. To change back to the regular behavior, turn on =term-char-mode= (=C-x C-k=).
 
-On the other hand, comint-mode spawns an interactive process in a
+On the other hand, =comint-mode= spawns an interactive process in a
 full-featured emacs buffer. You can scroll using the usual keys, you can edit the output of previous commands... It is mostly equivalent to =term-mode= with =term-line-mode=, but in my experience, it suffers from less minor bugs.
 
-Another point to note is that =term-mode= sends input to a terminal, and magma is run in that terminal. Getting the whole thing to run under different systems (windows...) can prove tricky. On the other hand, comint starts the magma process directly from emacs, and so does not have this kind of requirements.
+Another point to note is that =term-mode= sends input to a terminal, and magma is run in that terminal. Getting the whole thing to run under different systems (windows...) can prove tricky. On the other hand, =comint= starts the magma process directly from emacs, and so does not have this kind of requirements.
 
 ** Keymap
 *** In an editting window
