@@ -1,7 +1,7 @@
 ;;; magma-mode.el --- Magma mode for GNU Emacs. ;
 
-;; Copyright (C) 2007-2013 Luk Bettale
-;;               2013-2013 Thibaut Verron
+;; Copyright (C) 2007-2014 Luk Bettale
+;;               2013-2014 Thibaut Verron
 ;; Licensed under the GNU General Public License.
 
 ;; This program is free software; you can redistribute it and/or
@@ -24,20 +24,22 @@
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map "\C-c\C-e" 'magma-eval)
-    (define-key map "\C-c\C-u" 'magma-eval-until)
-    (define-key map "\C-c\C-l" 'magma-eval-line)
-    (define-key map "\C-c\C-p" 'magma-eval-paragraph)
-    (define-key map "\C-c\C-b" 'magma-eval-buffer)
-    (define-key map "\C-c\C-n" 'magma-set-working-buffer)
-    (define-key map "\C-c\C-o"
+    (define-key map (kbd "C-c :") 'magma-send)
+    (define-key map (kbd "C-c C-e") 'magma-eval)
+    (define-key map (kbd "C-c C-u") 'magma-eval-until)
+    (define-key map (kbd "C-c C-l") 'magma-eval-line)
+    (define-key map (kbd "C-c C-p") 'magma-eval-paragraph)
+    (define-key map (kbd "C-c C-b") 'magma-eval-buffer)
+    (define-key map (kbd "C-c C-n") 'magma-set-working-buffer)
+    (define-key map (kbd "C-c C-o")
       'magma-switch-to-interactive-buffer-same-frame)
-    (define-key map "\C-co" 'magma-switch-to-interactive-buffer)
-    (define-key map "\C-c\C-a" 'magma-restart)
-    (define-key map "\C-c\C-i" 'magma-int)
-    (define-key map "\C-c\C-k" 'magma-kill)
-    (define-key map "\C-c\C-x" 'magma-send)
-    map)
+    (define-key map (kbd "C-c o") 'magma-switch-to-interactive-buffer)
+    (define-key map (kbd "C-c C-a") 'magma-restart)
+    (define-key map (kbd "C-c C-i") 'magma-int)
+    (define-key map (kbd "C-c C-k") 'magma-kill)
+    (define-key map (kbd "C-c C-h") 'magma-help-word)
+    (define-key map (kbd "C-c C-w") 'magma-show-word)
+   map)
   "Keymap for magma-mode"
   )
 

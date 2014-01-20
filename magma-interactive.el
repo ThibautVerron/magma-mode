@@ -125,16 +125,29 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (comint-kill-subjob)
   )
 
-(defun magma-comint-send (expr &optional ins)
+(defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
-  (interactive "MExpression?\nP")
+  (interactive "P")
   (let ((command (concat expr "\n")))
-    (if ins
-        (comint-redirect-send-command-to-process command (current-buffer) (magma-get-buffer))
-      (comint-send-string (magma-get-buffer) command))
+    (comint-send-string (magma-get-buffer i) command))
     )
-  )
+  
 
+(defun magma-comint-help-word (topic)
+  "call-up the handbook in an interactive buffer for topic"
+  (interactive "sMagma help topic: ")
+  (make-comint-in-buffer (magma-get-buffer-name "help")
+                         (magma-make-buffer-name "help")
+                         magma-interactive-program
+                         magma-interactive-arguments)
+  (save-excursion
+    (set-buffer (magma-get-buffer "help"))
+    (magma-interactive-mode)
+    )
+  (comint-send-string
+   (magma-get-buffer "help")
+   (format "?%s\n" topic))
+  (display-buffer (magma-get-buffer "help")))
 
    
 
@@ -181,6 +194,21 @@ After changing this variable, restarting emacs is required (or reloading the mag
       (term-send-input)
       )))
 
+(defun magma-term-help-word (topic)
+  "call-up the handbook in an interactive buffer for topic"
+  (interactive "sMagma help topic: ")
+  (make-term (magma-get-buffer-name "help")
+             magma-interactive-program)
+  (save-excursion
+    (set-buffer (magma-get-buffer "help"))
+    (magma-interactive-mode)
+    (term-line-mode)
+    (term-show-maximum-output))
+  (term-send-string
+   (magma-get-buffer "help")
+   (format "?%s\n" topic))
+  (display-buffer (magma-get-buffer "help")))
+
 
 ;; Wrappers
 
@@ -206,18 +234,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (magma-run i)
   (display-buffer (magma-get-buffer i))
   )
-
-;; For all the evaluation functions, the universal argument causes the output
-;; to be pasted under the input as a comment. (TODO)
-;;
-;; With this, we aren't compatible with the settings for
-;; magma-mode.el. The reason is that I believe the magma process
-;; should only be set using magma-working-buffer-number, and maybe
-;; also changed with file-local variables. The only issue I can see
-;; with this is that it makes broadcasting a signal rather
-;; tedious. The key bindings also need to be rethought.
-
-
 
 
 (defun magma-eval-region (beg end)
@@ -280,25 +296,33 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive)
   (magma-eval-region (point-min) (point-max))
 )
-  
-(defvar magma-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map "\C-c\C-e" 'magma-eval)
-    (define-key map "\C-c\C-u" 'magma-eval-until)
-    (define-key map "\C-c\C-l" 'magma-eval-line)
-    (define-key map "\C-c\C-p" 'magma-eval-paragraph)
-    (define-key map "\C-c\C-b" 'magma-eval-buffer)
-    (define-key map "\C-c\C-n" 'magma-set-working-buffer)
-    (define-key map "\C-c\C-o"
-      'magma-switch-to-interactive-buffer-same-frame)
-    (define-key map "\C-co" 'magma-switch-to-interactive-buffer)
-    (define-key map "\C-c\C-a" 'magma-restart)
-    (define-key map "\C-c\C-i" 'magma-restart)
-    (define-key map "\C-c\C-k" 'magma-kill)
-    (define-key map "\C-c\C-x" 'magma-send)
-    map)
-  "Keymap for magma-mode"
-  )
+
+(defun magma-help-word (&optional browser)
+  "call-up the handbook in the interactive buffer for the current word"
+  (interactive "P")
+  (let ((topic (read-string
+                (format "Magma help topic (default %s): " (current-word))
+                nil nil (current-word))))
+    (if browser
+        (magma-help-word-browser topic)
+      (magma-help-word-text topic))))
+
+(defun magma-help-word-browser (topic)
+  "open the magma help page in a web browser for topic"
+  (interactive "sMagma help topic: ")
+  (let ((urlprefix "http://magma.maths.usyd.edu.au/magma/handbook/")
+        (urlsuffix "&chapters=1&examples=1&intrinsics=1"))
+    (browse-url (concat urlprefix "search?query=" topic urlsuffix))))
+
+
+(defun magma-show-word (&optional i)
+  "show the current word in magma"
+  (interactive "P")
+  (let ((word (current-word)))
+    (magma-run)
+    (magma-send
+     (concat word ";") i)))
+
 
 (defun magma-comint-send-input ()
   "Replaces comint-send-input in order to delete the reechoing of
@@ -325,7 +349,9 @@ After changing this variable, restarting emacs is required (or reloading the mag
   ;; with the input line.
   (setq comint-use-prompt-regexp t)
   (setq comint-prompt-regexp magma-prompt-regexp)
-  ;;(compilation-minor-mode 1)
+  ;; (make-local-variable 'compilation-minor-mode-map)
+  ;; (setq compilation-minor-mode-map magma-comint-interactive-mode-map)
+  ;; (compilation-minor-mode 1)
   ;; (add-to-list
   ;;  'compilation-error-regexp-alist
   ;;  '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
@@ -352,6 +378,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-int 'magma-comint-int)
   (defalias 'magma-kill 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
+  (defalias 'magma-help-word-text 'magma-comint-help-word)
   )
 
 (defun magma-init-with-term ()
@@ -360,6 +387,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-int 'magma-term-int)
   (defalias 'magma-kill 'magma-term-kill)
   (defalias 'magma-send 'magma-term-send)
+  (defalias 'magma-help-word-text 'magma-term-help-word)
   )
 
 
