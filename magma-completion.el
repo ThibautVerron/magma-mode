@@ -30,6 +30,7 @@
          (end (cdr bounds)))
     (list start end magma-completion-table-base)))
 
-(add-hook 'magma-interactive-mode-hook
+(add-hook 'magma-comint-interactive-mode-hook
           (lambda () (add-to-list 'completion-at-point-functions 'magma-completion-at-point)))
 
+(provide 'magma-completion)

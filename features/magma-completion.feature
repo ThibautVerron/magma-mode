@@ -1,4 +1,3 @@
-@wishlist
 Feature: Magma completion mechanism
   In order to use magma with comint in emacs
   I will need to have a proper completion engine
@@ -8,43 +7,39 @@ Feature: Magma completion mechanism
     And the buffer is empty
     And I turn on magma-mode 
     When I press "C-c C-o"
+    And I press "C-x o"
     And I wait for 1 second
-    And I press "C-x C-o"
-
-
+    
   Scenario: Completion at the end of a line, one candidate
     Given I insert "SetVerbo"
-    And I start an action chain
     And I press "TAB"
-    And I press "RET"
-    And I execute the action chain
     Then I should see "> SetVerbose"
     When I press "RET"
     Then I should see "SetVerbose"
     And I should not see "SetVerboSetVerbose"
+    
 
   Scenario: Completion at the end of a line, multiple candidates
-    Given I insert "Set"
+    Given I press "RET"
+    And I insert "Set"
     And I press "TAB"
-    And I switch to buffer "*completion*"
-    Then I should see:
-    """
-    Set
-    SetAllInvariantsOfDegree
-    SetAssertions
-    """
+    Then I should see message "Complete, but not unique"
+    If I type "A"
+    And I press "TAB"
+    And I switch to buffer "*Completions*"
+    Then I should see "SetAllInvariantsOfDegree"
+    And I should see "SetAssertions"
+    And I should not see "SetBufferSize"
     When I place the cursor before "AllInvariants"
     And I press "RET"
     Then I should be in buffer "*magma*"
     And I should see "SetAllInvariantsOfDegree"
-
+    
   Scenario: Completion in the middle of a line, one candidate
-    Given I insert "toto(SetVerbo)tata"
+    Given I press "RET"
+    And I insert "toto(SetVerbo)tata"
     And I place the cursor before ")tata"
-    And I start an action chain
     And I press "TAB"
-    And I press "RET"
-    And I execute the action chain
     Then I should see "> toto(SetVerbose)tata"
     When I press "RET"
     Then I should see "toto(SetVerbose)tata"
@@ -56,10 +51,11 @@ Feature: Magma completion mechanism
     
 
   Scenario: Picking candidates from the manual index
-    Given I insert "SetVerbo"
+    Given I press "RET"
+    And I insert "SetVerbo"
     And I press "TAB"
     Then I should see "SetVerbose"
-
+    
   Scenario: Picking candidates from the user input
 
 

@@ -1,7 +1,7 @@
-(provide 'magma-interactive)
-
 (require 'comint)
 (require 'term)
+
+(require 'magma-completion)
 
 (defcustom magma-interactive-program "magma"
   "*Program to be launched to use magma (usually magma)"
@@ -412,4 +412,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
 ;; fun magma-help-word-term (topic)
 ;; fun magma-help-word-browser (topic)
 ;; var magma-interactive-font-lock-keywords
+
+(provide 'magma-interactive)
 

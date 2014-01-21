@@ -68,12 +68,12 @@
 (require 'f)
 (require 'thingatpt)
 
+(defvar magma-path (f-dirname (f-this-file)))
+
 (require 'magma-electric-newline)
 (require 'magma-font-lock)
 (require 'magma-smie)
 (require 'magma-interactive)
-
-(defvar magma-path (f-dirname (f-this-file)))
 
 
 (define-derived-mode magma-mode
