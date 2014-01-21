@@ -1,3 +1,4 @@
+# -*- eval: (auto-fill-mode 1); -*-
 #LINK: magma      http://magma.maths.usyd.edu.au/magma/
 #LINK: magma-mode http://www-polsys.lip6.fr/~bettale/magma-mode/
 #LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
@@ -76,21 +77,34 @@ stable set of features.
 ** Comint vs term
 
 =Term-mode= will basically render the magma experience you would have in
-a regular terminal emulator, outside of emacs. Only the prompt can be
+a regular terminal emulator, regardless of emacs. Only the prompt can be
 written, =C-p= and =C-n= browse the history instead of scrolling the
 window, /et caetera/.
 
 Another specificity of term-mode is that it intercepts some prefix
 keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
-be replaced with =C-c=.
-So for example, if you need to switch from your magma code buffer to the magma process buffer, then switch back, you'll first press =C-x o= (=other-window=), then =C-c o=.
+be replaced with =C-c=.  So for example, if you need to switch from
+your magma code buffer to the magma process buffer, then switch back,
+you'll first press =C-x o= (=other-window=), then =C-c o=.
 
-This can be changed by turning on =term-line-mode= (=C-c C-j=), but this changes the behavior of =term-mode= way beyond the mere interception of signal keys. To change back to the regular behavior, turn on =term-char-mode= (=C-x C-k=).
+This can be changed by turning on =term-line-mode= (=C-c C-j=), but
+this changes the behavior of =term-mode= way beyond the mere
+interception of signal keys. To change back to the regular behavior,
+turn on =term-char-mode= (=C-x C-k=). Another option is to use =C-c o=
+(=magma-switch-to-interactive-buffer-same-frame=) instead of =C-x o=
+in the editting window.
 
 On the other hand, =comint-mode= spawns an interactive process in a
-full-featured emacs buffer. You can scroll using the usual keys, you can edit the output of previous commands... It is mostly equivalent to =term-mode= with =term-line-mode=, but in my experience, it suffers from less minor bugs.
+full-featured emacs buffer. You can scroll using the usual keys, you
+can edit the output of previous commands... It is mostly equivalent to
+=term-mode= with =term-line-mode=, but in my experience, it suffers
+from less minor bugs.
 
-Another point to note is that =term-mode= sends input to a terminal, and magma is run in that terminal. Getting the whole thing to run under different systems (windows...) can prove tricky. On the other hand, =comint= starts the magma process directly from emacs, and so does not have this kind of requirements.
+Another point to note is that =term-mode= sends input to a terminal,
+and magma is run in that terminal. Getting the whole thing to run
+under different systems (windows...) can prove tricky. On the other
+hand, =comint= starts the magma process directly from emacs, and so
+does not have this kind of requirements.
 
 ** Keymap
 *** In an editting window
@@ -103,8 +117,11 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
  - =C-c C-k= (=magma-kill=): kill the magma process
  - =C-c C-i= (=magma-int=): interrupt the magma process
  - =C-c C-a= (=magma-restart=): restart the magma process
- - =C-c C-x= (=magma-send=): send an expression to the magma process
- - =C-c C-l= (=magma-eval-line=): send the current line to the magma process
+ - =C-c := (=magma-send=): send an expression to the magma process
+ - =C-c C-w (=magma-show-word=): show the value of the word at point
+   in the magma buffer
+ - =C-c C-l= (=magma-eval-line=): send the current line to the magma
+   process
  - =C-c C-r= (=magma-eval-region=): send the current region to the
    magma process
  - =C-c C-b= (=magma-eval-buffer=): send the current buffer to the
@@ -115,6 +132,8 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
    to the point to the magma process
  - =C-c C-p= (=magma-eval-paragraph=): send the current paragraph to
    the magma process
+ - =C-c h= (=magma-show-help=): prompt for a symbol, and shows the
+   magma help about that symbol
 
 *** In an editting window, with electric return activated
     
@@ -160,3 +179,4 @@ Another point to note is that =term-mode= sends input to a terminal, and magma i
       x := "a long sentence, really, a long sentence, \\n"
       cat "and even a few more words";"
    #+end_src
+
