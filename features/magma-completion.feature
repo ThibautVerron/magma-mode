@@ -24,7 +24,19 @@ Feature: Magma completion mechanism
     And I should not see "SetVerboSetVerbose"
 
   Scenario: Completion at the end of a line, multiple candidates
-    
+    Given I insert "Set"
+    And I press "TAB"
+    And I switch to buffer "*completion*"
+    Then I should see:
+    """
+    Set
+    SetAllInvariantsOfDegree
+    SetAssertions
+    """
+    When I place the cursor before "AllInvariants"
+    And I press "RET"
+    Then I should be in buffer "*magma*"
+    And I should see "SetAllInvariantsOfDegree"
 
   Scenario: Completion in the middle of a line, one candidate
     Given I insert "toto(SetVerbo)tata"
@@ -41,10 +53,12 @@ Feature: Magma completion mechanism
     
 
   Scenario: Completion in the middle of a line, multiple candidates
-
+    
 
   Scenario: Picking candidates from the manual index
-
+    Given I insert "SetVerbo"
+    And I press "TAB"
+    Then I should see "SetVerbose"
 
   Scenario: Picking candidates from the user input
 
