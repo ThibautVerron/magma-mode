@@ -14,6 +14,7 @@
 (require 'espuds)
 (require 'ert)
 
+
 (Setup
  ;; Before anything has run
  ;;(setq condition-error-function )
@@ -22,8 +23,9 @@
  (require 'magma-mode)
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
-       (f-join magma-mode-root-path "bin/dummymagma"))
- )
+       (let ((ext (if (eq system-type 'windows-nt) ".bat" ".sh")))
+       (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
+)
 
 (Before
  ;; Before each scenario is run
@@ -38,5 +40,5 @@
  )
 
 (Fail
- 
+ ;; After a scenario has failed
  )

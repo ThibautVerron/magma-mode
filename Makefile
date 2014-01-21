@@ -27,8 +27,7 @@ test: ecukes
 unit: $(ELFILES)
 	${CASK} exec ert-runner
 
-.ecukes-failing-scenarios: $(ELFILES) $(ECUKESFILES)
-	${CASK} exec ecukes $(ECUKESFLAGS)
+.ecukes-failing-scenarios: ecukes-all
 
 ecukes-debug: .ecukes-failing-scenarios
 	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing --debug
@@ -39,7 +38,7 @@ ecukes-fail: .ecukes-failing-scenarios
 ecukes-all: $(ELFILES) $(ECUKESFILES)
 	${CASK} exec ecukes $(ECUKESFLAGS)
 
-ecukes: ecukes-fail ecukes-all
+ecukes: ecukes-all
 
 
 install:
