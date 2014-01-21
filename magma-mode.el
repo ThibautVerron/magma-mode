@@ -65,10 +65,16 @@
     st)
   "*Syntax table used while in `magma-mode'.")
 
+(require 'f)
+(require 'thingatpt)
+
 (require 'magma-electric-newline)
 (require 'magma-font-lock)
 (require 'magma-smie)
 (require 'magma-interactive)
+
+(defvar magma-path (f-dirname (f-this-file)))
+
 
 (define-derived-mode magma-mode
   prog-mode
