@@ -20,7 +20,16 @@
 (defgroup magma nil "Major mode for editting magma-code")
 
 (require 'cl)
+(require 'f)
+(require 'thingatpt)
 
+(defvar magma-path (f-dirname (f-this-file)))
+(add-to-list 'load-path magma-path)
+
+(require 'magma-electric-newline)
+(require 'magma-font-lock)
+(require 'magma-smie)
+(require 'magma-interactive)
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
@@ -39,7 +48,7 @@
     (define-key map (kbd "C-c C-k") 'magma-kill)
     (define-key map (kbd "C-c C-h") 'magma-help-word)
     (define-key map (kbd "C-c C-w") 'magma-show-word)
-   map)
+    map)
   "Keymap for magma-mode"
   )
 
@@ -64,16 +73,6 @@
     (modify-syntax-entry ?$  "_"      st)
     st)
   "*Syntax table used while in `magma-mode'.")
-
-(require 'f)
-(require 'thingatpt)
-
-(defvar magma-path (f-dirname (f-this-file)))
-
-(require 'magma-electric-newline)
-(require 'magma-font-lock)
-(require 'magma-smie)
-(require 'magma-interactive)
 
 
 (define-derived-mode magma-mode
