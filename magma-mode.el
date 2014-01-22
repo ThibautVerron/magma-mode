@@ -24,7 +24,7 @@
 (require 'thingatpt)
 
 (defvar magma-path (f-dirname (f-this-file)))
-(add-to-list 'load-path magma-path)
+;;(add-to-list 'load-path magma-path)
 
 (require 'magma-electric-newline)
 (require 'magma-font-lock)
