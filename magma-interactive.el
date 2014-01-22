@@ -125,11 +125,9 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
-  (interactive "P")
   (let ((command (concat expr "\n")))
     (comint-send-string (magma-get-buffer i) command))
     )
-  
 
 (defun magma-comint-help-word (topic)
   "call-up the handbook in an interactive buffer for topic"
@@ -183,7 +181,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-term-send (expr &optional ins)
   "Send the expression expr to the magma buffer for evaluation."
-  (interactive "MExpression?\nP")
   (save-window-excursion
     (let ((command expr))
       (magma-switch-to-interactive-buffer)
@@ -210,6 +207,15 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 ;; Wrappers
 
+(defun magma-send-expression (expr &optional i)
+  (interactive "ip")
+  (let* ((initval (if (region-active-p)
+                      (buffer-substring-no-properties (region-beginning)
+                                                      (region-end))))
+         (expr
+          (or expr
+              (read-string "Expr:" initval))))
+    (magma-send expr i)))
 
 (defun magma-restart (&optional i)
   "Restart the magma process in buffer i"
@@ -349,14 +355,12 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (setq comint-use-prompt-regexp t)
   (setq comint-prompt-read-only t)
   (setq comint-prompt-regexp magma-prompt-regexp)
-  ;; (make-local-variable 'compilation-minor-mode-map)
-  ;; (setq compilation-minor-mode-map magma-comint-interactive-mode-map)
-  ;; (compilation-minor-mode 1)
-  ;; (add-to-list
-  ;;  'compilation-error-regexp-alist
-  ;;  '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-  ;;    1 2 3 2 1)
-  ;;  )
+  (compilation-shell-minor-mode 1)
+  (add-to-list
+   'compilation-error-regexp-alist
+   '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
+     1 2 3 2 1)
+   )
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   )  
@@ -368,6 +372,12 @@ After changing this variable, restarting emacs is required (or reloading the mag
 \\<magma-term-interactive-mode-map>"
   (setq term-scroll-to-bottom-on-output t)
   (make-local-variable 'font-lock-defaults)
+  (compilation-shell-minor-mode 1)
+  (add-to-list
+   'compilation-error-regexp-alist
+   '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
+     1 2 3 2 1)
+   )
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   )  
 
