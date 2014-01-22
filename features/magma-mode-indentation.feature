@@ -391,4 +391,25 @@ Feature: Magma code indentation
         x := 2+2;
     end function;
     """
-
+    
+  @bugfix
+  Scenario: Indentation of expression suffixed with comments
+    When I insert:
+    """
+    expr1;
+    expr2;
+    expr3; // comment1
+    expr4;
+    expr5; /* comment2 */
+    expr6;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    expr1;
+    expr2;
+    expr3; // comment1
+    expr4;
+    expr5; /* comment2 */
+    expr6;
+    """

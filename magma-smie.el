@@ -45,6 +45,8 @@
             (expr "*" expr)
             (expr "/" expr)
             (expr "^" expr)
+            (expr "!" expr)
+            (expr "." expr)
             (expr "cat" expr)
             (expr "div" expr)
             (expr "mod" expr)
@@ -112,6 +114,8 @@
       (assoc "/")
       (assoc "*")
       (assoc "^")
+      (assoc ".")
+      (assoc "!")
       (assoc "ge")
       (assoc "gt")
       (assoc "le")
@@ -303,6 +307,8 @@
               (point))))
    ))
 
+;; toto
+
 (defun magma-smie-backward-token ()
   (interactive)
   (forward-comment (- (point)))
@@ -381,7 +387,7 @@
      (smie-rule-parent magma-indent-basic))
     (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
     
-    (`(:after . ";") 0)
+;;    (`(:after . ";") 0)
 ;;    (`(:before . ";") (magma-rule-parent))
     )
   )
