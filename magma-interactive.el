@@ -32,16 +32,14 @@
 
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
-    ;; example definition
     (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "RET") 'magma-comint-send-input)
+    (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
     map)
   "Keymap for magma-interactive-mode")
 
 (defvar magma-term-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) term-mode-map)))
-    ;; example definition
-    (define-key map "\t" 'completion-at-point)
     map)
   "Keymap for magma-interactive-mode")
 
@@ -334,6 +332,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (end (save-excursion (end-of-line) (point)))
          (str (buffer-substring-no-properties beg end)))
     (delete-region beg end)
+    (comint-add-to-input-history str)
     (comint-send-string (current-buffer) (concat str "\n"))
     )
   )
@@ -345,9 +344,10 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Magma interactive mode (using comint)
 \\<magma-comint-interactive-mode-map>"
   (setq comint-process-echoes t)
-  ;; This doesn't work because magma outputs the prompt, together
+  ;; This doesn't work because magma outputs the prompting "> ", together
   ;; with the input line.
   (setq comint-use-prompt-regexp t)
+  (setq comint-prompt-read-only t)
   (setq comint-prompt-regexp magma-prompt-regexp)
   ;; (make-local-variable 'compilation-minor-mode-map)
   ;; (setq compilation-minor-mode-map magma-comint-interactive-mode-map)
