@@ -119,7 +119,7 @@ does not have this kind of requirements.
     only).
 
     Context-dependent completion, or automatic parsing of magma input
-    is not provided at the moment.
+    is not supported at the moment.
 
 *** Building the dictionary
     The =bin= folder contains a script named
@@ -162,6 +162,8 @@ does not have this kind of requirements.
     
     then follow the above instructions to build the completion table,
     but use =~/tmpmagma/= as the path to the magma installation.
+    
+    Afterwards, you can remove the directory =.tmpmagma= and the file =magmadoc.htm=.
 
 *** Invoking the completion
 
