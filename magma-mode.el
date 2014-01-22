@@ -71,6 +71,7 @@
 
 (require 'magma-font-lock)
 (require 'magma-smie)
+(require 'magma-imenu)
 (require 'magma-interactive)
 (require 'magma-electric-newline)
 
@@ -84,6 +85,7 @@
   (setq comment-start "/* ")
   (make-local-variable 'comment-end)
   (setq comment-end " */")
+  (setq imenu-generic-expression magma-imenu-generic-expression)
   (smie-setup
    magma-smie-grammar
    #'magma-smie-rules
