@@ -26,11 +26,6 @@
 (defvar magma-path (f-dirname (f-this-file)))
 ;;(add-to-list 'load-path magma-path)
 
-(require 'magma-electric-newline)
-(require 'magma-font-lock)
-(require 'magma-smie)
-(require 'magma-interactive)
-
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c :") 'magma-send)
@@ -74,6 +69,10 @@
     st)
   "*Syntax table used while in `magma-mode'.")
 
+(require 'magma-font-lock)
+(require 'magma-smie)
+(require 'magma-interactive)
+(require 'magma-electric-newline)
 
 (define-derived-mode magma-mode
   prog-mode
