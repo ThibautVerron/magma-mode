@@ -28,14 +28,14 @@
 (Then "^I should see\\(?: \"\\(.+\\)\"\\|:\\)$"
   "Asserts that the current buffer includes some text."
   (lambda (expected)
-    (let ((actual (buffer-string))
+    (let ((actual (buffer-substring-no-properties (point-min) (point-max)))
           (message "Expected \n\"\"\"\n%s\n\"\"\"\nto be part of \n\"\"\"\n%s\n\"\"\"\nbut was not."))
       (cl-assert (s-contains? expected actual) nil message expected actual))))
 
 (Then "^I should not see\\(?: \"\\(.+\\)\"\\|:\\)$"
   "Asserts that the current buffer does not include some text."
   (lambda (expected)
-    (let ((actual (buffer-string))
+    (let ((actual (buffer-substring-no-properties (point-min) (point-max)))
           (message "Expected \n\"\"\"\n%s\n\"\"\"\nto not be part of \n\"\"\"\n%s\n\"\"\"\nbut was."))
       (cl-assert (not (s-contains? expected actual)) nil message expected actual))))
 

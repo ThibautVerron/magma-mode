@@ -32,11 +32,13 @@ stable set of features.
 1. Clone the repository in your favorite elisp folder
 
    #+begin_src shell-script
-      cd <FavoriteElispFolder>
+      cd $favoriteElispFolder
       git clone https://github.com/ThibautVerron/magma-mode.git
    #+end_src    
+
+2. If needed, install the required package [[https://github.com/rejeep/f.el][f.el]]. 
    
-2. Add the following to your emacs init file :
+3. Add the following to your emacs init file :
 
    #+begin_src emacs-lisp
       (add-to-list 'load-path "<FavoriteElispFolder>/magma-mode")
@@ -44,7 +46,7 @@ stable set of features.
       ;; Or simply (require 'magma-mode) if you aren't using any other magma-mode
    #+end_src
 
-3. Additional setup:
+4. Additional setup:
 
    #+begin_src emacs-lisp 
       ;; If you want to load the mode automatically with some file extensions
@@ -105,6 +107,72 @@ and magma is run in that terminal. Getting the whole thing to run
 under different systems (windows...) can prove tricky. On the other
 hand, =comint= starts the magma process directly from emacs, and so
 does not have this kind of requirements.
+
+** Completion
+*** Introduction
+    A basic completion engine is provided, to be used in the magma
+    editting window, or in a magma interactive buffer using comint.
+
+    At the moment, it only provides completion against a
+    dictionary. This dictionary is not included at the moment, but if
+    you need to build it, we provide a script for doing so (linux
+    only).
+
+    Context-dependent completion, or automatic parsing of magma input
+    is not provided at the moment.
+
+*** Building the dictionary
+    The =bin= folder contains a script named
+    =build_completion_table.sh=. It is very basic, and the usage is
+    quite constrained.
+
+    The easiest case is the case where you are using =emacs= on a
+    machine running =magma=. 
+    
+    In this case, follow these instructions:
+    1. Find your magma installation directory;
+    2. Place yourself in the =magma-mode= directory;
+    3. Run the script:
+
+       #+begin_src shell-script
+         .../magma-mode$ bin/build_completion_table.sh $pathtomagma
+       #+end_src
+
+    4. The completion table will be in =data/magma_symbols.txt=
+    
+    In case you are running emacs on a different machine than the one
+    running magma, the easiest way is to first create a fake
+    documentation. Run the following on the magma machine:
+
+    #+begin_src shell-script
+      cd $pathtomagma/doc/html
+      
+      cat *.htm > ~/.magmadoc.htm
+    #+end_src
+
+    Then on the emacs machine:
+
+    #+begin_src shell-script
+       mkdir -p .tmpmagma/doc/html
+     
+       scp $magmamachine:.magmadoc.htm .tmpmagma/doc/html/
+      
+       cd .tmpmagma
+    #+end_src
+    
+    then follow the above instructions to build the completion table,
+    but use =~/tmpmagma/= as the path to the magma installation.
+
+*** Invoking the completion
+
+    In =magma-mode= and =magma-comint-interactive-mode=, the
+    dictionary supplies =completion-at-point= with completion
+    candidates. In =magma-comint-interactive-mode=,
+    =completion-at-point= is bound to =TAB=, and in =magma-mode= it
+    is not bound to any key by default. 
+
+    In =magma-term-interactive-mode= (with =term-char-mode=), completion is supported out of
+    the box by magma itself.
 
 ** Keymap
 *** In an editting window

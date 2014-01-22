@@ -46,10 +46,8 @@ Feature: Magma completion mechanism
     And I should not see "toto(SetVerbo)tatatoto(SetVerbose)tata"
     And I should not see "toto(SetVerboSetVerbose)tata"
     
-
   Scenario: Completion in the middle of a line, multiple candidates
     
-
   Scenario: Picking candidates from the manual index
     Given I press "RET"
     And I insert "SetVerbo"

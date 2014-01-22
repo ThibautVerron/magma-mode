@@ -33,4 +33,8 @@
 (add-hook 'magma-comint-interactive-mode-hook
           (lambda () (add-to-list 'completion-at-point-functions 'magma-completion-at-point)))
 
+(add-hook 'magma-mode-hook
+          (lambda () (add-to-list 'completion-at-point-functions 'magma-completion-at-point)))
+
+
 (provide 'magma-completion)
