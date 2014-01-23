@@ -40,6 +40,7 @@
             ;;("(" expr ")")
             ;; (expr "where" id "is" expr)
             ;; (expr "select" expr "else" expr)
+            ("~" expr)
             (expr "+" expr)
             (expr "-" expr)
             (expr "*" expr)
@@ -116,6 +117,7 @@
       (assoc "^")
       (assoc ".")
       (assoc "!")
+      (left "~")
       (assoc "ge")
       (assoc "gt")
       (assoc "le")
@@ -148,7 +150,7 @@
 (defvar magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
@@ -388,7 +390,7 @@
     (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
     
 ;;    (`(:after . ";") 0)
-;;    (`(:before . ";") (magma-rule-parent))
+;;    (`(:before . ";") 0)
     )
   )
 

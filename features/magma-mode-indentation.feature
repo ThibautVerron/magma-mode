@@ -392,7 +392,7 @@ Feature: Magma code indentation
     end function;
     """
     
-  @bugfix
+  @fixedbug
   Scenario: Indentation of expression suffixed with comments
     When I insert:
     """
@@ -413,3 +413,19 @@ Feature: Magma code indentation
     expr5; /* comment2 */
     expr6;
     """
+
+  @fixedbug
+  Scenario: Indentation of expressions containing a "~"
+    When I insert:
+    """
+    Reverse(~L);
+    expr;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    Reverse(~L);
+    expr;
+    """
+    
+  
