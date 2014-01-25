@@ -28,7 +28,7 @@
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c :") 'magma-send)
+    (define-key map (kbd "C-c :") 'magma-send-expression)
     (define-key map (kbd "C-c C-e") 'magma-eval)
     (define-key map (kbd "C-c C-u") 'magma-eval-until)
     (define-key map (kbd "C-c C-l") 'magma-eval-line)
