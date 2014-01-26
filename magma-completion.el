@@ -3,6 +3,7 @@
 ;; Base settings
 
 (defvar magma-completion-table-file (f-join magma-path "data/magma_symbols.txt"))
+
 (defun magma-build-initial-table (file)
   (interactive)
   (with-temp-buffer
@@ -13,19 +14,19 @@
 
 (defvar magma-completion-table-base
   (magma-build-initial-table magma-completion-table-file))
-  
+
+(defvar-local magma-completion-table nil)
   
 (defun magma-completion-at-point ()
   (let* ((bounds (bounds-of-thing-at-point 'word))
          (start (car bounds))
          (end (cdr bounds)))
-    (list start end magma-completion-table)))
+    (list start end magma-completion-table :exclusive 'no)))
 
 (defun magma-init-completion ()
   "Function run at mode initialisation, activating the completion and defining
  its initial dictionary."
   (interactive)
-  (make-local-variable 'magma-completion-table)
   (setq magma-completion-table magma-completion-table-base)
   (make-local-variable 'completion-at-point-functions)
   (add-to-list 'completion-at-point-functions 'magma-completion-at-point)
@@ -34,7 +35,7 @@
 (defun magma-interactive-init-completion ()
   (magma-init-completion)
   (magma-interactive-rebuild-completion-table)
-  )
+  (setq comint-input-sentinel (lambda (str) (message str))))
 
 (defcustom magma-completion-auto-update 30
   "Should we rescan the buffer for new candidates to completion?
@@ -49,16 +50,20 @@
     (run-with-idle-timer magma-completion-auto-update t 'magma-editor-rebuild-completion-table))
   )
 
-
 (add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
+
 (add-hook 'magma-mode-hook 'magma-editor-init-completion)
 
 
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
+  (message "Rebuilding the completion table...")
   (setq magma-completion-table
-        (append magma-completion-table
-                (mapcar 'car (cdr (imenu--make-index-alist t))))))
+        (-union (mapcar 'car imenu--index-alist )
+                magma-completion-table))
+  nil)
+
+
 
 (defun magma-interactive-rebuild-completion-table ()
   (interactive)
