@@ -56,9 +56,10 @@
 (add-hook 'magma-mode-hook 'magma-editor-init-completion)
 
 
+
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
-  (message "Rebuilding the completion table...")
+  (magma--debug-message "Rebuilding the completion table...")
   (setq imenu--index-alist nil)
   (setq magma-completion-table
         (-union (mapcar 'car (cdr (imenu--make-index-alist t)))

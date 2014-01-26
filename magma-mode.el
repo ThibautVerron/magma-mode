@@ -27,6 +27,12 @@
 (defvar magma-path (f-dirname (f-this-file)))
 ;;(add-to-list 'load-path magma-path)
 
+(defvar magma--debug nil)
+
+(defun magma--debug-message (str)
+  (when magma--debug (message str)))
+
+
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c :") 'magma-send-expression)
