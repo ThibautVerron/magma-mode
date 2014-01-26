@@ -2,6 +2,8 @@
 
 ;; Base settings
 
+(require 'magma-scan)
+
 (defvar magma-completion-table-file (f-join magma-path "data/magma_symbols.txt"))
 
 (defun magma-build-initial-table (file)
@@ -40,10 +42,10 @@
          (with-temp-buffer
            (insert str)
            (magma-mode)
-           (mapcar 'car (cdr (imenu--make-index-alist t))))))
+           (magma-scan-get-names))))
     (magma--debug-message (format "Candidates found : %s" new-candidates))
     (setq magma-completion-table
-          (-union new-candidates magma-completion-table))))   
+          (-union new-candidates magma-completion-table))))
 
 (defun magma-interactive-init-completion ()
   (magma-init-completion)
@@ -74,11 +76,11 @@
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
   (magma--debug-message "Rebuilding the completion table...")
-  (setq imenu--index-alist nil)
-  (setq magma-completion-table
-        (-union (mapcar 'car (cdr (imenu--make-index-alist t)))
-                magma-completion-table))
-  nil)
+  (let ((new-candidates (magma-scan-get-names)))
+    (setq magma-completion-table
+        (-union new-candidates
+                magma-completion-table)))
+    nil)
 
 
 
