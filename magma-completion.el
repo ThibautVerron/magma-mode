@@ -29,13 +29,27 @@
   (interactive)
   (setq magma-completion-table magma-completion-table-base)
   (make-local-variable 'completion-at-point-functions)
-  (add-to-list 'completion-at-point-functions 'magma-completion-at-point)
+  (setq completion-at-point-functions (list 'magma-completion-at-point))
   )
+
+(defun magma-interactive-add-to-completion-table (str)
+  "Parse the string str, and extract new symbols to add to the completion table"
+  (magma--debug-message "Scanning input for completion candidates...")
+  (magma--debug-message (format "Input : %s" str))
+  (let ((new-candidates
+         (with-temp-buffer
+           (insert str)
+           (magma-mode)
+           (mapcar 'car (cdr (imenu--make-index-alist t))))))
+    (magma--debug-message (format "Candidates found : %s" new-candidates))
+    (setq magma-completion-table
+          (-union new-candidates magma-completion-table))))   
 
 (defun magma-interactive-init-completion ()
   (magma-init-completion)
   (magma-interactive-rebuild-completion-table)
-  (setq comint-input-sentinel (lambda (str) (message str))))
+  (add-hook 'comint-input-filter-functions
+            'magma-interactive-add-to-completion-table))
 
 (defcustom magma-completion-auto-update 30
   "Should we rescan the buffer for new candidates to completion?
@@ -48,13 +62,13 @@
   (magma-editor-rebuild-completion-table)
   (when magma-completion-auto-update
     (make-local-variable 'timer-idle-list)
-    (run-with-idle-timer magma-completion-auto-update t 'magma-editor-rebuild-completion-table))
+    (run-with-idle-timer magma-completion-auto-update t
+                         'magma-editor-rebuild-completion-table))
   )
 
 (add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
 
 (add-hook 'magma-mode-hook 'magma-editor-init-completion)
-
 
 
 (defun magma-editor-rebuild-completion-table ()

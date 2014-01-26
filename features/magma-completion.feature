@@ -3,10 +3,7 @@ Feature: Magma completion mechanism
   I will need to have a proper completion engine
 
   Background: 
-    Given I am in buffer "*magma-test*"
-    And the buffer is empty
-    And I turn on magma-mode 
-    When I press "C-c C-o"
+    Given I start a magma process
     And I press "C-x o"
     And I wait for 1 second
     
@@ -19,7 +16,6 @@ Feature: Magma completion mechanism
     Then I should see "Input: SetVerbose"
     And I should not see "Input: SetVerboSetVerbose"
     
-
   Scenario: Completion at the end of a line, multiple candidates
     Given I press "RET"
     And I insert "Set"
@@ -57,6 +53,14 @@ Feature: Magma completion mechanism
     Then I should see "SetVerbose"
     
   Scenario: Picking candidates from the user input
-
-
+    Given I press "RET"
+    And I insert:
+    """
+    function myfunction (res) return res; end function;
+    """
+    And I press "RET"
+    And I wait for 1 second
+    And I insert "myf"
+    And I press "TAB"
+    Then I should see "> myfunction"
   
