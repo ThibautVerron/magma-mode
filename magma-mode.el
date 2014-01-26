@@ -20,6 +20,7 @@
 (defgroup magma nil "Major mode for editting magma-code")
 
 (require 'cl)
+(require 'dash)
 (require 'f)
 (require 'thingatpt)
 
@@ -102,8 +103,6 @@
       (magma-init-with-comint)
     (magma-init-with-term)
     )
-
-
   )
 
 (provide 'magma-mode)

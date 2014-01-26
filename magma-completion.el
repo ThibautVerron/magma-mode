@@ -47,6 +47,7 @@
   (magma-init-completion)
   (magma-editor-rebuild-completion-table)
   (when magma-completion-auto-update
+    (make-local-variable 'timer-idle-list)
     (run-with-idle-timer magma-completion-auto-update t 'magma-editor-rebuild-completion-table))
   )
 
@@ -58,8 +59,9 @@
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
   (message "Rebuilding the completion table...")
+  (setq imenu--index-alist nil)
   (setq magma-completion-table
-        (-union (mapcar 'car imenu--index-alist )
+        (-union (mapcar 'car (cdr (imenu--make-index-alist t)))
                 magma-completion-table))
   nil)
 
