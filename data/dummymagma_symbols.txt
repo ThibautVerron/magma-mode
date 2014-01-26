@@ -1,0 +1,3 @@
+SetAllInvariantsOfDegree
+SetVerbose
+SetBufferSize
