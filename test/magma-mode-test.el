@@ -3,15 +3,15 @@
       (insert-file-contents-literally (f-join magma-path "testfiles/defuns.m"))
       (magma-mode)
       (magma-editor-rebuild-completion-table)
-      (should (memq "test3" magma-completion-table))
-      (should (memq "SetVerbose" magma-completion-table))))
+      (should (-contains? magma-completion-table "test3"))
+      (should (-contains? magma-completion-table "SetVerbose"))))
 
 (ert-deftest magma-build-completion-table-at-init ()
   (with-temp-buffer
     (insert-file-contents-literally (f-join magma-path "testfiles/defuns.m"))
     (magma-mode)
-    (should (memq "test3" magma-completion-table))
-    (should (memq "SetVerbose" magma-completion-table))))
+    (should (-contains? magma-completion-table "test3"))
+    (should (-contains? magma-completion-table "SetVerbose"))))
 
 (ert-deftest magma-build-completion-table-when-idle ()
   (with-temp-buffer
@@ -21,8 +21,8 @@
     (insert-file-contents-literally
      (f-join magma-path "testfiles/extradefuns.m"))
     (sleep-for 35)
-    (should (memq "test3" magma-completion-table))
-    (should (memq "extratest1" magma-completion-table))
-    (should (memq "SetVerbose" magma-completion-table))))
+    (should (-contains? magma-completion-table "test3"))
+    (should (-contains? magma-completion-table "extratest1"))
+    (should (-contains? magma-completion-table "SetVerbose"))))
 
 
