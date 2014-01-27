@@ -37,4 +37,21 @@
     (should (-contains? magma-completion-table "extratest1"))
     (should (-contains? magma-completion-table "SetVerbose"))))
 
+(ert-deftest magma-scan-load ()
+  (with-temp-buffer
+    (let ((magma-working-directory (f-join magma-path "testfiles")))
+      (insert-file-contents-literally
+       (f-join magma-working-directory "load.m"))
+      (magma-mode)
+      (should (-contains? magma-completion-table "test1")))))
 
+(ert-deftest magma-scan-cd ()
+  (with-temp-buffer
+    (let* ((magma-working-directory (f-join magma-path "testfiles"))
+           (magma-base-working-directory (f-join magma-path "testfiles")))
+      (insert-file-contents-literally
+       (f-join magma-base-working-directory "changedirectory.m"))
+      (magma-mode)
+      (should (equal magma-working-directory
+                     (f-join magma-base-working-directory "testdir")))
+      (should (-contains? magma-completion-table "test2")))))

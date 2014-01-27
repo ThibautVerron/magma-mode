@@ -9,5 +9,5 @@
 (setq magma-completion-table-file (f-join magma-path
                                           "data/dummymagma_symbols.txt"))
 ;;(setq magma-completion-auto-update 1)
-
+;;(setq magma--debug t)
 

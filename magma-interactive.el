@@ -13,10 +13,6 @@
   :group 'magma
   :type 'sexp)
 
-(defcustom magma-default-directory "~/magma"
-  "Default work directory for magma (currently mostly ignored)"
-  :group 'magma
-  :type 'string)
 
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")

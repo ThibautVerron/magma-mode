@@ -42,7 +42,7 @@
          (with-temp-buffer
            (insert str)
            (magma-mode)
-           (magma-scan-get-names))))
+           (magma-scan))))
     (magma--debug-message (format "Candidates found : %s" new-candidates))
     (setq magma-completion-table
           (-union new-candidates magma-completion-table))))
@@ -76,7 +76,7 @@
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
   (magma--debug-message "Rebuilding the completion table...")
-  (let ((new-candidates (magma-scan-get-names)))
+  (let ((new-candidates (magma-scan)))
     (setq magma-completion-table
         (-union new-candidates
                 magma-completion-table)))

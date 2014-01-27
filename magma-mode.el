@@ -27,6 +27,11 @@
 (defvar magma-path (f-dirname (f-this-file)))
 ;;(add-to-list 'load-path magma-path)
 
+(defcustom magma-default-directory "~/"
+  "Default work directory for magma (currently mostly ignored)"
+  :group 'magma
+  :type 'string)
+
 (defvar magma--debug nil)
 
 (defun magma--debug-message (str)
