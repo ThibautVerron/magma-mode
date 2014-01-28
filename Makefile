@@ -22,7 +22,7 @@ ECUKESFILES = $(STEPFILES) $(ENVFILES) $(FEATFILES)
 
 all: test
 
-test: ecukes
+test: unit ecukes
 
 unit: $(ELFILES)
 	${CASK} exec ert-runner

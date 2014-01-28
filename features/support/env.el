@@ -25,6 +25,8 @@
  (setq magma-interactive-program
        (let ((ext (if (eq system-type 'windows-nt) ".bat" ".sh")))
        (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
+ (setq magma-completion-table-file (f-join magma-path
+                                           "data/dummymagma_symbols.txt"))
 )
 
 (Before

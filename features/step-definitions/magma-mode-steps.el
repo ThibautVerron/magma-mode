@@ -9,6 +9,22 @@
         )
       )
 
+(When "^I start a magma process"
+  (lambda ()
+    (When "I start a magma process named \"*magma*\"")
+    )
+  )
+
+(When "^I start a magma process named \\(\".+\"\\)"
+  (lambda (name)
+    (Given "I am in buffer \"*magma-test*\"")
+    (And "the buffer is empty")
+    (And "I turn on magma-mode" )
+    (When "I press \"C-c C-o\"")
+    (And "I wait for 1 second")
+    )
+  )
+
 (When "^I wait for \\([0-9]+\\) seconds?"
   (lambda (arg)
     (let ((duration (string-to-number arg)))

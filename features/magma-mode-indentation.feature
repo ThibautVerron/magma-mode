@@ -5,8 +5,8 @@ Feature: Magma code indentation
   
   Background:
     Given I am in buffer "*magma-test*"
-    And I turn on magma-mode
     And the buffer is empty
+    And I turn on magma-mode
     
   Scenario: Basic indentation
     When I insert:

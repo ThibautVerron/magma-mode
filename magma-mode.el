@@ -20,11 +20,23 @@
 (defgroup magma nil "Major mode for editting magma-code")
 
 (require 'cl)
+(require 'dash)
 (require 'f)
 (require 'thingatpt)
 
 (defvar magma-path (f-dirname (f-this-file)))
 ;;(add-to-list 'load-path magma-path)
+
+(defcustom magma-default-directory "~/"
+  "Default work directory for magma (currently mostly ignored)"
+  :group 'magma
+  :type 'string)
+
+(defvar magma--debug nil)
+
+(defun magma--debug-message (str)
+  (when magma--debug (message str)))
+
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
@@ -102,8 +114,6 @@
       (magma-init-with-comint)
     (magma-init-with-term)
     )
-
-
   )
 
 (provide 'magma-mode)

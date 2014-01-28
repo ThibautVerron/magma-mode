@@ -1,3 +1,5 @@
+(require 'imenu)
+
 (defvar magma-defun-regexp "^\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
 
 (setq magma-imenu-generic-expression

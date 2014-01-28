@@ -13,10 +13,6 @@
   :group 'magma
   :type 'sexp)
 
-(defcustom magma-default-directory "~/magma"
-  "Default work directory for magma (currently mostly ignored)"
-  :group 'magma
-  :type 'string)
 
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")
@@ -126,6 +122,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (concat expr "\n")))
+    (run-hook-with-args 'comint-input-filter-functions expr)
     (comint-send-string (magma-get-buffer i) command))
     )
 
@@ -339,7 +336,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (str (buffer-substring-no-properties beg end)))
     (delete-region beg end)
     (comint-add-to-input-history str)
-    (comint-send-string (current-buffer) (concat str "\n"))
+    (magma-comint-send str)
     )
   )
 
