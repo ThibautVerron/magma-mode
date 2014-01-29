@@ -8,7 +8,7 @@ Feature: Interaction with a magma process
     And the buffer is empty
     And I turn on magma-mode 
     When I press "C-c C-o"
-    And I wait for 1 second
+    And I wait for an instant
    
   Scenario: Start a magma process
     When I press "C-x o"
@@ -20,7 +20,7 @@ Feature: Interaction with a magma process
     Given I insert "6*7;"
     And I press "C-c C-b"
     And I press "C-x o"
-    And I wait for 1 second
+    And I wait for an instant
     Then I should see "> 6*7;"
     And I should not see:
     """
@@ -34,7 +34,7 @@ Feature: Interaction with a magma process
     And I press "M->"
     And I insert "6*7;"
     And I press "RET"
-    And I wait for 1 second
+    And I wait for an instant
     Then I should see "> 6*7;"
     And I should not see:
     """
@@ -42,3 +42,19 @@ Feature: Interaction with a magma process
     6*7;
     """
     And I should see "42"
+
+  Scenario: Start multiple processes
+
+
+  Scenario: Send expressions to multiple processes, separately
+
+
+  Scenario: Send a line to multiple processes, broadcast
+
+
+  Scenario: Send an expression to multiple processes, broadcast
+
+
+  Scenario: Send a region to multiple processes, broadcast
+
+

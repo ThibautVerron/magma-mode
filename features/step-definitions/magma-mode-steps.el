@@ -25,10 +25,15 @@
     )
   )
 
-(When "^I wait for \\([0-9]+\\) seconds?"
+(When "^I wait for \\([0-9.]+\\) seconds?"
   (lambda (arg)
     (let ((duration (string-to-number arg)))
       (sleep-for duration))))
+
+(When "^I wait for an instant"
+  (lambda ()
+    (When (format "I wait for %s seconds" magma-delay))))
+
 
 (When "^I indent the buffer"
       (lambda ()

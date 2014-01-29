@@ -205,7 +205,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 ;; Wrappers
 
 (defun magma-send-expression (expr &optional i)
-  (interactive "ip")
+  (interactive "iP")
   (let* ((initval (if (region-active-p)
                       (buffer-substring-no-properties (region-beginning)
                                                       (region-end))))
@@ -237,17 +237,17 @@ After changing this variable, restarting emacs is required (or reloading the mag
   )
 
 
-(defun magma-eval-region (beg end)
+(defun magma-eval-region (beg end &optional i)
   "Evaluates the current region"
-  (interactive "r")
+  (interactive "rP")
   (let ((str (buffer-substring-no-properties beg end)))
     (magma-send str)
     )
   )
 
-(defun magma-eval-line ()
+(defun magma-eval-line ( &optional i)
   "Evaluate current line"
-  (interactive)
+  (interactive "P")
   (while (looking-at "^$")
     (forward-line))
   (let* ((beg (save-excursion
@@ -261,42 +261,43 @@ After changing this variable, restarting emacs is required (or reloading the mag
     )
   )
 
-(defun magma-eval-paragraph ()
+(defun magma-eval-paragraph ( &optional i)
   "Evaluate current paragraph (space separated block)"
-  (interactive)
+  (interactive "P")
   (forward-paragraph)
   (let ((end (point)))
     (backward-paragraph)
     (magma-eval-region (point) end)
     (goto-char end)))
 
-(defun magma-eval-next-statement ()
+(defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
-  (interactive)
+  (interactive "P")
   (magma-eval-line)
   ;;(magma-eval-region
    ;;(magma-beginning-of-statement-1) (magma-end-of-statement-1))
   )
 
-(defun magma-eval ()
+(defun magma-eval (&optional i)
   "Evaluates region if mark is set, else expression."
-  (interactive)
+  (interactive "P")
   (if mark-active
-      (magma-eval-region (region-beginning) (region-end))
+      (magma-eval-region (region-beginning"P") (region-end))
     (magma-eval-next-statement))
   )
 
-(defun magma-eval-until ()
+(defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
-  (interactive)
+  (interactive "P")
   (magma-end-of-statement-1)
   (magma-eval-region (point-min) (point)))
 
-(defun magma-eval-buffer ()
+(defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer"
-  (interactive)
+  (interactive "P")
   (magma-eval-region (point-min) (point-max))
 )
+
 
 (defun magma-help-word (&optional browser)
   "call-up the handbook in the interactive buffer for the current word"
@@ -323,6 +324,39 @@ After changing this variable, restarting emacs is required (or reloading the mag
     (magma-run)
     (magma-send
      (concat word ";") i)))
+
+(defun magma-broadcast-whatever (whatever)
+  (mapc
+   'lambda (i) (save-excursion (funcall whatever i))
+   magma-active-buffers-list))
+
+(defun magma-broadcast-kill ()
+  (magma-broadcast-whatever 'magma-kill))
+(defun magma-broadcast-int ()
+  (magma-broadcast-whatever 'magma-int))
+(defun magma-broadcast-send ()
+  (magma-broadcast-whatever 'magma-send))
+(defun magma-broadcast-send-expression (&optional expr)
+  (magma-broadcast-whatever '(lambda (i) (magma-send-expression expr i)))
+(defun magma-broadcast-eval-region (start end)
+  (magma-broadcast-whatever '(lambda (i) (magma-eval-region start end i))))
+(defun magma-broadcast-eval-line ()
+  (magma-broadcast-whatever 'magma-eval-line))
+(defun magma-broadcast-eval-paragraph ()
+  (magma-broadcast-whatever 'magma-eval-paragraph))
+(defun magma-broadcast-eval-next-statement ()
+  (magma-broadcast-whatever 'magma-eval-next-statement))
+(defun magma-broadcast-eval-function ()
+  (magma-broadcast-whatever 'magma-eval-function))
+(defun magma-broadcast-eval ()
+  (magma-broadcast-whatever 'magma-eval))
+(defun magma-broadcast-eval-until ()
+  (magma-broadcast-whatever 'magma-eval-until))
+(defun magma-broadcast-eval-buffer ()
+  (magma-broadcast-whatever 'magma-eval-buffer))
+(defun magma-broadcast-show-word ()
+  (magma-broadcast-whatever 'magma-show-word))
+
 
 
 (defun magma-comint-send-input ()
