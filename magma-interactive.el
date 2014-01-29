@@ -212,14 +212,14 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (expr
           (or expr
               (read-string "Expr:" initval))))
-    (magma-send expr i)))
+    (magma-send-or-broadcast expr i)))
 
 (defun magma-restart (&optional i)
   "Restart the magma process in buffer i"
   (interactive "P")
-  (magma-kill i)
+  (magma-kill-or-broadcast i)
   (sleep-for 2)
-  (magma-run i)
+  (magma-run-or-broadcast i)
   )
 
 (defun magma-switch-to-interactive-buffer (&optional i)
@@ -241,7 +241,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Evaluates the current region"
   (interactive "rP")
   (let ((str (buffer-substring-no-properties beg end)))
-    (magma-send str)
+    (magma-send-or-broadcast str i)
     )
   )
 
@@ -321,41 +321,71 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "show the current word in magma"
   (interactive "P")
   (let ((word (current-word)))
-    (magma-run)
-    (magma-send
+    (magma-run-or-broadcast i)
+    (magma-send-or-broadcast
      (concat word ";") i)))
 
-(defun magma-broadcast-whatever (whatever)
+(defun magma-broadcast-fun (fun)
   (mapc
-   'lambda (i) (save-excursion (funcall whatever i))
+   'lambda (i) (save-excursion (funcall fun i))
    magma-active-buffers-list))
 
-(defun magma-broadcast-kill ()
-  (magma-broadcast-whatever 'magma-kill))
-(defun magma-broadcast-int ()
-  (magma-broadcast-whatever 'magma-int))
-(defun magma-broadcast-send ()
-  (magma-broadcast-whatever 'magma-send))
-(defun magma-broadcast-send-expression (&optional expr)
-  (magma-broadcast-whatever '(lambda (i) (magma-send-expression expr i)))
-(defun magma-broadcast-eval-region (start end)
-  (magma-broadcast-whatever '(lambda (i) (magma-eval-region start end i))))
-(defun magma-broadcast-eval-line ()
-  (magma-broadcast-whatever 'magma-eval-line))
-(defun magma-broadcast-eval-paragraph ()
-  (magma-broadcast-whatever 'magma-eval-paragraph))
-(defun magma-broadcast-eval-next-statement ()
-  (magma-broadcast-whatever 'magma-eval-next-statement))
-(defun magma-broadcast-eval-function ()
-  (magma-broadcast-whatever 'magma-eval-function))
-(defun magma-broadcast-eval ()
-  (magma-broadcast-whatever 'magma-eval))
-(defun magma-broadcast-eval-until ()
-  (magma-broadcast-whatever 'magma-eval-until))
-(defun magma-broadcast-eval-buffer ()
-  (magma-broadcast-whatever 'magma-eval-buffer))
-(defun magma-broadcast-show-word ()
-  (magma-broadcast-whatever 'magma-show-word))
+(defun magma-choose-buffer (i)
+  "Given an input i in raw prefix form, decides what buffers we should be working on. The input can be an integer, in which case it returns that integer; or it can be the list '(4), in which case it prompts for an integer; or it can be the list '(16), in which case it returns the symbol 'broadcast, meaning we should work on all buffers"
+  (cond
+   ((not i) magma-working-buffer-number)
+   ((integerp i)
+    i)
+   ((and (listp i) (eq (car i) 4))
+    (read-number "In buffer?" magma-working-buffer-number))
+   ((and (listp i) (eq (car i) 16))
+    'broadcast)
+   (t (message "Invalid buffer specified") magma-working-buffer-number)))
+
+(defun magma-broadcast-if-needed (fun i)
+  (let ((buf (magma-choose-buffer i)))
+    (cond
+     ((integerp buf)
+      (funcall fun buf))
+     ((eq buf 'broadcast)
+      (magma-broadcast-fun fun))
+     (t (message "Invalid buffer specified")))))
+
+(defun magma-send-or-broadcast (expr i)
+  (magma-broadcast-if-needed (apply-partially 'magma-send expr) i))
+(defun magma-kill-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma-kill i))
+(defun magma-run-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma-run i))
+
+
+
+;; (defun magma-broadcast-kill ()
+;;   (magma-broadcast-fun 'magma-kill))
+;; (defun magma-broadcast-int ()
+;;   (magma-broadcast-fun 'magma-int))
+;; (defun magma-broadcast-send ()
+;;   (magma-broadcast-fun 'magma-send))
+;; (defun magma-broadcast-send-expression (&optional expr)
+;;   (magma-broadcast-fun '(lambda (i) (magma-send-expression expr i)))
+;; (defun magma-broadcast-eval-region (start end)
+;;   (magma-broadcast-fun '(lambda (i) (magma-eval-region start end i))))
+;; (defun magma-broadcast-eval-line ()
+;;   (magma-broadcast-fun 'magma-eval-line))
+;; (defun magma-broadcast-eval-paragraph ()
+;;   (magma-broadcast-fun 'magma-eval-paragraph))
+;; (defun magma-broadcast-eval-next-statement ()
+;;   (magma-broadcast-fun 'magma-eval-next-statement))
+;; (defun magma-broadcast-eval-function ()
+;;   (magma-broadcast-fun 'magma-eval-function))
+;; (defun magma-broadcast-eval ()
+;;   (magma-broadcast-fun 'magma-eval))
+;; (defun magma-broadcast-eval-until ()
+;;   (magma-broadcast-fun 'magma-eval-until))
+;; (defun magma-broadcast-eval-buffer ()
+;;   (magma-broadcast-fun 'magma-eval-buffer))
+;; (defun magma-broadcast-show-word ()
+;;   (magma-broadcast-fun 'magma-show-word))
 
 
 
