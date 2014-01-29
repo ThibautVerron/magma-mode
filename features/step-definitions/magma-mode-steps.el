@@ -60,6 +60,13 @@
           (message "Expected \n\"\"\"\n%s\n\"\"\"\nto not be part of \n\"\"\"\n%s\n\"\"\"\nbut was."))
       (cl-assert (not (s-contains? expected actual)) nil message expected actual))))
 
+(When "^I go to beginning of buffer$"
+  "Places the cursor at the beginning of buffer."
+  '(lambda () (goto-char (point-min))))
+
+(When "^I go to end of buffer$"
+  "Places the cursor at the end of buffer."
+  '(lambda () (goto-char (point-max))))
 
 
 

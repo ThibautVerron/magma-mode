@@ -1,7 +1,7 @@
 CASK ?= cask
 EMACS ?= emacs
 
-ECUKESFLAGS = #--no-win
+ECUKESFLAGS = --no-win
 
 ELFILES = magma-completion.el \
 	magma-electric-newline.el \
