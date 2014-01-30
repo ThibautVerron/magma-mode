@@ -18,6 +18,7 @@
                 (magma-mode))
               (insert-buffer-substring buf)
               (goto-char (point-min))
+              (newline) ;; Otherwise, comment-kill fails if there is a comment on line 1
               
               ;; Get rid of the comments
               (comment-kill (count-lines (point-min) (point-max)))
