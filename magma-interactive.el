@@ -282,7 +282,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Evaluates region if mark is set, else expression."
   (interactive "P")
   (if mark-active
-      (magma-eval-region (region-beginning"P") (region-end))
+      (magma-eval-region (region-beginning) (region-end))
     (magma-eval-next-statement))
   )
 
