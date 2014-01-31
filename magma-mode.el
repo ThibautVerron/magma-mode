@@ -33,9 +33,13 @@
   :type 'string)
 
 (defvar magma--debug nil)
+(defvar magma--debug2 nil)
 
 (defun magma--debug-message (str)
-  (when magma--debug (message str)))
+  (when (or magma--debug magma--debug2) (message str)))
+
+(defun magma--debug2-message (str)
+  (when magma--debug2 (message str)))
 
 
 (defvar magma-mode-map

@@ -38,11 +38,7 @@
   "Parse the string str, and extract new symbols to add to the completion table"
   (magma--debug-message "Scanning input for completion candidates...")
   (magma--debug-message (format "Input : %s" str))
-  (let ((new-candidates
-         (with-temp-buffer
-           (insert str)
-           (magma-mode)
-           (magma-scan))))
+  (let ((new-candidates (magma-scan str)))
     (magma--debug-message (format "Candidates found : %s" new-candidates))
     (setq magma-completion-table
           (-union new-candidates magma-completion-table))))
@@ -51,7 +47,7 @@
   (magma-init-completion)
   (magma-interactive-rebuild-completion-table)
   (add-hook 'comint-input-filter-functions
-            'magma-interactive-add-to-completion-table))
+            'magma-interactive-add-to-completion-table nil t))
 
 (defcustom magma-completion-auto-update 30
   "Should we rescan the buffer for new candidates to completion?

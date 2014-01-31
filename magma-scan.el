@@ -5,18 +5,20 @@
 
 (defvar-local magma-working-directory magma-default-directory)
 
-(defun magma-scan ()
+(defun magma-scan (&optional str)
   "Scans the current magma buffer. Updates the working directory,
   and returns the list of the names of functions defined in the
   buffer, and in files it loads."
   (interactive)
   (magma--debug-message "Scanning the buffer")
   (let*
-      ((buf (current-buffer))
+      ((content (or str (buffer-substring-no-properties (point-min) (point-max))))
+       (workdir magma-working-directory)
        (res (with-temp-buffer
               (let ((magma-mode-hook nil))
                 (magma-mode))
-              (insert-buffer-substring buf)
+              (insert content)
+              (setq magma-working-directory workdir)
               (goto-char (point-min))
               (newline) ;; Otherwise, comment-kill fails if there is a comment on line 1
               
@@ -32,9 +34,11 @@
                 (beginning-of-line)
                 (cond
                  ((looking-at "ChangeDirectory(\"\\(.*\\)\");")
-                  (setq magma-working-directory
-                        (f-expand (match-string-no-properties 1)
-                                  magma-working-directory)))
+                  (let ((newdir (match-string-no-properties 1)))
+                    (magma--debug2-message (format "Magma scan: cd %s" newdir))
+                    (setq magma-working-directory
+                          (f-expand newdir magma-working-directory))
+                    (magma--debug2-message (format "Magma scan: new workdir %s" magma-working-directory))))
                  ((looking-at "load \"\\(.*\\)\";")
                   (let* ((file (match-string-no-properties 1))
                          (filewithpath (f-expand file
@@ -44,18 +48,19 @@
                         (end-of-line)
                         (insert "\n")
                         (insert-file-contents filewithpath)
-                        (magma--debug-message
+                        (magma--debug2-message
                          (format "Magma scan: loaded %s" filewithpath)))
-                      (magma--debug-message
-                       (format "Magma scan: nonexistant file %s" filewithpath)))
+                      (magma--debug2-message
+                       (format "Magma scan: nonexistent file %s" filewithpath)))
                     ))
                  ((looking-at
                    "\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
-                  (setq defs
-                        (-union (list (match-string-no-properties 2))
-                                defs))
-                  )
-                 )
+                  (let ((newdef (match-string-no-properties 2)))
+                    (magma--debug2-message (format "Magma scan: new definition found : %s" newdef))
+                    (setq defs
+                          (-union (list newdef) defs))
+                  )))
+                 
                 (end-of-line) ;; So that forward-line really goes to the next line
                 (setq moreLines (= 0 (forward-line 1)))
                 )
