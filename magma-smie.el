@@ -104,12 +104,12 @@
       (assoc ";")
       (left "(") (right ")")
       ;;(left ":")
+      (assoc ",")
       (left "|") (left "paren:")
       (assoc ":=")
       (assoc "where") (assoc "is") (assoc "select")
       (assoc "else")
       (assoc "special:")
-      (assoc ",")
       (assoc "::")
       (assoc "+")
       (assoc "-")
@@ -329,6 +329,7 @@
 (defcustom magma-indent-basic 4 "Indentation of blocks"
   :group 'magma
   :type 'integer)
+
 (defcustom magma-indent-args 4
   "Indentation inside expressions (currently mostly ignored)"
   :group 'magma
@@ -350,20 +351,14 @@
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)
 
-    ;; (`(:after . ")")
-    ;;  (when (smie-rule-parent-p "function" "procedure")
-    ;;    (smie-rule-parent magma-indent-basic)))
-    
-    ;;(`(:list-intro . ,(or `"function" `"procedure")) t)
-
     (`(:after . ,(or `"then" `"else"))
      (smie-rule-parent magma-indent-basic))
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
 
-    ;;    (`(:after . ";") 0)
-;;    (`(:before . ";") 0)
+    ;; (`(:after . "paren:")
+    ;;  (smie-rule-parent))
     )
   )
 

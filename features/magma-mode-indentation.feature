@@ -565,7 +565,7 @@ Feature: Magma code indentation
     """
 
     
-  @bug
+  @fixedbug
   Scenario: Indentation of type definitions in records
     When I insert:
     """
