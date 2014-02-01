@@ -38,10 +38,12 @@
       ;; Expression
       (expr (id)
             ;;("(" expr ")")
-            ;; (expr "where" id "is" expr)
-            ;; (expr "select" expr "else" expr)
+            (expr "where" id "is" expr)
+            (expr "select" expr "else" expr)
             ("~" expr)
+            ("#" expr)
             (expr "+" expr)
+            (expr "::" expr) ;; For intrinsics only
             (expr "-" expr)
             (expr "*" expr)
             (expr "/" expr)
@@ -103,10 +105,12 @@
       (left "(") (right ")")
       ;;(left ":")
       (left "|") (left "paren:")
+      (assoc ":=")
+      (assoc "where") (assoc "is") (assoc "select")
+      (assoc "else")
       (assoc "special:")
       (assoc ",")
-      (assoc ":=")
-
+      (assoc "::")
       (assoc "+")
       (assoc "-")
       (assoc "mod")
@@ -117,6 +121,7 @@
       (assoc "^")
       (assoc ".")
       (assoc "!")
+      (left "#")
       (left "~")
       (assoc "ge")
       (assoc "gt")
@@ -136,10 +141,10 @@
   (concat
    "\\("
    (regexp-opt '("," "|" ";" "(" ")" "[" "]" "<" ">" ":="))
-   "\\|"
+   "\\|" 
    (regexp-opt '("for" "while" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
-                 "then") 'words)
+                 "then" "where" "is" "select") 'words)
    "\\)"))
 
 (defvar magma-smie-end-tokens-regexp
@@ -150,7 +155,7 @@
 (defvar magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
@@ -231,40 +236,6 @@
          (save-excursion
            (backward-sexp)
            (magma-looking-at-fun-openparen)))))
-
-
-;; (defun magma-at-end-funcall-p ()
-;;   "Point is after a closing paren, returns t iff this closing
-;;   paren is the end of a funcall foo(bar...)"
-;;   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
-;;     (and (looking-back ")")
-;;          (save-excursion
-;;            (backward-sexp)
-;;            (backward-word)
-;;            (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))) 
-;;     )
-
-;; (defun magma-identify-then ()
-;;   "Point is on \"then\", identify whether we are in an if
-;;   construct (returns \"ifthen\"), or in an elif
-;;   construct (returns \"elifthen\") or other (returns \"then\",
-;;   should be treated as an error)"
-;;   (let ((forward-sexp-function nil))
-;;     (save-excursion
-;;       (catch 'token
-;;         (while t
-;;           (condition-case nil 
-;;               (progn
-;;                 (forward-comment (- (point)))
-;;                 (backward-sexp)
-;;                 (cond
-;;                  ((looking-at "if") (throw 'token "ifthen"))
-;;                  ((looking-at "elif") (throw 'token "elifthen"))
-;;                  ((bobp) (throw 'token "then"))
-;;                  ))
-;;             (error (throw 'token "then"))))
-;;         ))))
-
 
 ;; The two following defuns are adapted from the GNU emacs manual, section 23.7.1.4 (SMIE / Defining tokens)
 
@@ -387,9 +358,11 @@
 
     (`(:after . ,(or `"then" `"else"))
      (smie-rule-parent magma-indent-basic))
-    (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
-    
-;;    (`(:after . ";") 0)
+    (`(:before . "elif") (smie-rule-parent))
+    (`(:before . "else")
+     (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
+
+    ;;    (`(:after . ";") 0)
 ;;    (`(:before . ";") 0)
     )
   )
