@@ -14,6 +14,10 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 ;; General Public License for more details.
 
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
 
 ;;; Code:
 

@@ -32,8 +32,8 @@ tested over the years.
       git clone https://github.com/ThibautVerron/magma-mode.git
    #+end_src    
 
-2. If needed, install the required package [[https://github.com/rejeep/f.el][f.el]] (you should install it
-   anyway).
+2. If needed, install the required packages [[https://github.com/rejeep/f.el][f.el]] (filenames library)
+   and [[https://github.com/magnars/dash.el][dash.el]] (lists library). 
    
 3. Add the following to your emacs init file :
 
@@ -46,31 +46,26 @@ tested over the years.
 4. Additional setup:
 
    #+begin_src emacs-lisp 
-      ;; If you want to load the mode automatically with some file extensions
-      (setq auto-mode-alist
-      (append '(("\\.mgm$\\|\\.m$" . magma-mode))
-      auto-mode-alist))
-      
-      ;; If you need to use a different magma path
-      (setq magma-interactive-program "magma")
-      
-      ;; If you need to pass specific arguments to magma
-      (setq magma-interactive-arguments '())
-      
-      ;; At the moment, the following options need to be inserted
-      ;; *before* "(require 'magma-mode')", and you need to either
-      ;; restart emacs or reload the magma loadfile after changing
-      ;; it. It is a design flaw and should be fixed in the future.
-      
-      ;; If you want to use comint instead of term.
-      
-      (setq magma-interactive-use-comint t)
-      
-      ;; Electric return key (try RET or C-j, or C-c C-j) while in a
-      ;; string or comment. Like it or hate it, enable it or disable
-      ;; it. This is beta, might ruin the indentation of your document,
-      ;; crash emacs or eat your cat.
-      (setq magma-use-electric-newline t)
+     ;; If you want to load the mode automatically with some file extensions
+     (setq auto-mode-alist
+     (append '(("\\.mgm$\\|\\.m$" . magma-mode))
+     auto-mode-alist))
+     
+     ;; If you need to use a different magma program
+     (setq magma-interactive-program "magma")
+     
+     ;; If you need to pass specific arguments to magma
+     (setq magma-interactive-arguments '())
+           
+     ;; If you want to use comint instead of term.
+     (setq magma-interactive-use-comint t)
+     
+     ;; Electric return key (try RET or C-j, or C-c C-j) while in a
+     ;; string or comment. Like it or hate it, enable it or disable
+     ;; it. This is beta, might ruin the indentation of your document,
+     ;; crash emacs or eat your cat.
+     (setq magma-use-electric-newline t)
+     
    #+end_src
 
 ** Comint vs term
