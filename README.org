@@ -182,7 +182,8 @@ does not have this kind of requirements.
     overcome some of its current issues, please file an issue.
 
 ** Keymap
-*** In an editting window
+
+Keymap for the =magma-mode=:
 
  - =C-c C-o= (=magma-switch-to-interactive-buffer-same-frame=): 
    start an interactive magma process, in the same frame
@@ -202,7 +203,8 @@ does not have this kind of requirements.
  - =C-c C-b= (=magma-eval-buffer=): send the current buffer to the
    magma process
  - =C-c C-e= (=magma-eval=): if region is set, send the region to the
-   magma process, else send the current line
+   magma process, else send the current expression
+ - =C-c C-f= (=magma-eval-defun=): evaluate the current function definition
  - =C-c C-u= (=magma-eval-until=): send the content of the buffer up
    to the point to the magma process
  - =C-c C-p= (=magma-eval-paragraph=): send the current paragraph to
@@ -210,7 +212,7 @@ does not have this kind of requirements.
  - =C-c h= (=magma-show-help=): prompt for a symbol, and shows the
    magma help about that symbol
 
-The evaluation functions take optional prefix arguments:
+Additionally, the evaluation functions take optional prefix arguments:
 
  - =C-u 3 C-l= : send the current line to the magma process number 3
  - =C-u C-l= : prompts for a magma process, and send the current line
@@ -219,7 +221,8 @@ The evaluation functions take optional prefix arguments:
 
 These features are highly untested.
 
-*** In an editting window, with electric return activated
+Additionally, if you have =magma-use-electric-newline= set to =t=,
+the following keys are also bound:
     
  - =RET= or =C-j= (=magma-newline-and-indent=): inserts a visual
    newline in the buffer. It is a regular =newline-and-indent= in most
