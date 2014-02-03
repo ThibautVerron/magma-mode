@@ -279,7 +279,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (end (save-excursion
                 (end-of-line)
                 (point))))
-    (magma-eval-region beg end)
+    (magma-eval-region beg end i)
     (next-line)
     )
   )
@@ -290,37 +290,51 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (forward-paragraph)
   (let ((end (point)))
     (backward-paragraph)
-    (magma-eval-region (point) end)
+    (magma-eval-region (point) end i)
     (goto-char end)))
 
 (defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
   (interactive "P")
-  (magma-eval-line)
-  ;;(magma-eval-region
-   ;;(magma-beginning-of-statement-1) (magma-end-of-statement-1))
-  )
+  (let ((regbeg (progn
+                    (magma-beginning-of-expr)
+                    (point)))
+          (regend (progn
+                    (magma-end-of-expr)
+                    (point))))
+    (magma-eval-region regbeg regend i)))
+  
 
 (defun magma-eval (&optional i)
-  "Evaluates region if mark is set, else expression."
+  "Evaluate the current region if set and the current statement
+  otherwise"
   (interactive "P")
   (if mark-active
-      (magma-eval-region (region-beginning) (region-end))
-    (magma-eval-next-statement))
-  )
+      (magma-eval-region (region-beginning) (region-end) i)
+    (magma-eval-next-statement i)))
+
+(defun magma-eval-defun (&optional i)
+  "Evaluate the current defun"
+  (interactive "P")
+  (let ((regbeg (progn
+                  (magma-beginning-of-defun)
+                  (point)))
+        (regend (progn
+                  (magma-end-of-defun)
+                  (point))))
+    (magma-eval-region regbeg regend i)))
+  
 
 (defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
   (interactive "P")
   (magma-end-of-statement-1)
-  (magma-eval-region (point-min) (point)))
+  (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer"
   (interactive "P")
-  (magma-eval-region (point-min) (point-max))
-)
-
+  (magma-eval-region (point-min) (point-max) i))
 
 (defun magma-help-word (&optional browser)
   "call-up the handbook in the interactive buffer for the current word"
@@ -466,7 +480,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   )  
 
 
-(defun magma-init-with-comint ()
+(defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
   (defalias 'magma-int 'magma-comint-int)
@@ -475,7 +489,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-help-word-text 'magma-comint-help-word)
   )
 
-(defun magma-init-with-term ()
+(defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
   (defalias 'magma-run 'magma-term-run)
   (defalias 'magma-int 'magma-term-int)
@@ -484,7 +498,10 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-help-word-text 'magma-term-help-word)
   )
 
-
+(defun magma-interactive-init ()
+  (if magma-interactive-use-comint
+      (magma-interactive-init-with-comint)
+    (magma-interactive-init-with-term)))
 
 
 

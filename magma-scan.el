@@ -86,6 +86,7 @@
               (cons magma-working-directory defs))))
        (setq magma-working-directory (car res))
        (cdr res)))
-    
 
 (provide 'magma-scan)
+
+;;; magma-scan.el ends here

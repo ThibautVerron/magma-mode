@@ -388,3 +388,62 @@
 (defun magma-indent-line ()
   (interactive)
   (smie-indent-line))
+
+
+;; Additional functions for movement
+
+(defconst magma-end-of-expr-tokens
+  (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)"))
+
+(defun magma-looking-back-end-of-expr-p ()
+  "Test whether we are at the beginning of an expression"
+  (let ((prevtoken
+         (save-excursion (magma-smie-backward-token))))
+    (or (-contains? magma-end-of-expr-tokens prevtoken)
+        (bobp))))
+
+(defun magma-looking-at-end-of-expr-p ()
+  "Test whether we are before the end of an expression"
+  (let ((nexttoken
+         (save-excursion (magma-smie-forward-token))))
+    (-contains? magma-end-of-expr-tokens nexttoken)))
+
+(defun magma-beginning-of-expr ()
+  (interactive)
+  (while (not (magma-looking-back-end-of-expr-p))
+    (magma-smie-backward-token)))
+;; FIXME What if the point is in a string or comment?
+
+(defun magma-end-of-expr ()
+  (interactive)
+  (magma-beginning-of-expr)
+  (smie-forward-sexp ";")
+  (forward-char 1)) ;; We should always be looking at a ";" there
+
+(defun magma-mark-expr ()
+  (interactive)
+  (magma-beginning-of-expr)
+  (set-mark-command nil)
+  (magma-end-of-expr)
+  (setq deactivate-mark nil))
+
+(defconst magma-defun-regexp
+  (regexp-opt '("function" "procedure" "intrinsics") 'words)
+  "Regexp for words marking the beginning of a defun")
+
+(defun magma-beginning-of-defun (&optional nofail)
+  (interactive)
+  (condition-case nil
+      (search-backward-regexp magma-defun-regexp)
+    (error (or nofail
+               (message "Not in a function, procedure or intrinsics definition")))))
+
+(defun magma-end-of-defun ()
+  (interactive)
+  (magma-beginning-of-defun t)
+  (magma-end-of-expr))
+
+
+
+
+;;; magma-smie.el ends here

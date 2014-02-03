@@ -523,7 +523,7 @@ Feature: Magma code indentation
     end for;
     """
     
-  Scenario: Indentation of else in a combination of if, elif and select
+  Scenario: Indentation of else in a combination of case and select
     When I insert:
     """
     for x in L do
