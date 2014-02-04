@@ -21,13 +21,10 @@
 
 ;;; Code:
 
-(provide 'magma-smie)
-
 (require 'smie)
 
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
-
 
 (defvar magma-smie-grammar
   (smie-prec2->grammar
@@ -123,7 +120,7 @@
     '((assoc "elif" "when")
       ;;(left "ifthen")
       ;;(left "elifthen" "when:")
-      (nonassoc "end if" "end case" "end function" "end procedure")
+      (nonassoc "end if" "end casppe" "end function" "end procedure")
       (assoc ";")
       (left "(") (right ")")
       ;;(left ":")
@@ -158,7 +155,8 @@
       (assoc "and")
       
       )
-    )))
+    ))
+  "BNF grammar for the SMIEngine.")
 
 (defvar magma-smie-tokens-regexp
   (concat
@@ -168,12 +166,13 @@
    (regexp-opt '("for" "while" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
                  "then" "where" "is" "select") 'words)
-   "\\)"))
+   "\\)")
+  "SMIE tokens for magma keywords, except for block ends.")
 
 (defvar magma-smie-end-tokens-regexp
   (regexp-opt '("end while" "end if" "end case" "end try" "end for"
-                "end function" "end procedure") 'words))
-
+                "end function" "end procedure") 'words)
+  "SMIE tokens for block ends.")
 
 (defvar magma-smie-operators-regexp
   (concat
@@ -184,16 +183,17 @@
                  "eq" "ne" "lt" "gt" "ge" "le"
                  "and" "or" "not"
                  ) 'words)
-   "\\)"))
+   "\\)")
+  "Regexp matching magma operators.")
 
 
 (defvar magma-smie-special1-regexp
   (regexp-opt '("print" "printf" "load" "save" "restore") 'words)
-  "Special functions requiring no parentheses and no colon")
+  "Regexp matching special functions requiring no parentheses and no colon")
 
 (defvar magma-smie-special2-regexp
   (regexp-opt '("vprint" "vprintf") 'words)
-  "Special functions requiring no parentheses but a colon")
+  "Regexp matching special functions requiring no parentheses but a colon")
 
 (defun magma-identify-colon ()
   "If point is at a colon, returns the appropriate token for that
@@ -260,10 +260,8 @@
            (backward-sexp)
            (magma-looking-at-fun-openparen)))))
 
-;; The two following defuns are adapted from the GNU emacs manual, section 23.7.1.4 (SMIE / Defining tokens)
-
 (defun magma-smie-forward-token ()
-  (interactive)
+  "Read the next token in the magma buffer"
   (forward-comment (point-max))
   (cond
    ((magma-looking-at-fun-openparen)
@@ -303,10 +301,8 @@
               (point))))
    ))
 
-;; toto
-
 (defun magma-smie-backward-token ()
-  (interactive)
+  "Read the previous token in the magma buffer."
   (forward-comment (- (point)))
   (let ((bolp
          (save-excursion
@@ -359,6 +355,7 @@
   :type 'integer)
 
 (defun magma-smie-rules (kind token)
+  "SMIE indentation rules."
   (pcase (cons kind token)
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args)
@@ -386,6 +383,7 @@
   )
 
 (defun magma-indent-line ()
+  "Indent a line according to the SMIE settings."
   (interactive)
   (smie-indent-line))
 
@@ -393,7 +391,8 @@
 ;; Additional functions for movement
 
 (defconst magma-end-of-expr-tokens
-  (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)"))
+  (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)")
+  "SMIE tokens marking the end of an expression.")
 
 (defun magma-looking-back-end-of-expr-p ()
   "Test whether we are at the beginning of an expression"
@@ -423,7 +422,9 @@
   (forward-char 1)) ;; We should always be looking at a ";" there
 
 (defun magma-previous-expr ()
-  "Go to the beginning of the expression, or to the beginning of the previous expression if already at the beginning of the current one."
+  "Go to the beginning of the expression, or to the beginning of
+  the previous expression if already at the beginning of the
+  current one."
   (interactive)
   (let ((prev-point (point)))
     (magma-beginning-of-expr)
@@ -431,6 +432,7 @@
       (backward-sexp))))
 
 (defun magma-mark-expr ()
+  "Mark the current expression"
   (interactive)
   (magma-beginning-of-expr)
   (set-mark-command nil)
@@ -442,19 +444,24 @@
   "Regexp for words marking the beginning of a defun")
 
 (defun magma-beginning-of-defun (&optional silent)
-  (interactive)
-  (condition-case nil
+  "Go to the beginning of the function, procedure or intrinsics
+  definition at point"
+  (interactive) (condition-case nil
       (search-backward-regexp magma-defun-regexp)
     (error (or silent
-               (message "Not in a function, procedure or intrinsics definition")))))
+               (message "Not in a function, procedure or
+               intrinsics definition")))))
 
 (defun magma-end-of-defun ()
+  "Go to the beginning of the function, procedure or intrinsics
+  definition at point"
   (interactive)
-  (or (looking-at magma-defun-regexp)
+  (or (looking-atmagma-defun-regexp)
       (magma-beginning-of-defun))
   (magma-end-of-expr))
 
 
+(provide 'magma-smie)
 
 
 ;;; magma-smie.el ends here
