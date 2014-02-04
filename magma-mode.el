@@ -63,6 +63,8 @@
     (define-key map (kbd "C-c C-k") 'magma-kill)
     (define-key map (kbd "C-c C-h") 'magma-help-word)
     (define-key map (kbd "C-c C-w") 'magma-show-word)
+    (define-key map [remap forward-paragraph] 'magma-end-of-expr)
+    (define-key map [remap backward-paragraph] 'magma-previous-expr)
     map)
   "Keymap for magma-mode"
   )

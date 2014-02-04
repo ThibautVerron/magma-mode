@@ -409,16 +409,26 @@
     (-contains? magma-end-of-expr-tokens nexttoken)))
 
 (defun magma-beginning-of-expr ()
+  "Go to the beginning of the current expression."
   (interactive)
   (while (not (magma-looking-back-end-of-expr-p))
     (magma-smie-backward-token)))
 ;; FIXME What if the point is in a string or comment?
 
 (defun magma-end-of-expr ()
+  "Go to the end of the current expression."
   (interactive)
   (magma-beginning-of-expr)
   (smie-forward-sexp ";")
   (forward-char 1)) ;; We should always be looking at a ";" there
+
+(defun magma-previous-expr ()
+  "Go to the beginning of the expression, or to the beginning of the previous expression if already at the beginning of the current one."
+  (interactive)
+  (let ((prev-point (point)))
+    (magma-beginning-of-expr)
+    (when (eq prev-point (point))
+      (backward-sexp))))
 
 (defun magma-mark-expr ()
   (interactive)
@@ -431,16 +441,17 @@
   (regexp-opt '("function" "procedure" "intrinsics") 'words)
   "Regexp for words marking the beginning of a defun")
 
-(defun magma-beginning-of-defun (&optional nofail)
+(defun magma-beginning-of-defun (&optional silent)
   (interactive)
   (condition-case nil
       (search-backward-regexp magma-defun-regexp)
-    (error (or nofail
+    (error (or silent
                (message "Not in a function, procedure or intrinsics definition")))))
 
 (defun magma-end-of-defun ()
   (interactive)
-  (magma-beginning-of-defun t)
+  (or (looking-at magma-defun-regexp)
+      (magma-beginning-of-defun))
   (magma-end-of-expr))
 
 
