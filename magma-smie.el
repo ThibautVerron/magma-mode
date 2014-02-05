@@ -449,14 +449,13 @@
   (interactive) (condition-case nil
       (search-backward-regexp magma-defun-regexp)
     (error (or silent
-               (message "Not in a function, procedure or
-               intrinsics definition")))))
+               (message "Not in a function, procedure or intrinsics definition")))))
 
 (defun magma-end-of-defun ()
   "Go to the beginning of the function, procedure or intrinsics
   definition at point"
   (interactive)
-  (or (looking-atmagma-defun-regexp)
+  (or (looking-at magma-defun-regexp)
       (magma-beginning-of-defun))
   (magma-end-of-expr))
 
