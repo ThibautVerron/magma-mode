@@ -577,3 +577,16 @@ Feature: Magma code indentation
     x := recformat<toto : Type1,
                    tata : Type2>
     """
+
+  @fixedbug
+  Scenario: Indentation of -> 
+    When I insert:
+    """
+    testhom := hom<P -> Q>;
+    """
+    And I cut the line after "Q"
+    Then I should see:
+    """
+    testhom := hom<P -> Q
+                  >;
+    """

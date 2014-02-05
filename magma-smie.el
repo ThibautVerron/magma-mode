@@ -177,7 +177,7 @@
 (defvar magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
