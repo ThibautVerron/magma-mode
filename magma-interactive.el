@@ -133,7 +133,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "P")
   (set-buffer (magma-get-buffer i))
   ;;(comint-interrupt-subjob)
-  (kill-process nil comint-ptyp)
+  (interrupt-process nil comint-ptyp)
   ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
