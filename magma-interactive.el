@@ -133,7 +133,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "P")
   (set-buffer (magma-get-buffer i))
   ;;(comint-interrupt-subjob)
-  (interrupt-process nil comint-ptyp)
+  (or (not (comint-check-proc (current-buffer)))
+      (interrupt-process nil comint-ptyp))
   ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
@@ -142,7 +143,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "P")
   (set-buffer (magma-get-buffer i))
   ;;(comint-kill-subjob)
-  (kill-process nil comint-ptyp)
+  (or (not (comint-check-proc (current-buffer)))
+      (kill-process nil comint-ptyp))
   ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
