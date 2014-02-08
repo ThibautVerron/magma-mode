@@ -27,7 +27,7 @@ Feature: Interaction with a magma process
     > 6*7;
     6*7;
     """
-    And I should see "42"
+    And I should see "Input: 6*7;"
 
   Scenario: Evaluate an expression in the magma buffer, no reecho
     Given I press "C-x o"
@@ -41,7 +41,7 @@ Feature: Interaction with a magma process
     > 6*7;
     6*7;
     """
-    And I should see "42"
+    And I should see "Input: 6*7;"
 
   Scenario: Evaluate a simple expression
     Given I insert:
