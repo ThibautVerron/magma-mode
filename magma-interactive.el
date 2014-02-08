@@ -132,14 +132,18 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Interrupt the magma process in buffer i"
   (interactive "P")
   (set-buffer (magma-get-buffer i))
-  (comint-interrupt-subjob)
+  ;;(comint-interrupt-subjob)
+  (kill-process nil comint-ptyp)
+  ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   (interactive "P")
   (set-buffer (magma-get-buffer i))
-  (comint-kill-subjob)
+  ;;(comint-kill-subjob)
+  (kill-process nil comint-ptyp)
+  ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
 (defun magma-comint-send (expr &optional i)
