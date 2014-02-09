@@ -4,7 +4,6 @@ Feature: Magma completion mechanism
 
   Background: 
     Given I start a magma process
-    And I press "C-x o"
     And I wait for an instant
     
   Scenario: Completion at the end of a line, one candidate

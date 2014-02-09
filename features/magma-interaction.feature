@@ -11,15 +11,15 @@ Feature: Interaction with a magma process
     And I wait for an instant
    
   Scenario: Start a magma process
-    When I press "C-x o"
     Then I should be in buffer "*magma*"
     And I should see "Welcome to dummymagma v1.0!"
     And I should see "> "
 
   Scenario: Evaluate an external buffer, no reecho
-    Given I insert "6*7;"
+    Given I am in buffer "*magma-test*"
+    And I insert "6*7;"
     And I press "C-c C-b"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see "> 6*7;"
     And I should not see:
@@ -30,8 +30,7 @@ Feature: Interaction with a magma process
     And I should see "Input: 6*7;"
 
   Scenario: Evaluate an expression in the magma buffer, no reecho
-    Given I press "C-x o"
-    And I press "M->"
+    Given I press "M->"
     And I insert "6*7;"
     And I press "RET"
     And I wait for an instant
@@ -44,14 +43,15 @@ Feature: Interaction with a magma process
     And I should see "Input: 6*7;"
 
   Scenario: Evaluate a simple expression
-    Given I insert:
+    Given I am in buffer "*magma-test*"
+    And I insert:
     """
     x := 3;
     y := 4;
     """
     And I place the cursor before "x"
     And I press "C-c C-e"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see:
     """
@@ -63,7 +63,8 @@ Feature: Interaction with a magma process
     """
 
   Scenario: Evaluate a complex expression (for... end for)
-    Given I insert:
+    Given I am in buffer "*magma-test*"
+    And I insert:
     """
     for i in list do
     x := 3;
@@ -72,7 +73,7 @@ Feature: Interaction with a magma process
     """
     And I place the cursor before "for"
     And I press "C-c C-e"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see:
     """
@@ -92,7 +93,8 @@ Feature: Interaction with a magma process
     """
 
   Scenario: Evaluate a complex expression (if ... (select... else) else... end if)
-    Given I insert:
+    Given I am in buffer "*magma-test*"
+    And I insert:
     """
     if test then
     x := test2 select 1 else 2;
@@ -103,7 +105,7 @@ Feature: Interaction with a magma process
     """
     And I place the cursor before "x"
     And I press "C-c C-e"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see:
     """
@@ -136,7 +138,8 @@ Feature: Interaction with a magma process
     """
 
   Scenario: Evaluate a defun
-    Given I insert:
+    Given I am in buffer "*magma-test*"
+    And I insert:
     """
     function toto (arg)
     arg := arg +2;
@@ -146,7 +149,7 @@ Feature: Interaction with a magma process
     """
     And I place the cursor before "+2"
     And I press "C-c C-f"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see:
     """
@@ -171,13 +174,14 @@ Feature: Interaction with a magma process
     ;; And I should not see message "Not in a function, procedure or intrinsics definition"
 
   Scenario: Evaluate a defun, not in a defun
-    Given I insert:
+    Given I am in buffer "*magma-test*"
+    And I insert:
     """
     x := 3;
     """
     And I place the cursor before "x"
     And I press "C-c C-f"
-    And I press "C-x o"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see message "Not in a function, procedure or intrinsics definition"
 
@@ -196,3 +200,14 @@ Feature: Interaction with a magma process
 
   Scenario: Send a region to multiple processes, broadcast
 
+
+  Scenario: Kill a magma process
+
+
+  Scenario: Interrupt a magma process
+
+
+  Scenario: Kill multiple magma processes
+
+
+  Scenario: Interrupt multiple magma processes

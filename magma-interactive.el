@@ -262,7 +262,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Switch to the magma process in buffer i, in another window on the same frame"
   (interactive "P")
   (magma-run i)
-  (display-buffer (magma-get-buffer i))
+  (pop-to-buffer (magma-get-buffer i))
   )
 
 
