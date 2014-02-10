@@ -36,14 +36,13 @@
   :group 'magma
   :type 'string)
 
-(defvar magma--debug nil "Echo basic debug information?")
-(defvar magma--debug2 nil "Echo detailed debug information?")
+(defvar magma--debug-level 0 "Echo basic debug information?")
 
 (defun magma--debug-message (str)
-  (when (or magma--debug magma--debug2) (message str)))
+  (when (>= magma--debug-level 1) (message str)))
 
 (defun magma--debug2-message (str)
-  (when magma--debug2 (message str)))
+  (when (>= magma--debug-level 2) (message str)))
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
