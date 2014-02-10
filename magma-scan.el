@@ -42,6 +42,7 @@
          (with-temp-buffer
            (let ((magma-mode-hook nil))
              (magma-mode))
+           (insert "\n")
            (insert-file-contents-literally file)
            (goto-char (point-min))
            
