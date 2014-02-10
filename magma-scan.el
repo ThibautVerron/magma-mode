@@ -23,7 +23,6 @@
 
 (defvar-local magma-working-directory magma-default-directory)
 
-<<<<<<< HEAD
 (defun magma-scan-completion-file (file)
   (interactive)
   (with-temp-buffer
