@@ -49,7 +49,10 @@
   "Parse the string str, and extract new symbols to add to the completion table"
   (magma--debug-message "Scanning input for completion candidates...")
   (magma--debug-message (format "Input : %s" str))
-  (let ((new-candidates (magma-scan str)))
+  (let ((new-candidates
+         (with-temp-buffer
+           (insert str)
+           (magma-scan))))
     (magma--debug-message (format "Candidates found : %s" new-candidates))
     (setq magma-completion-table
           (-union new-candidates magma-completion-table))))
