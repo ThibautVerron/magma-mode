@@ -53,19 +53,10 @@
   (add-hook 'comint-input-filter-functions
             'magma-interactive-add-to-completion-table))
 
-(defcustom magma-completion-auto-update 30
-  "Should we rescan the buffer for new candidates to completion?
-  If nil, never rescan automatically, if a number n, rescan after
-  n seconds of inactivity."
-  )
 
 (defun magma-editor-init-completion ()
   (magma-init-completion)
   (magma-editor-rebuild-completion-table)
-  (when magma-completion-auto-update
-    (make-local-variable 'timer-idle-list)
-    (run-with-idle-timer magma-completion-auto-update t
-                         'magma-editor-rebuild-completion-table))
   )
 
 (add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
@@ -83,10 +74,13 @@
     nil)
 
 
-
 (defun magma-interactive-rebuild-completion-table ()
   (interactive)
   nil)
 
+(defun magma-completion-at-point ()
+  (magma-editor-rebuild-completion-table)
+  ;; Fixme: maybe rebuild only if called twice, or something...
+  (completion-at-point))
 
 (provide 'magma-completion)
