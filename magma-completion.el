@@ -6,16 +6,8 @@
 
 (defvar magma-completion-table-file (f-join magma-path "data/magma_symbols.txt"))
 
-(defun magma-build-initial-table (file)
-  (interactive)
-  (with-temp-buffer
-    (condition-case nil
-        (insert-file-contents file)
-      (error (message "The index file does not exist, so I cannot enable completion. Please see the comments to build it.")))
-    (split-string (buffer-string) "\n" t)))
-
 (defvar magma-completion-table-base
-  (magma-build-initial-table magma-completion-table-file))
+  (magma-scan-completion-file magma-completion-table-file))
 
 (defvar-local magma-completion-table nil)
   
@@ -67,11 +59,7 @@
 (defun magma-editor-rebuild-completion-table ()
   (interactive)
   (magma--debug-message "Rebuilding the completion table...")
-  (let ((new-candidates (magma-scan)))
-    (setq magma-completion-table
-        (-union new-candidates
-                magma-completion-table)))
-    nil)
+  (ignore (magma-scan)))
 
 
 (defun magma-interactive-rebuild-completion-table ()
