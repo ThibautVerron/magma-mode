@@ -11,7 +11,7 @@
 
 (defvar-local magma-completion-table nil)
   
-(defun magma-completion-at-point ()
+(defun magma-find-completions-at-point ()
   (let* ((bounds (bounds-of-thing-at-point 'word))
          (start (car bounds))
          (end (cdr bounds)))
@@ -23,7 +23,7 @@
   (interactive)
   (setq magma-completion-table magma-completion-table-base)
   (make-local-variable 'completion-at-point-functions)
-  (setq completion-at-point-functions (list 'magma-completion-at-point))
+  (setq completion-at-point-functions (list 'magma-find-completions-at-point))
   )
 
 (defun magma-interactive-add-to-completion-table (str)
@@ -67,6 +67,7 @@
   nil)
 
 (defun magma-completion-at-point ()
+  (interactive)
   (magma-editor-rebuild-completion-table)
   ;; Fixme: maybe rebuild only if called twice, or something...
   (completion-at-point))
