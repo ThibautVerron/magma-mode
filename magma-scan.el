@@ -13,6 +13,8 @@
       (error (message "The index file does not exist, so I cannot enable completion. Please see the comments to build it.")))
     (split-string (buffer-string) "\n" t)))
 
+(defvar magma-scan-anonymous-temp-file (make-temp-file ".magmascan"))
+
 (defconst magma-scan-defun-regexp "\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
 
 (defun magma-scan-make-filename (file)
@@ -23,9 +25,7 @@
              (path (f-dirname fullfile))
              (base (f-filename fullfile)))
         (f-join path (concat ".scan-" base ".el")))
-    (make-temp-file ".magmascan")))
-;; There should also be some code to delete the temp files if
-;; needed... But who writes code in a non-file buffer?
+    magma-scan-anonymous-temp-file))
 
 (defun magma-scan-changedirectory-el (dir)
   "Elisp code to insert to perform a cd to DIR from the current directory held in magma-working-directory"
