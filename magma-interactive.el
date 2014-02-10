@@ -1,3 +1,26 @@
+;;; magma-interactive.el --- Interaction with an external magma process. ;
+
+;; Copyright (C) 2007-2014 Luk Bettale
+;;               2013-2014 Thibaut Verron
+;; Licensed under the GNU General Public License.
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
+
+;;; Code:
+
 (require 'comint)
 (require 'term)
 
@@ -109,14 +132,20 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Interrupt the magma process in buffer i"
   (interactive "P")
   (set-buffer (magma-get-buffer i))
-  (comint-interrupt-subjob)
+  ;;(comint-interrupt-subjob)
+  (or (not (comint-check-proc (current-buffer)))
+      (interrupt-process nil comint-ptyp))
+  ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   (interactive "P")
   (set-buffer (magma-get-buffer i))
-  (comint-kill-subjob)
+  ;;(comint-kill-subjob)
+  (or (not (comint-check-proc (current-buffer)))
+      (kill-process nil comint-ptyp))
+  ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
 (defun magma-comint-send (expr &optional i)
@@ -205,21 +234,21 @@ After changing this variable, restarting emacs is required (or reloading the mag
 ;; Wrappers
 
 (defun magma-send-expression (expr &optional i)
-  (interactive "ip")
+  (interactive "iP")
   (let* ((initval (if (region-active-p)
                       (buffer-substring-no-properties (region-beginning)
                                                       (region-end))))
          (expr
           (or expr
               (read-string "Expr:" initval))))
-    (magma-send expr i)))
+    (magma-send-or-broadcast expr i)))
 
 (defun magma-restart (&optional i)
   "Restart the magma process in buffer i"
   (interactive "P")
-  (magma-kill i)
+  (magma-kill-or-broadcast i)
   (sleep-for 2)
-  (magma-run i)
+  (magma-run-or-broadcast i)
   )
 
 (defun magma-switch-to-interactive-buffer (&optional i)
@@ -233,21 +262,21 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Switch to the magma process in buffer i, in another window on the same frame"
   (interactive "P")
   (magma-run i)
-  (display-buffer (magma-get-buffer i))
+  (pop-to-buffer (magma-get-buffer i))
   )
 
 
-(defun magma-eval-region (beg end)
+(defun magma-eval-region (beg end &optional i)
   "Evaluates the current region"
-  (interactive "r")
+  (interactive "rP")
   (let ((str (buffer-substring-no-properties beg end)))
-    (magma-send str)
+    (magma-send-or-broadcast str i)
     )
   )
 
-(defun magma-eval-line ()
+(defun magma-eval-line ( &optional i)
   "Evaluate current line"
-  (interactive)
+  (interactive "P")
   (while (looking-at "^$")
     (forward-line))
   (let* ((beg (save-excursion
@@ -256,47 +285,62 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (end (save-excursion
                 (end-of-line)
                 (point))))
-    (magma-eval-region beg end)
+    (magma-eval-region beg end i)
     (next-line)
     )
   )
 
-(defun magma-eval-paragraph ()
+(defun magma-eval-paragraph ( &optional i)
   "Evaluate current paragraph (space separated block)"
-  (interactive)
+  (interactive "P")
   (forward-paragraph)
   (let ((end (point)))
     (backward-paragraph)
-    (magma-eval-region (point) end)
+    (magma-eval-region (point) end i)
     (goto-char end)))
 
-(defun magma-eval-next-statement ()
+(defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
-  (interactive)
-  (magma-eval-line)
-  ;;(magma-eval-region
-   ;;(magma-beginning-of-statement-1) (magma-end-of-statement-1))
-  )
+  (interactive "P")
+  (let ((regbeg (progn
+                    (magma-beginning-of-expr)
+                    (point)))
+          (regend (progn
+                    (magma-end-of-expr)
+                    (point))))
+    (magma-eval-region regbeg regend i)))
+  
 
-(defun magma-eval ()
-  "Evaluates region if mark is set, else expression."
-  (interactive)
+(defun magma-eval (&optional i)
+  "Evaluate the current region if set and the current statement
+  otherwise"
+  (interactive "P")
   (if mark-active
-      (magma-eval-region (region-beginning) (region-end))
-    (magma-eval-next-statement))
-  )
+      (magma-eval-region (region-beginning) (region-end) i)
+    (magma-eval-next-statement i)))
 
-(defun magma-eval-until ()
+(defun magma-eval-defun (&optional i)
+  "Evaluate the current defun"
+  (interactive "P")
+  (let ((regbeg (progn
+                  (magma-beginning-of-defun)
+                  (point)))
+        (regend (progn
+                  (magma-end-of-defun)
+                  (point))))
+    (magma-eval-region regbeg regend i)))
+  
+
+(defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
-  (interactive)
+  (interactive "P")
   (magma-end-of-statement-1)
-  (magma-eval-region (point-min) (point)))
+  (magma-eval-region (point-min) (point) i))
 
-(defun magma-eval-buffer ()
+(defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer"
-  (interactive)
-  (magma-eval-region (point-min) (point-max))
-)
+  (interactive "P")
+  (magma-eval-region (point-min) (point-max) i))
 
 (defun magma-help-word (&optional browser)
   "call-up the handbook in the interactive buffer for the current word"
@@ -320,9 +364,72 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "show the current word in magma"
   (interactive "P")
   (let ((word (current-word)))
-    (magma-run)
-    (magma-send
+    (magma-run-or-broadcast i)
+    (magma-send-or-broadcast
      (concat word ";") i)))
+
+(defun magma-broadcast-fun (fun)
+  (mapc
+   'lambda (i) (save-excursion (funcall fun i))
+   magma-active-buffers-list))
+
+(defun magma-choose-buffer (i)
+  "Given an input i in raw prefix form, decides what buffers we should be working on. The input can be an integer, in which case it returns that integer; or it can be the list '(4), in which case it prompts for an integer; or it can be the list '(16), in which case it returns the symbol 'broadcast, meaning we should work on all buffers"
+  (cond
+   ((not i) magma-working-buffer-number)
+   ((integerp i)
+    i)
+   ((and (listp i) (eq (car i) 4))
+    (read-number "In buffer?" magma-working-buffer-number))
+   ((and (listp i) (eq (car i) 16))
+    'broadcast)
+   (t (message "Invalid buffer specified") magma-working-buffer-number)))
+
+(defun magma-broadcast-if-needed (fun i)
+  (let ((buf (magma-choose-buffer i)))
+    (cond
+     ((integerp buf)
+      (funcall fun buf))
+     ((eq buf 'broadcast)
+      (magma-broadcast-fun fun))
+     (t (message "Invalid buffer specified")))))
+
+(defun magma-send-or-broadcast (expr i)
+  (magma-broadcast-if-needed (apply-partially 'magma-send expr) i))
+(defun magma-kill-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma-kill i))
+(defun magma-run-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma-run i))
+
+
+
+;; (defun magma-broadcast-kill ()
+;;   (magma-broadcast-fun 'magma-kill))
+;; (defun magma-broadcast-int ()
+;;   (magma-broadcast-fun 'magma-int))
+;; (defun magma-broadcast-send ()
+;;   (magma-broadcast-fun 'magma-send))
+;; (defun magma-broadcast-send-expression (&optional expr)
+;;   (magma-broadcast-fun '(lambda (i) (magma-send-expression expr i)))
+;; (defun magma-broadcast-eval-region (start end)
+;;   (magma-broadcast-fun '(lambda (i) (magma-eval-region start end i))))
+;; (defun magma-broadcast-eval-line ()
+;;   (magma-broadcast-fun 'magma-eval-line))
+;; (defun magma-broadcast-eval-paragraph ()
+;;   (magma-broadcast-fun 'magma-eval-paragraph))
+;; (defun magma-broadcast-eval-next-statement ()
+;;   (magma-broadcast-fun 'magma-eval-next-statement))
+;; (defun magma-broadcast-eval-function ()
+;;   (magma-broadcast-fun 'magma-eval-function))
+;; (defun magma-broadcast-eval ()
+;;   (magma-broadcast-fun 'magma-eval))
+;; (defun magma-broadcast-eval-until ()
+;;   (magma-broadcast-fun 'magma-eval-until))
+;; (defun magma-broadcast-eval-buffer ()
+;;   (magma-broadcast-fun 'magma-eval-buffer))
+;; (defun magma-broadcast-show-word ()
+;;   (magma-broadcast-fun 'magma-show-word))
+
 
 
 (defun magma-comint-send-input ()
@@ -379,7 +486,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   )  
 
 
-(defun magma-init-with-comint ()
+(defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
   (defalias 'magma-int 'magma-comint-int)
@@ -388,7 +495,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-help-word-text 'magma-comint-help-word)
   )
 
-(defun magma-init-with-term ()
+(defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
   (defalias 'magma-run 'magma-term-run)
   (defalias 'magma-int 'magma-term-int)
@@ -397,7 +504,10 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (defalias 'magma-help-word-text 'magma-term-help-word)
   )
 
-
+(defun magma-interactive-init ()
+  (if magma-interactive-use-comint
+      (magma-interactive-init-with-comint)
+    (magma-interactive-init-with-term)))
 
 
 

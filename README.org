@@ -15,17 +15,13 @@ as the interaction with a magma process through term-mode.
 
 The new features of this mode are principally a new indentation
 engine, based on [[http://www.gnu.org/software/emacs/manual/html_node/elisp/SMIE.html][SMIE]] and a new way of interacting with a magma
-process, through comint.
-
-On the other hand, this mode lacks a lot of features offered by Luk
-Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]], for example the ability to easily communicate
-with several magma processes.
+process, through comint. 
 
 ** Information
 
 This is beta software, all features are not yet fully implemented.
-For most usages, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] offers a more complete and
-stable set of features.
+For sensible usage, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] has been more thoroughly
+tested over the years.
 
 ** Installation instructions
 
@@ -36,7 +32,8 @@ stable set of features.
       git clone https://github.com/ThibautVerron/magma-mode.git
    #+end_src    
 
-2. If needed, install the required package [[https://github.com/rejeep/f.el][f.el]]. 
+2. If needed, install the required packages [[https://github.com/rejeep/f.el][f.el]] (filenames library)
+   and [[https://github.com/magnars/dash.el][dash.el]] (lists library). 
    
 3. Add the following to your emacs init file :
 
@@ -49,31 +46,26 @@ stable set of features.
 4. Additional setup:
 
    #+begin_src emacs-lisp 
-      ;; If you want to load the mode automatically with some file extensions
-      (setq auto-mode-alist
-      (append '(("\\.mgm$\\|\\.m$" . magma-mode))
-      auto-mode-alist))
-      
-      ;; If you need to use a different magma path
-      (setq magma-interactive-program "magma")
-      
-      ;; If you need to pass specific arguments to magma
-      (setq magma-interactive-arguments '())
-      
-      ;; At the moment, the following options need to be inserted
-      ;; *before* "(require 'magma-mode')", and you need to either
-      ;; restart emacs or reload the magma loadfile after changing
-      ;; it. It is a design flaw and should be fixed in the future.
-      
-      ;; If you want to use comint instead of term.
-      
-      (setq magma-interactive-use-comint t)
-      
-      ;; Electric return key (try RET or C-j, or C-c C-j) while in a
-      ;; string or comment. Like it or hate it, enable it or disable
-      ;; it. This is beta, might ruin the indentation of your document,
-      ;; crash emacs or eat your cat.
-      (setq magma-use-electric-newline t)
+     ;; If you want to load the mode automatically with some file extensions
+     (setq auto-mode-alist
+     (append '(("\\.mgm$\\|\\.m$" . magma-mode))
+     auto-mode-alist))
+     
+     ;; If you need to use a different magma program
+     (setq magma-interactive-program "magma")
+     
+     ;; If you need to pass specific arguments to magma
+     (setq magma-interactive-arguments '())
+           
+     ;; If you want to use comint instead of term.
+     (setq magma-interactive-use-comint t)
+     
+     ;; Electric return key (try RET or C-j, or C-c C-j) while in a
+     ;; string or comment. Like it or hate it, enable it or disable
+     ;; it. This is beta, might ruin the indentation of your document,
+     ;; crash emacs or eat your cat.
+     (setq magma-use-electric-newline t)
+     
    #+end_src
 
 ** Comint vs term
@@ -113,13 +105,13 @@ does not have this kind of requirements.
     A basic completion engine is provided, to be used in the magma
     editting window, or in a magma interactive buffer using comint.
 
-    At the moment, it only provides completion against a
-    dictionary. This dictionary is not included at the moment, but if
-    you need to build it, we provide a script for doing so (linux
-    only).
+    At the moment, it provides completion based on a dictionary. This
+    dictionary is not included at the moment, but if you need to build
+    it, we provide a script for doing so (linux only).
 
-    Context-dependent completion, or automatic parsing of magma input
-    is not supported at the moment.
+    This dictionary is updated with definitions from the current
+    buffer, and from externally loaded files (using the =load= magma
+    primitive).
 
 *** Building the dictionary
     The =bin= folder contains a script named
@@ -173,11 +165,25 @@ does not have this kind of requirements.
     =completion-at-point= is bound to =TAB=, and in =magma-mode= it
     is not bound to any key by default. 
 
-    In =magma-term-interactive-mode= (with =term-char-mode=), completion is supported out of
-    the box by magma itself.
+    In =magma-term-interactive-mode= (with =term-char-mode=),
+    completion is supported out of the box by magma itself.
+
+*** Limitations
+
+    Context-dependent completion is not supported at the moment.
+
+    The dictionary is only updated with function, procedure and
+    intrinsics definitions. The reason is that I deem unlikely that a
+    user will want completion for variables and inline-defined
+    functions without any decent scoping. 
+
+    However, it is not a frozen feature, so if you have usecases for
+    extensions to the completion engine, and/or suggestions to
+    overcome some of its current issues, please file an issue.
 
 ** Keymap
-*** In an editting window
+
+Keymap for the =magma-mode=:
 
  - =C-c C-o= (=magma-switch-to-interactive-buffer-same-frame=): 
    start an interactive magma process, in the same frame
@@ -187,7 +193,7 @@ does not have this kind of requirements.
  - =C-c C-k= (=magma-kill=): kill the magma process
  - =C-c C-i= (=magma-int=): interrupt the magma process
  - =C-c C-a= (=magma-restart=): restart the magma process
- - =C-c := (=magma-send=): send an expression to the magma process
+ - =C-c := (=magma-send-expression=): send an expression to the magma process
  - =C-c C-w (=magma-show-word=): show the value of the word at point
    in the magma buffer
  - =C-c C-l= (=magma-eval-line=): send the current line to the magma
@@ -197,7 +203,8 @@ does not have this kind of requirements.
  - =C-c C-b= (=magma-eval-buffer=): send the current buffer to the
    magma process
  - =C-c C-e= (=magma-eval=): if region is set, send the region to the
-   magma process, else send the current line
+   magma process, else send the current expression
+ - =C-c C-f= (=magma-eval-defun=): evaluate the current function definition
  - =C-c C-u= (=magma-eval-until=): send the content of the buffer up
    to the point to the magma process
  - =C-c C-p= (=magma-eval-paragraph=): send the current paragraph to
@@ -205,7 +212,17 @@ does not have this kind of requirements.
  - =C-c h= (=magma-show-help=): prompt for a symbol, and shows the
    magma help about that symbol
 
-*** In an editting window, with electric return activated
+Additionally, the evaluation functions take optional prefix arguments:
+
+ - =C-u 3 C-l= : send the current line to the magma process number 3
+ - =C-u C-l= : prompts for a magma process, and send the current line
+   to this process
+ - =C-u C-u C-l= : send the current line to all magma processes
+
+These features are highly untested.
+
+Additionally, if you have =magma-use-electric-newline= set to =t=,
+the following keys are also bound:
     
  - =RET= or =C-j= (=magma-newline-and-indent=): inserts a visual
    newline in the buffer. It is a regular =newline-and-indent= in most

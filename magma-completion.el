@@ -1,6 +1,25 @@
-;; Completion in the magma buffer.
+;;; magma-completion.el --- Code completion for magma. ;
 
-;; Base settings
+;; Copyright (C) 2007-2014 Luk Bettale
+;;               2013-2014 Thibaut Verron
+;; Licensed under the GNU General Public License.
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
+
+;;; Code:
 
 (require 'magma-scan)
 
@@ -30,11 +49,7 @@
   "Parse the string str, and extract new symbols to add to the completion table"
   (magma--debug-message "Scanning input for completion candidates...")
   (magma--debug-message (format "Input : %s" str))
-  (let ((new-candidates
-         (with-temp-buffer
-           (insert str)
-           (magma-mode)
-           (magma-scan))))
+  (let ((new-candidates (magma-scan str)))
     (magma--debug-message (format "Candidates found : %s" new-candidates))
     (setq magma-completion-table
           (-union new-candidates magma-completion-table))))
@@ -43,7 +58,7 @@
   (magma-init-completion)
   (magma-interactive-rebuild-completion-table)
   (add-hook 'comint-input-filter-functions
-            'magma-interactive-add-to-completion-table))
+            'magma-interactive-add-to-completion-table nil t))
 
 
 (defun magma-editor-init-completion ()

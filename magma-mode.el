@@ -14,6 +14,10 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 ;; General Public License for more details.
 
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
 
 ;;; Code:
 
@@ -24,24 +28,27 @@
 (require 'f)
 (require 'thingatpt)
 
-(defvar magma-path (f-dirname (f-this-file)))
+(defconst magma-path (f-dirname (f-this-file)) "magma-mode install folder")
 ;;(add-to-list 'load-path magma-path)
 
 (defcustom magma-default-directory "~/"
-  "Default work directory for magma (currently mostly ignored)"
+  "Default work directory for magma"
   :group 'magma
   :type 'string)
 
-(defvar magma--debug nil)
+(defvar magma--debug-level 0 "Echo basic debug information?")
 
 (defun magma--debug-message (str)
-  (when magma--debug (message str)))
+  (when (>= magma--debug-level 1) (message str)))
 
+(defun magma--debug2-message (str)
+  (when (>= magma--debug-level 2) (message str)))
 
 (defvar magma-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c :") 'magma-send-expression)
     (define-key map (kbd "C-c C-e") 'magma-eval)
+    (define-key map (kbd "C-c C-f") 'magma-eval-defun)
     (define-key map (kbd "C-c C-u") 'magma-eval-until)
     (define-key map (kbd "C-c C-l") 'magma-eval-line)
     (define-key map (kbd "C-c C-p") 'magma-eval-paragraph)
@@ -55,6 +62,8 @@
     (define-key map (kbd "C-c C-k") 'magma-kill)
     (define-key map (kbd "C-c C-h") 'magma-help-word)
     (define-key map (kbd "C-c C-w") 'magma-show-word)
+    (define-key map [remap forward-paragraph] 'magma-end-of-expr)
+    (define-key map [remap backward-paragraph] 'magma-previous-expr)
     map)
   "Keymap for magma-mode"
   )
@@ -110,11 +119,8 @@
   (make-local-variable 'indent-line-function)
   (setq indent-line-function 'smie-indent-line)
 
-  (if magma-interactive-use-comint
-      (magma-init-with-comint)
-    (magma-init-with-term)
-    )
-  )
+  (magma-interactive-init))
+  
 
 (provide 'magma-mode)
 

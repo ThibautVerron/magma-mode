@@ -1,10 +1,30 @@
-(provide 'magma-smie)
+;;; magma-smie.el --- Indentation in the magma buffers. ;
+
+;; Copyright (C) 2007-2014 Luk Bettale
+;;               2013-2014 Thibaut Verron
+;; Licensed under the GNU General Public License.
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
+
+;;; Code:
 
 (require 'smie)
 
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
-
 
 (defvar magma-smie-grammar
   (smie-prec2->grammar
@@ -38,10 +58,12 @@
       ;; Expression
       (expr (id)
             ;;("(" expr ")")
-            ;; (expr "where" id "is" expr)
-            ;; (expr "select" expr "else" expr)
+            (expr "where" id "is" expr)
+            (expr "select" expr "else" expr)
             ("~" expr)
+            ("#" expr)
             (expr "+" expr)
+            (expr "::" expr) ;; For intrinsics only
             (expr "-" expr)
             (expr "*" expr)
             (expr "/" expr)
@@ -98,15 +120,17 @@
     '((assoc "elif" "when")
       ;;(left "ifthen")
       ;;(left "elifthen" "when:")
-      (nonassoc "end if" "end case" "end function" "end procedure")
+      (nonassoc "end if" "end casppe" "end function" "end procedure")
       (assoc ";")
       (left "(") (right ")")
       ;;(left ":")
-      (left "|") (left "paren:")
-      (assoc "special:")
       (assoc ",")
+      (left "|") (left "paren:")
       (assoc ":=")
-
+      (assoc "where") (assoc "is") (assoc "select")
+      (assoc "else")
+      (assoc "special:")
+      (assoc "::")
       (assoc "+")
       (assoc "-")
       (assoc "mod")
@@ -117,6 +141,7 @@
       (assoc "^")
       (assoc ".")
       (assoc "!")
+      (left "#")
       (left "~")
       (assoc "ge")
       (assoc "gt")
@@ -130,42 +155,45 @@
       (assoc "and")
       
       )
-    )))
+    ))
+  "BNF grammar for the SMIEngine.")
 
 (defvar magma-smie-tokens-regexp
   (concat
    "\\("
    (regexp-opt '("," "|" ";" "(" ")" "[" "]" "<" ">" ":="))
-   "\\|"
+   "\\|" 
    (regexp-opt '("for" "while" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
-                 "then") 'words)
-   "\\)"))
+                 "then" "where" "is" "select") 'words)
+   "\\)")
+  "SMIE tokens for magma keywords, except for block ends.")
 
 (defvar magma-smie-end-tokens-regexp
   (regexp-opt '("end while" "end if" "end case" "end try" "end for"
-                "end function" "end procedure") 'words))
-
+                "end function" "end procedure") 'words)
+  "SMIE tokens for block ends.")
 
 (defvar magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
                  "and" "or" "not"
                  ) 'words)
-   "\\)"))
+   "\\)")
+  "Regexp matching magma operators.")
 
 
 (defvar magma-smie-special1-regexp
   (regexp-opt '("print" "printf" "load" "save" "restore") 'words)
-  "Special functions requiring no parentheses and no colon")
+  "Regexp matching special functions requiring no parentheses and no colon")
 
 (defvar magma-smie-special2-regexp
   (regexp-opt '("vprint" "vprintf") 'words)
-  "Special functions requiring no parentheses but a colon")
+  "Regexp matching special functions requiring no parentheses but a colon")
 
 (defun magma-identify-colon ()
   "If point is at a colon, returns the appropriate token for that
@@ -232,44 +260,8 @@
            (backward-sexp)
            (magma-looking-at-fun-openparen)))))
 
-
-;; (defun magma-at-end-funcall-p ()
-;;   "Point is after a closing paren, returns t iff this closing
-;;   paren is the end of a funcall foo(bar...)"
-;;   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
-;;     (and (looking-back ")")
-;;          (save-excursion
-;;            (backward-sexp)
-;;            (backward-word)
-;;            (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))) 
-;;     )
-
-;; (defun magma-identify-then ()
-;;   "Point is on \"then\", identify whether we are in an if
-;;   construct (returns \"ifthen\"), or in an elif
-;;   construct (returns \"elifthen\") or other (returns \"then\",
-;;   should be treated as an error)"
-;;   (let ((forward-sexp-function nil))
-;;     (save-excursion
-;;       (catch 'token
-;;         (while t
-;;           (condition-case nil 
-;;               (progn
-;;                 (forward-comment (- (point)))
-;;                 (backward-sexp)
-;;                 (cond
-;;                  ((looking-at "if") (throw 'token "ifthen"))
-;;                  ((looking-at "elif") (throw 'token "elifthen"))
-;;                  ((bobp) (throw 'token "then"))
-;;                  ))
-;;             (error (throw 'token "then"))))
-;;         ))))
-
-
-;; The two following defuns are adapted from the GNU emacs manual, section 23.7.1.4 (SMIE / Defining tokens)
-
 (defun magma-smie-forward-token ()
-  (interactive)
+  "Read the next token in the magma buffer"
   (forward-comment (point-max))
   (cond
    ((magma-looking-at-fun-openparen)
@@ -309,10 +301,8 @@
               (point))))
    ))
 
-;; toto
-
 (defun magma-smie-backward-token ()
-  (interactive)
+  "Read the previous token in the magma buffer."
   (forward-comment (- (point)))
   (let ((bolp
          (save-excursion
@@ -358,12 +348,14 @@
 (defcustom magma-indent-basic 4 "Indentation of blocks"
   :group 'magma
   :type 'integer)
+
 (defcustom magma-indent-args 4
   "Indentation inside expressions (currently mostly ignored)"
   :group 'magma
   :type 'integer)
 
 (defun magma-smie-rules (kind token)
+  "SMIE indentation rules."
   (pcase (cons kind token)
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args)
@@ -379,21 +371,96 @@
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)
 
-    ;; (`(:after . ")")
-    ;;  (when (smie-rule-parent-p "function" "procedure")
-    ;;    (smie-rule-parent magma-indent-basic)))
-    
-    ;;(`(:list-intro . ,(or `"function" `"procedure")) t)
-
     (`(:after . ,(or `"then" `"else"))
      (smie-rule-parent magma-indent-basic))
-    (`(:before . ,(or `"elif" `"else")) (smie-rule-parent))
-    
-;;    (`(:after . ";") 0)
-;;    (`(:before . ";") 0)
+    (`(:before . "elif") (smie-rule-parent))
+    (`(:before . "else")
+     (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
+
+    ;; (`(:after . "paren:")
+    ;;  (smie-rule-parent))
     )
   )
 
 (defun magma-indent-line ()
+  "Indent a line according to the SMIE settings."
   (interactive)
   (smie-indent-line))
+
+
+;; Additional functions for movement
+
+(defconst magma-end-of-expr-tokens
+  (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)")
+  "SMIE tokens marking the end of an expression.")
+
+(defun magma-looking-back-end-of-expr-p ()
+  "Test whether we are at the beginning of an expression"
+  (let ((prevtoken
+         (save-excursion (magma-smie-backward-token))))
+    (or (-contains? magma-end-of-expr-tokens prevtoken)
+        (bobp))))
+
+(defun magma-looking-at-end-of-expr-p ()
+  "Test whether we are before the end of an expression"
+  (let ((nexttoken
+         (save-excursion (magma-smie-forward-token))))
+    (-contains? magma-end-of-expr-tokens nexttoken)))
+
+(defun magma-beginning-of-expr ()
+  "Go to the beginning of the current expression."
+  (interactive)
+  (while (not (magma-looking-back-end-of-expr-p))
+    (magma-smie-backward-token)))
+;; FIXME What if the point is in a string or comment?
+
+(defun magma-end-of-expr ()
+  "Go to the end of the current expression."
+  (interactive)
+  (magma-beginning-of-expr)
+  (smie-forward-sexp ";")
+  (forward-char 1)) ;; We should always be looking at a ";" there
+
+(defun magma-previous-expr ()
+  "Go to the beginning of the expression, or to the beginning of
+  the previous expression if already at the beginning of the
+  current one."
+  (interactive)
+  (let ((prev-point (point)))
+    (magma-beginning-of-expr)
+    (when (eq prev-point (point))
+      (backward-sexp))))
+
+(defun magma-mark-expr ()
+  "Mark the current expression"
+  (interactive)
+  (magma-beginning-of-expr)
+  (set-mark-command nil)
+  (magma-end-of-expr)
+  (setq deactivate-mark nil))
+
+(defconst magma-defun-regexp
+  (regexp-opt '("function" "procedure" "intrinsics") 'words)
+  "Regexp for words marking the beginning of a defun")
+
+(defun magma-beginning-of-defun (&optional silent)
+  "Go to the beginning of the function, procedure or intrinsics
+  definition at point"
+  (interactive) (condition-case nil
+      (search-backward-regexp magma-defun-regexp)
+    (error (or silent
+               (message "Not in a function, procedure or intrinsics definition")))))
+
+(defun magma-end-of-defun ()
+  "Go to the beginning of the function, procedure or intrinsics
+  definition at point"
+  (interactive)
+  (or (looking-at magma-defun-regexp)
+      (magma-beginning-of-defun))
+  (magma-end-of-expr))
+
+
+(provide 'magma-smie)
+
+
+;;; magma-smie.el ends here

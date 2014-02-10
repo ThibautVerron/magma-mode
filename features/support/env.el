@@ -27,6 +27,7 @@
        (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
  (setq magma-completion-table-file (f-join magma-path
                                            "data/dummymagma_symbols.txt"))
+ (setq magma-delay "0.001")
 )
 
 (Before

@@ -428,4 +428,165 @@ Feature: Magma code indentation
     expr;
     """
     
-  
+  Scenario: Indentation of select ... else
+    When I insert:
+    """
+    for x in L do
+    y := x eq 0 select 3 else 2;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        y := x eq 0 select 3 else 2;
+    end for;
+    """
+    When I cut the line after "0"
+    And I cut the line after "3"
+    Then I should see:
+    """
+    for x in L do
+        y := x eq 0
+             select 3
+             else 2;
+    end for;
+    """
+
+  Scenario: Indentation of else in a combination of if and select
+    When I insert:
+    """
+    for x in L do
+    if x ge 0 then
+    y := x eq 0 
+    select 1
+    else 2;
+    else 
+    y := x eq 0
+    select 1
+    else 2;
+    end if;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        if x ge 0 then
+            y := x eq 0 
+                 select 1
+                 else 2;
+        else 
+            y := x eq 0
+                 select 1
+                 else 2;
+        end if;
+    end for;
+    """
+
+  Scenario: Indentation of else in a combination of if, elif and select
+    When I insert:
+    """
+    for x in L do
+    if x ge 0 then
+    y := x eq 0 
+    select 1
+    else 2;
+    elif x ge 0 then
+    y := x eq 0
+    select 1
+    else 2;
+    else 
+    y := x eq 0
+    select 1
+    else 2;
+    end if;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        if x ge 0 then
+            y := x eq 0 
+                 select 1
+                 else 2;
+        elif x ge 0 then
+            y := x eq 0
+                 select 1
+                 else 2;
+        else 
+            y := x eq 0
+                 select 1
+                 else 2;
+        end if;
+    end for;
+    """
+    
+  Scenario: Indentation of else in a combination of case and select
+    When I insert:
+    """
+    for x in L do
+    case x:
+    when 0:
+    y := x eq 0
+    select 1
+    else 2;
+    when 1:
+    y := x eq 0
+    select 1
+    else 2;
+    else
+    y := x eq 0
+    select 1
+    else 2;
+    end case;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        case x:
+        when 0:
+            y := x eq 0
+                 select 1
+                 else 2;
+        when 1:
+            y := x eq 0
+                 select 1
+                 else 2;
+        else
+            y := x eq 0
+                 select 1
+                 else 2;
+        end case;
+    end for;
+    """
+
+    
+  @fixedbug
+  Scenario: Indentation of type definitions in records
+    When I insert:
+    """
+    x := recformat<toto : Type1, tata : Type2>
+    """
+    And I cut the line after "Type1,"
+    Then I should see:
+    """
+    x := recformat<toto : Type1,
+                   tata : Type2>
+    """
+
+  @fixedbug
+  Scenario: Indentation of -> 
+    When I insert:
+    """
+    testhom := hom<P -> Q>;
+    """
+    And I cut the line after "Q"
+    Then I should see:
+    """
+    testhom := hom<P -> Q
+                  >;
+    """

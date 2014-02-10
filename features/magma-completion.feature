@@ -4,15 +4,14 @@ Feature: Magma completion mechanism
 
   Background: 
     Given I start a magma process
-    And I press "C-x o"
-    And I wait for 1 second
+    And I wait for an instant
     
   Scenario: Completion at the end of a line, one candidate
     Given I insert "SetVerbo"
     And I press "TAB"
     Then I should see "> SetVerbose"
     When I press "RET"
-    And I wait for 1 second
+    And I wait for an instant
     Then I should see "Input: SetVerbose"
     And I should not see "Input: SetVerboSetVerbose"
     
@@ -39,7 +38,7 @@ Feature: Magma completion mechanism
     And I press "TAB"
     Then I should see "> toto(SetVerbose)tata"
     When I press "RET"
-    And I wait for 1 second
+    And I wait for an instant
     Then I should see "Input: toto(SetVerbose)tata"
     And I should not see "Input: toto(SetVerbo)tatatoto(SetVerbose)tata"
     And I should not see "Input: toto(SetVerboSetVerbose)tata"
@@ -59,7 +58,7 @@ Feature: Magma completion mechanism
     function myfunction (res) return res; end function;
     """
     And I press "RET"
-    And I wait for 1 second
+    And I wait for an instant
     And I insert "myf"
     And I press "TAB"
     Then I should see "> myfunction"

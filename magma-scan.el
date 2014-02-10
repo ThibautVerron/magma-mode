@@ -1,10 +1,29 @@
-;; We want functions to scan a magma buffer for names (completion
-;; candidates) and other information:
-;; - working directory (following "ChangeDirectory" commands)
-;; - names extracted from external files (loaded with "load")
+;;; magma-scan.el --- Scan magma input for completion candidates. ;
+
+;; Copyright (C) 2007-2014 Luk Bettale
+;;               2013-2014 Thibaut Verron
+;; Licensed under the GNU General Public License.
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;;; Commentary:
+
+;; Documentation available in README.org or on
+;; https://github.com/ThibautVerron/magma-mode
+
+;;; Code:
 
 (defvar-local magma-working-directory magma-default-directory)
 
+<<<<<<< HEAD
 (defun magma-scan-completion-file (file)
   (interactive)
   (with-temp-buffer
@@ -100,3 +119,5 @@
   )
 
 (provide 'magma-scan)
+
+;;; magma-scan.el ends here
