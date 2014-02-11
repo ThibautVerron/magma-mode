@@ -37,7 +37,7 @@
 
 (defun magma-scan-make-filename (file)
   "Make the name of the file holding the completion candidates
-  for the file FILE"
+  for the file FILE. If FILE is nil, use the file stored in `magma-scan-anonymous-temp-file'"
   (if file
       (let* ((fullfile (f-long file))
              (path (f-dirname fullfile))
@@ -101,13 +101,13 @@
     
 (defun magma-load-or-rescan (file &optional forcerescan)
   "Load the completion file associated to file, rebuilding it if
-  needed"
-  (if (f-exists? file)
+  needed. If FILE is nil, use the filename stored in `magma-scan-anonymous-temp-file', and always rebuild the table."
+  (if (or (not file) (f-exists? file))
       (let ((loadfile (magma-scan-make-filename file)))
         (when (or forcerescan
-                  (file-newer-than-file-p file loadfile))
+                  (and file (file-newer-than-file-p file loadfile)))
           (magma-scan-file file loadfile))
-        (load loadfile nil t))
+        (load loadfile nil nil t))
     (magma--debug-message
      (format "Skipping nonexistent file %s" file))))
 

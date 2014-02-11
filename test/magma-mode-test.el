@@ -26,6 +26,7 @@
     (should (-contains? magma-completion-table "SetVerbose"))))
 
 (ert-deftest magma-build-completion-table-when-idle ()
+  :expected-result :failed ;; Removed feature
   (with-temp-buffer
     (insert-file-contents-literally
      (f-join magma-path "testfiles/defuns.m"))
