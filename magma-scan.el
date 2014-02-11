@@ -56,13 +56,17 @@
 (defun magma-scan-file (file outfile)
   "Scan the file file for definitions, and write the result into file OUTFILE."
   (write-region ";;; This file was generated automatically.\n\n" nil outfile)
-  (let ((defs
-         (with-temp-buffer
-           (let ((magma-mode-hook nil))
-             (magma-mode))
-           (insert "\n")
-           (insert-file-contents-literally file)
-           (goto-char (point-min))
+  
+  (let* ((buf (current-buffer))
+         (defs
+           (with-temp-buffer
+             (let ((magma-mode-hook nil))
+               (magma-mode))
+             (insert "\n")
+             (if file
+                 (insert-file-contents-literally file)
+               (insert-buffer-substring-no-properties buf))
+             (goto-char (point-min))
            
            ;; Get rid of the comments
            (comment-kill (count-lines (point-min) (point-max)))
