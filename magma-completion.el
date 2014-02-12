@@ -50,10 +50,15 @@
   (magma--debug-message "Scanning input for completion candidates...")
   (magma--debug-message (format "Input : %s" str))
   (setq magma-completion-table
-         (with-temp-buffer
-           (insert str)
-           (magma-scan)
-           magma-completion-table)))
+         (let ((prev-table magma-completion-table))
+           (with-temp-buffer
+             ;; FIXME : integrate that into magma-scan
+             (let ((magma-mode-hook nil))
+               (magma-mode))
+             (setq magma-completion-table prev-table)
+             (insert str)
+             (magma-scan)
+             magma-completion-table))))
 
 
 (defun magma-interactive-init-completion ()

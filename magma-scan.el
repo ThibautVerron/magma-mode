@@ -31,19 +31,23 @@
       (error (message "The index file does not exist, so I cannot enable completion. Please see the comments to build it.")))
     (split-string (buffer-string) "\n" t)))
 
-(defvar magma-scan-anonymous-temp-file (make-temp-file ".magmascan"))
-
 (defconst magma-scan-defun-regexp "\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
 
 (defun magma-scan-make-filename (file)
   "Make the name of the file holding the completion candidates
-  for the file FILE. If FILE is nil, use the file stored in `magma-scan-anonymous-temp-file'"
+  for the file FILE. If FILE is nil, make a name based on the
+  current buffer's name."
   (if file
       (let* ((fullfile (f-long file))
              (path (f-dirname fullfile))
              (base (f-filename fullfile)))
         (f-join path (concat ".scan-" base ".el")))
-    magma-scan-anonymous-temp-file))
+    ;; If the buffer isn't associated to any file...
+    (let ((buf (buffer-name)))
+      (f-join "/tmp"
+              (concat ".scan-"
+                      (substring-no-properties buf 1 -1) ;; Dirty...
+                      ".el")))))
 
 (defun magma-scan-changedirectory-el (dir)
   "Elisp code to insert to perform a cd to DIR from the current directory held in magma-working-directory"
@@ -53,9 +57,13 @@
   "Elisp code to insert to load the definitions from another file"
   (concat "(magma-load-or-rescan (f-expand \"" file "\" magma-working-directory))\n"))
 
+(defun magma-scan-write-to-file (text file &optional overwrite)
+  (let ((append (not overwrite)))
+    (write-region text nil file append 'nomessage)))
+
 (defun magma-scan-file (file outfile)
   "Scan the file file for definitions, and write the result into file OUTFILE."
-  (write-region ";;; This file was generated automatically.\n\n" nil outfile)
+  (magma-scan-write-to-file ";;; This file was generated automatically.\n\n" outfile t)
   
   (let* ((buf (current-buffer))
          (defs
@@ -80,13 +88,14 @@
              (beginning-of-line)
              (cond
               ((looking-at "ChangeDirectory(\"\\(.*\\)\");")
-               (write-region (magma-scan-changedirectory-el
-                              (match-string-no-properties 1))
-                             nil outfile t))
+               (magma-scan-write-to-file
+                (magma-scan-changedirectory-el
+                 (match-string-no-properties 1))
+                outfile))
               ((looking-at "load \"\\(.*\\)\";")
                (let* ((file (match-string-no-properties 1)))
-                 (write-region (magma-scan-load-el file)
-                               nil outfile t)))
+                 (magma-scan-write-to-file (magma-scan-load-el file)
+                               outfile)))
               ((looking-at magma-scan-defun-regexp)
                (setq defs
                      (-union (list (match-string-no-properties 2))
@@ -101,7 +110,7 @@
                     (-reduce-r-from
                      (apply-partially 'format "\"%s\" %s") "" defs)
                             ") magma-completion-table))\n")))
-      (write-region defsline nil outfile t))))
+      (magma-scan-write-to-file defsline outfile ))))
     
 (defun magma-load-or-rescan (file &optional forcerescan)
   "Load the completion file associated to file, rebuilding it if
@@ -109,9 +118,10 @@
   (if (or (not file) (f-exists? file))
       (let ((loadfile (magma-scan-make-filename file)))
         (when (or forcerescan
-                  (and file (file-newer-than-file-p file loadfile)))
+                  (not file)
+                  (file-newer-than-file-p file loadfile))
           (magma-scan-file file loadfile))
-        (load loadfile nil nil t))
+        (load loadfile nil t t))
     (magma--debug-message
      (format "Skipping nonexistent file %s" file))))
 
@@ -120,6 +130,11 @@
   (interactive "P")
   (magma-load-or-rescan (buffer-file-name) forcerescan)
   )
+
+(defun magma-visit-scan ()
+  (interactive)
+  (let ((file (buffer-file-name)))
+    (find-file-read-only-other-frame (magma-scan-make-filename file))))
 
 (provide 'magma-scan)
 
