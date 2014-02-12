@@ -20,13 +20,13 @@
  ;;(setq condition-error-function )
  (setq magma-interactive-use-comint t)
  (setq magma-use-electric-newline t)
- (require 'magma-mode)
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
        (let ((ext (if (eq system-type 'windows-nt) ".bat" ".sh")))
        (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
- (setq magma-completion-table-file (f-join magma-path
+ (setq magma-completion-table-file (f-join magma-mode-root-path
                                            "data/dummymagma_symbols.txt"))
+ (require 'magma-mode)
  (setq magma-delay "0.001")
 )
 
