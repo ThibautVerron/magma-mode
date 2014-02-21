@@ -444,8 +444,18 @@ After changing this variable, restarting emacs is required (or reloading the mag
     (delete-region beg end)
     (comint-add-to-input-history str)
     (magma-comint-send str)
-    )
-  )
+      ;; (message (format "%s %s" beg end))
+      ;; (message (format "%s" (buffer-substring-no-properties beg end)))
+    (sleep-for 10)
+    (add-text-properties
+     beg end 
+     '(front-sticky t
+                    font-lock-face comint-highlight-input) nil)
+    ;; (goto-char end)
+    ;; (insert "test")
+    ;; (and (search-forward str nil t)
+    ;;      (replace-match "" nil t))
+    ))
 
 
 (define-derived-mode magma-comint-interactive-mode
@@ -456,9 +466,14 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (setq comint-process-echoes t)
   ;; This doesn't work because magma outputs the prompting "> ", together
   ;; with the input line.
-  (setq comint-use-prompt-regexp t)
+  (setq comint-use-prompt-regexp nil)
   (setq comint-prompt-read-only t)
   (setq comint-prompt-regexp magma-prompt-regexp)
+  (make-local-variable 'comint-highlight-prompt)
+  (setq comint-highlight-prompt t)
+  ;; (make-local-variable 'comint-highlight-input)
+  ;; (setq comint-highlight-input t)
+  (setq comint-scroll-to-bottom-on-output t)
   (compilation-shell-minor-mode 1)
   (add-to-list
    'compilation-error-regexp-alist
@@ -466,7 +481,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
      1 2 3 2 1)
    )
   (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
+  (setq font-lock-defaults '(magma-interactive-font-lock-keywords t nil))
   )  
 
 (define-derived-mode magma-term-interactive-mode
