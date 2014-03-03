@@ -5,7 +5,9 @@ Feature: Magma completion mechanism
   Background: 
     Given I start a magma process
     And I wait for an instant
-    
+    And I press "RET"
+    And I wait for an instant
+
   Scenario: Completion at the end of a line, one candidate
     Given I insert "SetVerbo"
     And I press "TAB"
@@ -16,8 +18,7 @@ Feature: Magma completion mechanism
     And I should not see "Input: SetVerboSetVerbose"
     
   Scenario: Completion at the end of a line, multiple candidates
-    Given I press "RET"
-    And I insert "Set"
+    Given I insert "Set"
     And I press "TAB"
     Then I should see message "Complete, but not unique"
     When I type "A"
@@ -32,8 +33,7 @@ Feature: Magma completion mechanism
     And I should see "SetAllInvariantsOfDegree"
     
   Scenario: Completion in the middle of a line, one candidate
-    Given I press "RET"
-    And I insert "toto(SetVerbo)tata"
+    Given I insert "toto(SetVerbo)tata"
     And I place the cursor before ")tata"
     And I press "TAB"
     Then I should see "> toto(SetVerbose)tata"
@@ -46,14 +46,12 @@ Feature: Magma completion mechanism
   Scenario: Completion in the middle of a line, multiple candidates
     
   Scenario: Picking candidates from the manual index
-    Given I press "RET"
-    And I insert "SetVerbo"
+    Given I insert "SetVerbo"
     And I press "TAB"
     Then I should see "SetVerbose"
     
   Scenario: Picking candidates from the user input
-    Given I press "RET"
-    And I insert:
+    Given I insert:
     """
     function myfunction (res) return res; end function;
     """

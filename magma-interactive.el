@@ -52,7 +52,7 @@
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
     (define-key map "\t" 'completion-at-point)
-    (define-key map (kbd "RET") 'magma-comint-send-input)
+    (define-key map (kbd "RET") 'comint-send-input)
     (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
     map)
   "Keymap for magma-interactive-mode")
@@ -148,12 +148,24 @@ After changing this variable, restarting emacs is required (or reloading the mag
   ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
-(defun magma-comint-send (expr &optional i)
+(defun magma-comint-send-string (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (concat expr "\n")))
     (run-hook-with-args 'comint-input-filter-functions expr)
     (comint-send-string (magma-get-buffer i) command))
     )
+
+(defun magma-comint-send (expr &optional i)
+  "Send the expression expr to the magma buffer for evaluation."
+  (let ((command expr)
+        (buffer (magma-get-buffer i)))
+    (run-hook-with-args 'comint-input-filter-functions expr)
+    (with-current-buffer buffer
+      (end-of-buffer)
+      ;; (goto-char (process-mark (get-buffer-process buffer)))
+      (insert command)
+      (magma-comint-send-input))))
+
 
 (defun magma-comint-help-word (topic)
   "call-up the handbook in an interactive buffer for topic"
@@ -317,7 +329,9 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "P")
   (if mark-active
       (magma-eval-region (region-beginning) (region-end) i)
-    (magma-eval-next-statement i)))
+    (progn
+      (magma-eval-next-statement i)
+      (when (looking-at "[[:space:]]*$") (forward-line 1)))))
 
 (defun magma-eval-defun (&optional i)
   "Evaluate the current defun"
@@ -430,40 +444,67 @@ After changing this variable, restarting emacs is required (or reloading the mag
 ;; (defun magma-broadcast-show-word ()
 ;;   (magma-broadcast-fun 'magma-show-word))
 
+(defvar magma--echo-complete nil)
 
+(defun magma-comint-delete-reecho (output)
+  (if (not magma--echo-complete)
+      (progn
+        (while (eq (string-match "\\(^[[:alnum:]|]*>[^>].*$\\|^\n\\|^.*\^H\\)" output) 0)
+          ;; Line beginning with whatever>, or empty line,
+          ;; or "erased" line with ^H
+          (setq output (replace-match "" nil nil output)))
+        (unless (eq output "") (setq magma--echo-complete t))))
+  (when magma--echo-complete
+    (if (string-match "^[[:alnum:]|]*> $" output)
+        (setq magma--echo-complete nil)))
+  output)
+
+;; (defun magma-comint-delete-reecho (output)
+;;   (when (string-match "^\\(\\(.\\|\n\\)*\n\\)[[:alnum:]|]*> \\1" output)
+;;     (setq output (replace-match "" nil nil output)))
+;;   output)
 
 (defun magma-comint-send-input ()
-  "Replaces comint-send-input in order to delete the reechoing of
-  the input line with its prompt"
   (interactive)
-  (let* ((pmark (process-mark
-                 (get-buffer-process (current-buffer))))
-         (beg (marker-position pmark))
-         (end (save-excursion (end-of-line) (point)))
-         (str (buffer-substring-no-properties beg end)))
-    (delete-region beg end)
-    (comint-add-to-input-history str)
-    (magma-comint-send str)
-      ;; (message (format "%s %s" beg end))
-      ;; (message (format "%s" (buffer-substring-no-properties beg end)))
-    (sleep-for 10)
-    (add-text-properties
-     beg end 
-     '(front-sticky t
-                    font-lock-face comint-highlight-input) nil)
-    ;; (goto-char end)
-    ;; (insert "test")
-    ;; (and (search-forward str nil t)
-    ;;      (replace-match "" nil t))
-    ))
+  (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
+  (comint-send-input))
 
+;; (defun magma-comint-send-input ()
+;;   "Replaces comint-send-input in order to delete the reechoing of
+;;   the input line with its prompt"
+;;   (interactive)
+;;   (let* ((pmark (process-mark
+;;                  (get-buffer-process (current-buffer))))
+;;          (beg (marker-position pmark))
+;;          (end (save-excursion (end-of-line) (point)))
+;;          (str (buffer-substring-no-properties beg end)))
+;;     (delete-region beg end)
+;;     (comint-add-to-input-history str)
+;;     (magma-comint-send-string str)
+;;     ;;(sleep-for 0.1)
+;;     ;; (add-text-properties
+;;     ;;  beg end 
+;;     ;;  '(front-sticky t
+;;     ;;                 font-lock-face comint-highlight-input) nil)
+;;     ))
+
+(defun magma-interactive-common-settings ()
+  "Settings common to comint and term modes"
+  (compilation-shell-minor-mode 1)
+  (set (make-local-variable 'compilation-mode-font-lock-keywords)
+        nil)
+  (set (make-local-variable 'font-lock-keywords) nil)
+  (add-to-list
+   'compilation-error-regexp-alist
+   '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
+     1 2 3 2 1)))
 
 (define-derived-mode magma-comint-interactive-mode
   comint-mode
   "Magma-Interactive"
   "Magma interactive mode (using comint)
 \\<magma-comint-interactive-mode-map>"
-  (setq comint-process-echoes t)
+  ;;(setq comint-process-echoes t)
   ;; This doesn't work because magma outputs the prompting "> ", together
   ;; with the input line.
   (setq comint-use-prompt-regexp nil)
@@ -474,14 +515,12 @@ After changing this variable, restarting emacs is required (or reloading the mag
   ;; (make-local-variable 'comint-highlight-input)
   ;; (setq comint-highlight-input t)
   (setq comint-scroll-to-bottom-on-output t)
-  (compilation-shell-minor-mode 1)
-  (add-to-list
-   'compilation-error-regexp-alist
-   '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-     1 2 3 2 1)
-   )
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-interactive-font-lock-keywords t nil))
+  (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
+  (magma-interactive-common-settings)
+  ;; (setq font-lock-defaults
+  ;;       (list (cons (list "^[[:alnum:]|]*>.*$" 'comint-highlight-input)
+  ;;                   magma-interactive-font-lock-keywords)
+  ;;             nil nil))
   )  
 
 (define-derived-mode magma-term-interactive-mode
@@ -491,14 +530,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
 \\<magma-term-interactive-mode-map>"
   (setq term-scroll-to-bottom-on-output t)
   (make-local-variable 'font-lock-defaults)
-  (compilation-shell-minor-mode 1)
-  (add-to-list
-   'compilation-error-regexp-alist
-   '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-     1 2 3 2 1)
-   )
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
-  )  
+  (magma-interactive-common-settings))
 
 
 (defun magma-interactive-init-with-comint ()
@@ -523,27 +556,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (if magma-interactive-use-comint
       (magma-interactive-init-with-comint)
     (magma-interactive-init-with-term)))
-
-
-
-;; Restent à définir:
-;; fun magma-broadcast-kill (?i)
-;; fun magma-broadcast-int (?i)
-;; fun magma-broadcast-eval-region (start end)
-;; fun magma-broadcast-eval-line
-;; fun magma-broadcast-eval-paragraph
-;; fun magma-broadcast-eval-next-statement
-;; fun magma-eval-function (?i)
-;; fun magma-broadcast-eval-function
-;; fun magma-broadcast-eval
-;; fun magma-broadcast-eval-until
-;; fun magma-broadcast-broadcast-eval-buffer
-;; fun magma-show-word (?i)
-;; fun magma-broadcast-show-word
-;; fun magma-help-word (?browser)
-;; fun magma-help-word-term (topic)
-;; fun magma-help-word-browser (topic)
-;; var magma-interactive-font-lock-keywords
 
 (provide 'magma-interactive)
 

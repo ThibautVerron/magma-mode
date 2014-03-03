@@ -7,7 +7,9 @@ Feature: Interaction with a magma process
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I turn on magma-mode 
-    When I press "C-c C-o"
+    And I press "C-c C-o"
+    And I wait for an instant
+    And I press "RET"
     And I wait for an instant
    
   Scenario: Start a magma process
@@ -21,11 +23,10 @@ Feature: Interaction with a magma process
     And I press "C-c C-b"
     And I switch to buffer "*magma*"
     And I wait for an instant
-    Then I should see "> 6*7;"
-    And I should not see:
+    Then I should not see:
     """
     > 6*7;
-    6*7;
+    > 6*7;
     """
     And I should see "Input: 6*7;"
 
