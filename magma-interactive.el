@@ -447,17 +447,20 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defvar magma--echo-complete nil)
 
 (defun magma-comint-delete-reecho (output)
-  (if (not magma--echo-complete)
+  (with-temp-buffer
+    (insert output)
+    (goto-char (point-min))
+    (if (not magma--echo-complete)
       (progn
-        (while (eq (string-match "\\(^[[:alnum:]|]*>[^>].*$\\|^\n\\|^.*\^H\\)" output) 0)
-          ;; Line beginning with whatever>, or empty line,
+        (while (looking-at "\\(^[[:alnum:]|]*>[^>].*$\\|^\n\\|^.*\^H\\)")
+                           ;; Line beginning with whatever>, or empty line,
           ;; or "erased" line with ^H
-          (setq output (replace-match "" nil nil output)))
+          (replace-match "" nil nil))
         (unless (eq output "") (setq magma--echo-complete t))))
-  (when magma--echo-complete
-    (if (string-match "^[[:alnum:]|]*> $" output)
-        (setq magma--echo-complete nil)))
-  output)
+    (when magma--echo-complete
+      (if (string-match "^[[:alnum:]|]*> $" output)
+          (setq magma--echo-complete nil)))
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 ;; (defun magma-comint-delete-reecho (output)
 ;;   (when (string-match "^\\(\\(.\\|\n\\)*\n\\)[[:alnum:]|]*> \\1" output)
