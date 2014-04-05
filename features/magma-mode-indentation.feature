@@ -163,6 +163,7 @@ Feature: Magma code indentation
     print 3;
     else
     print 4;
+    print 5;
     end case;
     end for;
     """
@@ -178,6 +179,7 @@ Feature: Magma code indentation
             print 3;
         else
             print 4;
+            print 5;
         end case;
     end for;
     """
@@ -188,10 +190,13 @@ Feature: Magma code indentation
     for x in list do
     if x eq 0 then
     print 1;
+    print 2;
     elif x eq 1 then
     print 2;
+    print 3;
     else
     print 3;
+    print 4;
     end if;
     end for;
     """
@@ -201,10 +206,13 @@ Feature: Magma code indentation
     for x in list do
         if x eq 0 then
             print 1;
+            print 2;
         elif x eq 1 then
             print 2;
+            print 3;
         else
             print 3;
+            print 4;
         end if;
     end for;
     """

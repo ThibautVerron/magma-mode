@@ -26,6 +26,8 @@
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
 
+(makunbound 'magma-smie-grammar)
+
 (defvar magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
@@ -43,8 +45,6 @@
             ("if" ifbody "end if")
             ("case" expr "case:" caseinsts "end case")
             ("try" insts "catche" insts "end try")
-            ;; ("function" id "(" funargs ")" insts "end function")
-            ;; ("procedure" id "(" funargs ")" insts "end procedure")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
             ("special1" specialargs)
@@ -58,12 +58,13 @@
       ;; Expression
       (expr (id)
             ;;("(" expr ")")
+            ("&")
             (expr "where" id "is" expr)
-            (expr "select" expr "else" expr)
+            (expr "select" expr "selectelse" expr)
             ("~" expr)
             ("#" expr)
             (expr "+" expr)
-            (expr "::" expr) ;; For intrinsics only
+            ;; (expr "::" expr) ;; For intrinsics only
             (expr "-" expr)
             (expr "*" expr)
             (expr "/" expr)
@@ -109,28 +110,47 @@
                    (specialargs "," specialargs))
 
       ;; What appears in a "if" block
-      (ifbody (ifelsebody) (ifbody "elif" ifbody))
+      (ifbody (ifelsebody) (ifthenbody "elif" ifbody))
       (ifelsebody (ifthenbody) (ifthenbody "else" insts))
       (ifthenbody (expr "then" insts))
-      
+
       ;; What appears in a "case" block
-      (caseinsts (caseinsts "when" expr "when:" insts) ;; Not sure if this will work
-                 (caseinsts "else" insts))
+      (caseinsts (caseinsts "when" expr "when:" insts) 
+                 (caseinsts "else" insts)
+                 )
       )
-    '((assoc "elif" "when")
+    '((left "if")
+      (nonassoc "end if")
+      (assoc "then" "else"))
+    '((left "case")
+      (nonassoc "end case")
+      (assoc "case:")
+      (assoc "when")
+      (assoc "when:"))
+      ;; (assoc "else")
       ;;(left "ifthen")
       ;;(left "elifthen" "when:")
-      (nonassoc "end if" "end casppe" "end function" "end procedure")
-      (assoc ";")
-      (left "(") (right ")")
+    '((nonassoc "end function" "end procedure")
+      ;; (left "(") (right ")")
       ;;(left ":")
       (assoc ",")
       (left "|") (left "paren:")
-      (assoc ":=")
-      (assoc "where") (assoc "is") (assoc "select")
-      (assoc "else")
-      (assoc "special:")
+      (assoc ":="))
+    '((assoc "special:"))
+    '((assoc ";")
       (assoc "::")
+      (assoc "select" "selectelse")
+      (assoc "where" "is")
+      (left "not")
+      (assoc "or")
+      (assoc "and")
+      (assoc "ge")
+      (assoc "gt")
+      (assoc "le")
+      (assoc "lt")
+      (assoc "ne")
+      (assoc "eq")
+      (assoc "in")
       (assoc "+")
       (assoc "-")
       (assoc "mod")
@@ -142,20 +162,9 @@
       (assoc ".")
       (assoc "!")
       (left "#")
-      (left "~")
-      (assoc "ge")
-      (assoc "gt")
-      (assoc "le")
-      (assoc "lt")
-      (assoc "ne")
-      (assoc "eq")
-      (assoc "in")
-      (left "not")
-      (assoc "or")
-      (assoc "and")
-      
-      )
-    ))
+      (left "&")
+      (left "~"))
+   ))
   "BNF grammar for the SMIEngine.")
 
 (defvar magma-smie-tokens-regexp
@@ -177,7 +186,7 @@
 (defvar magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->" "&"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
@@ -223,6 +232,31 @@
             (error (throw 'token "paren:"))))
         ))))
 
+(defun magma-identify-else()
+  "Assume the point is before \"else\". Returns:
+- \"selectelse\" : if the \"else\" belongs to a select
+- \"else\" : otherwise, that is if the \"else\" belongs to an if
+  or a case"
+  (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
+    (save-excursion
+      (catch 'token
+        (while t
+          (condition-case nil 
+              (progn
+                (forward-comment (- (point)))
+                (backward-sexp)
+                (cond
+                 ((looking-at "select") (throw 'token "selectelse"))
+                 ((looking-at "\\(case\\|if\\)") (throw 'token "else"))
+                 ;; We also need to take care of the case of a select
+                 ;; in a if. There is no way we can see two
+                 ;; selectelse without a select in between.
+                 ((looking-at "else") (throw 'token "else"))
+                 ((bobp) (throw 'token "else"))
+                 ))
+            (error (throw 'token "else"))))
+        ))))
+  
 (defun magma-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
@@ -279,6 +313,10 @@
    ((looking-at "\\<catch [[:alnum:]]+")
     (goto-char (match-end 0))
     "catche")
+   ((looking-at "else")
+    (let ((elsetoken (save-match-data (magma-identify-else))))
+      (goto-char (match-end 0))
+      elsetoken))
    ((looking-at magma-smie-tokens-regexp)
     (goto-char (match-end 0))
     (match-string-no-properties 0))
@@ -288,9 +326,9 @@
    ((looking-at magma-smie-special2-regexp)
     (goto-char (match-end 0))
     "special2")
-   ((looking-at "then")
-    (goto-char (match-end 0))
-    (magma-identify-then))
+   ;; ((looking-at "then")
+   ;;  (goto-char (match-end 0))
+   ;;  (magma-identify-then))
    ((looking-at ":[^=]")
     (let ((token (magma-identify-colon)))
       (forward-char 1)
@@ -324,6 +362,9 @@
      ((looking-back "\\<catch [[:alnum:]]+")
       (goto-char (match-beginning 0))
       "catche")
+     ((looking-back "else")
+      (goto-char (match-beginning 0))
+      (magma-identify-else))
      ((looking-back magma-smie-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
@@ -333,9 +374,9 @@
      ((looking-back magma-smie-special2-regexp bolp)
       (goto-char (match-beginning 0))
       "special2")
-     ((looking-back "then")
-      (goto-char (match-beginning 0))
-      (magma-identify-then))
+     ;; ((looking-back "then")
+     ;;  (goto-char (match-beginning 0))
+     ;;  (magma-identify-then))
      ((looking-back ":")
       (forward-char -1)
       (magma-identify-colon))
@@ -365,20 +406,36 @@
        magma-indent-basic))
     (`(,(or `:after `:before) . ":=") (smie-rule-parent))
     (`(:list-intro . ":=") t)
+    ;; (`(:list-intro . "then") t)
+    ;; (`(:list-intro . "else") t)
     (`(:after . ,(or `"special1" `"special2")) 0)
     (`(:after . "special:") 0)
 
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)
 
-    (`(:after . ,(or `"then" `"else"))
+    (`(:before . "then")
      (smie-rule-parent magma-indent-basic))
+    (`(:after . "then")
+     (smie-rule-parent magma-indent-basic))
+
+    (`(:after . "else")
+     (smie-rule-parent magma-indent-basic))
+
+    ;; The parent of an "else" in "if then else" is the corresponding
+    ;; "then", not the "if"
+    ;; (`(:before . "then")
+    ;;  (smie-rule-parent magma-indent-basic))
+    
+    ;; (`(:after . ,(or `"if" `"elif"))
+    ;;  (smie-rule-parent magma-indent-basic))
+    
+    
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
-
-    ;; (`(:after . "paren:")
-    ;;  (smie-rule-parent))
+    ;; (`(:after . "selectelse")
+    ;;  0)
     )
   )
 
@@ -419,7 +476,8 @@
   (interactive)
   (magma-beginning-of-expr)
   (smie-forward-sexp ";")
-  (forward-char 1)) ;; We should always be looking at a ";" there
+  (when (looking-at ";") (forward-char 1)))
+;; We should always be looking at a ";" there
 
 (defun magma-previous-expr ()
   "Go to the beginning of the expression, or to the beginning of
@@ -429,7 +487,8 @@
   (let ((prev-point (point)))
     (magma-beginning-of-expr)
     (when (eq prev-point (point))
-      (backward-sexp))))
+      (backward-sexp)
+      (magma-beginning-of-expr))))
 
 (defun magma-mark-expr ()
   "Mark the current expression"
