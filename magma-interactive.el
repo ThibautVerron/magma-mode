@@ -36,7 +36,6 @@
   :group 'magma
   :type 'sexp)
 
-
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")
 
@@ -72,7 +71,6 @@
 After changing this variable, restarting emacs is required (or reloading the magma-mode load file)."
   :group 'magma
   :type 'boolean)
-
 
 (defun magma-get-buffer-name (&optional i)
   (if (not i) (magma-get-buffer-name magma-working-buffer-number)
@@ -384,11 +382,16 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-broadcast-fun (fun)
   (mapc
-   'lambda (i) (save-excursion (funcall fun i))
+   #'(lambda (i) (save-excursion (funcall fun i)))
    magma-active-buffers-list))
 
 (defun magma-choose-buffer (i)
-  "Given an input i in raw prefix form, decides what buffers we should be working on. The input can be an integer, in which case it returns that integer; or it can be the list '(4), in which case it prompts for an integer; or it can be the list '(16), in which case it returns the symbol 'broadcast, meaning we should work on all buffers"
+  "Given an input i in raw prefix form, decides what buffers we
+  should be working on. The input can be an integer, in which
+  case it returns that integer; or it can be the list '(4), in
+  which case it prompts for an integer; or it can be the list
+  '(16), in which case it returns the symbol 'broadcast, meaning
+  we should work on all buffers"
   (cond
    ((not i) magma-working-buffer-number)
    ((integerp i)

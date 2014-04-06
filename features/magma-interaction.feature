@@ -186,21 +186,109 @@ Feature: Interaction with a magma process
     And I wait for an instant
     Then I should see message "Not in a function, procedure or intrinsics definition"
 
+  @fixedbug
+  Scenario: Evaluate an expression with no output
+    Given I am in buffer "*magma-test*"
+    And I insert:
+    """
+    silence;
+    """
+    And I place the cursor before "s"
+    And I press "C-c C-e"
+    And I switch to buffer "*magma*"
+    And I insert "@RandomText1@"
+    And I wait for an instant
+    Then I should see:
+    """
+    > @RandomText1@
+    """
+    But I should not see:
+    """
+    Input: silence;
+    """
+    
     
   Scenario: Start multiple processes
+    Given I am in buffer "*magma-test*"
+    And I press "C-u 2 C-c C-o"
+    Then I should be in buffer "*magma-2*"
+    When I press "RET"
+    And I wait for an instant
+    And I should see "Welcome to dummymagma v1.0!"
+    And I should see "> "
 
-
+    
   Scenario: Send expressions to multiple processes, separately
-
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I insert:
+    """
+    2+2;
+    3+3;
+    """
+    And I place the cursor before "2+"
+    And I press "C-c C-e"
+    And I place the cursor before "3+"
+    And I press "C-u 2 C-c C-e"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see "Input: 2+2;"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then I should see "Input: 3+3;"
+    
 
   Scenario: Send a line to multiple processes, broadcast
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I insert:
+    """
+    4+4;
+    """
+    And I place the cursor before "4+"
+    And I press "C-u C-u C-c C-l"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see "Input: 4+4;"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then I should see "Input: 4+4;"
 
 
   Scenario: Send an expression to multiple processes, broadcast
-
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I insert:
+    """
+    5+5;
+    """
+    And I place the cursor before "5+"
+    And I press "C-u C-u C-c C-e"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see "Input: 5+5;"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then I should see "Input: 5+5;"
+    
 
   Scenario: Send a region to multiple processes, broadcast
-
+Scenario: Send an expression to multiple processes, broadcast
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I insert:
+    """
+    6; // Not 6+6 because + gets interpreted as part of a regexp by espuds
+    """
+    And I select "6;"
+    And I press "C-u C-u C-c C-e"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see "Input: 6;"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then I should see "Input: 6;"
+  
 
   Scenario: Kill a magma process
 
