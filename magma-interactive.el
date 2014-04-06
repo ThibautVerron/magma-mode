@@ -167,7 +167,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
       (end-of-buffer)
       ;; (goto-char (process-mark (get-buffer-process buffer)))
       (insert command)
-      (magma-comint-send-input))))
+      (comint-send-input))))
 
 
 (defun magma-comint-help-word (topic)
