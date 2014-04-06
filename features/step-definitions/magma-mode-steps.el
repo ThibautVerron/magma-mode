@@ -34,7 +34,6 @@
   (lambda ()
     (When (format "I wait for %s seconds" magma-delay))))
 
-
 (When "^I indent the buffer"
       (lambda ()
         (indent-region (point-min) (point-max))))
@@ -43,6 +42,15 @@
       (lambda (position)
         (When (format "I place the cursor %s" position))
         (magma-newline-and-indent)))
+
+(Then "^the buffer should have a process$"
+  (lambda ()
+    (comint-check-proc (current-buffer))))
+
+(Then "^the buffer should \\(not have a\\|have no\\) process$"
+  (lambda (ignored) 
+    (not (Then "the buffer should have a process"))))
+
 
 ;; Redefinitions of some steps from espuds
 

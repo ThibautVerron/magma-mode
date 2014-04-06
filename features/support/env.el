@@ -19,6 +19,7 @@
  ;; Before anything has run
  ;;(setq condition-error-function )
  (setq magma-interactive-use-comint t)
+ (setq magma-prompt-read-only nil)
  (setq magma-use-electric-newline t)
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program

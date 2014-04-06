@@ -4,10 +4,15 @@ Feature: Interaction with a magma process
   I want to be able to evaluate code from within emacs
 
   Background: 
-    Given I am in buffer "*magma-test*"
+    Given I am in buffer "*magma*"
+    And the buffer is empty
+    And I switch to buffer "*magma-2*"
+    And the buffer is empty
+    And I switch to buffer "*magma-test*"
     And the buffer is empty
     And I turn on magma-mode 
-    And I press "C-c C-o"
+    And I press "C-c C-a"
+    And I switch to buffer "*magma*"
     And I wait for an instant
     And I press "RET"
     And I wait for an instant
@@ -16,6 +21,19 @@ Feature: Interaction with a magma process
     Then I should be in buffer "*magma*"
     And I should see "Welcome to dummymagma v1.0!"
     And I should see "> "
+    And the buffer should have a process
+
+    
+  Scenario: Start multiple processes
+    Given I am in buffer "*magma-test*"
+    And I press "C-u 2 C-c C-o"
+    Then I should be in buffer "*magma-2*"
+    When I press "RET"
+    And I wait for an instant
+    And I should see "Welcome to dummymagma v1.0!"
+    And I should see "> "
+    And the buffer should have a process
+    
 
   Scenario: Evaluate an external buffer, no reecho
     Given I am in buffer "*magma-test*"
@@ -207,15 +225,6 @@ Feature: Interaction with a magma process
     Input: silence;
     """
     
-    
-  Scenario: Start multiple processes
-    Given I am in buffer "*magma-test*"
-    And I press "C-u 2 C-c C-o"
-    Then I should be in buffer "*magma-2*"
-    When I press "RET"
-    And I wait for an instant
-    And I should see "Welcome to dummymagma v1.0!"
-    And I should see "> "
 
     
   Scenario: Send expressions to multiple processes, separately
@@ -290,12 +299,50 @@ Feature: Interaction with a magma process
   
 
   Scenario: Kill a magma process
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-k"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma killed"
 
 
   Scenario: Interrupt a magma process
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-i"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma interrupt"
 
 
   Scenario: Kill multiple magma processes
-
-
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-a"
+    And I press "C-u 2 C-a"
+    And I press "C-u C-u C-c C-k"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma killed"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma-2 killed"
+    
+    
   Scenario: Interrupt multiple magma processes
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-a"
+    And I press "C-u 2 C-c C-a"
+    # And I switch to buffer "magma-2"
+    # Then the buffer should have a process
+    And I press "C-u C-u C-c C-i"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma interrupt"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma-2 interrupt"

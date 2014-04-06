@@ -65,6 +65,11 @@
 (defvar magma-prompt-regexp "^[^ ]*> "
   "Regexp matching the magma prompt")
 
+(defvar magma-prompt-read-only t
+  "Should the prompt in the magma buffer be read-only? Setting
+  this to `nil' can be confusing to users, but we expose this
+  setting for elisp calls.")
+
 (defcustom magma-interactive-use-comint nil
   "If non-nil, communication with the magma process is done using comint. Otherwise, it uses term-mode.
 
@@ -128,7 +133,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
-  (interactive "P")
+  ;;(interactive "P")
   (set-buffer (magma-get-buffer i))
   ;;(comint-interrupt-subjob)
   (or (not (comint-check-proc (current-buffer)))
@@ -138,7 +143,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
-  (interactive "P")
+  ;;(interactive "P")
   (set-buffer (magma-get-buffer i))
   ;;(comint-kill-subjob)
   (or (not (comint-check-proc (current-buffer)))
@@ -198,7 +203,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
     
 (defun magma-term-int (&optional i)
   "Interrupt the magma process in buffer i"
-  (interactive "P")
+  ;;(interactive "P")
   (if (term-check-proc (magma-get-buffer i))
       (save-excursion
         (set-buffer (magma-get-buffer i))
@@ -206,7 +211,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-term-kill (&optional i)
   "Kill the magma process in buffer i"
-  (interactive "P")
+  ;;(interactive "P")
   (if (term-check-proc (magma-get-buffer i))
       (save-excursion
         ;; (setq magma-active-buffers-list
@@ -414,40 +419,21 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-send-or-broadcast (expr i)
   (magma-broadcast-if-needed (apply-partially 'magma-send expr) i))
 (defun magma-kill-or-broadcast (i)
-  (magma-broadcast-if-needed 'magma-kill i))
+  (magma-broadcast-if-needed 'magma--kill-cmd i))
+(defun magma-int-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma--int-cmd i))
 (defun magma-run-or-broadcast (i)
   (magma-broadcast-if-needed 'magma-run i))
 
+(defun magma-kill (i)
+  (interactive "P")
+  (magma-kill-or-broadcast i))
 
+(defun magma-int (i)
+  (interactive "P")
+  (magma-int-or-broadcast i))
 
-;; (defun magma-broadcast-kill ()
-;;   (magma-broadcast-fun 'magma-kill))
-;; (defun magma-broadcast-int ()
-;;   (magma-broadcast-fun 'magma-int))
-;; (defun magma-broadcast-send ()
-;;   (magma-broadcast-fun 'magma-send))
-;; (defun magma-broadcast-send-expression (&optional expr)
-;;   (magma-broadcast-fun '(lambda (i) (magma-send-expression expr i)))
-;; (defun magma-broadcast-eval-region (start end)
-;;   (magma-broadcast-fun '(lambda (i) (magma-eval-region start end i))))
-;; (defun magma-broadcast-eval-line ()
-;;   (magma-broadcast-fun 'magma-eval-line))
-;; (defun magma-broadcast-eval-paragraph ()
-;;   (magma-broadcast-fun 'magma-eval-paragraph))
-;; (defun magma-broadcast-eval-next-statement ()
-;;   (magma-broadcast-fun 'magma-eval-next-statement))
-;; (defun magma-broadcast-eval-function ()
-;;   (magma-broadcast-fun 'magma-eval-function))
-;; (defun magma-broadcast-eval ()
-;;   (magma-broadcast-fun 'magma-eval))
-;; (defun magma-broadcast-eval-until ()
-;;   (magma-broadcast-fun 'magma-eval-until))
-;; (defun magma-broadcast-eval-buffer ()
-;;   (magma-broadcast-fun 'magma-eval-buffer))
-;; (defun magma-broadcast-show-word ()
-;;   (magma-broadcast-fun 'magma-show-word))
-
-(defvar magma--echo-complete nil)
+;;(defvar magma--echo-complete nil)
 
 (defun magma-comint-delete-reecho (output)
   (with-temp-buffer
@@ -474,24 +460,6 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
   (comint-send-input))
 
-;; (defun magma-comint-send-input ()
-;;   "Replaces comint-send-input in order to delete the reechoing of
-;;   the input line with its prompt"
-;;   (interactive)
-;;   (let* ((pmark (process-mark
-;;                  (get-buffer-process (current-buffer))))
-;;          (beg (marker-position pmark))
-;;          (end (save-excursion (end-of-line) (point)))
-;;          (str (buffer-substring-no-properties beg end)))
-;;     (delete-region beg end)
-;;     (comint-add-to-input-history str)
-;;     (magma-comint-send-string str)
-;;     ;;(sleep-for 0.1)
-;;     ;; (add-text-properties
-;;     ;;  beg end 
-;;     ;;  '(front-sticky t
-;;     ;;                 font-lock-face comint-highlight-input) nil)
-;;     ))
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
@@ -513,7 +481,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   ;; This doesn't work because magma outputs the prompting "> ", together
   ;; with the input line.
   (setq comint-use-prompt-regexp nil)
-  (setq comint-prompt-read-only t)
+  (setq comint-prompt-read-only magma-prompt-read-only)
   (setq comint-prompt-regexp magma-prompt-regexp)
   (make-local-variable 'comint-highlight-prompt)
   (setq comint-highlight-prompt t)
@@ -542,8 +510,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
-  (defalias 'magma-int 'magma-comint-int)
-  (defalias 'magma-kill 'magma-comint-kill)
+  (defalias 'magma--int-cmd 'magma-comint-int)
+  (defalias 'magma--kill-cmd 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
   (defalias 'magma-help-word-text 'magma-comint-help-word)
   )
@@ -551,8 +519,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
   (defalias 'magma-run 'magma-term-run)
-  (defalias 'magma-int 'magma-term-int)
-  (defalias 'magma-kill 'magma-term-kill)
+  (defalias 'magma--int-cmd 'magma-term-int)
+  (defalias 'magma--kill-cmd 'magma-term-kill)
   (defalias 'magma-send 'magma-term-send)
   (defalias 'magma-help-word-text 'magma-term-help-word)
   )
