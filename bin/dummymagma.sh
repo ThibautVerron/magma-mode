@@ -14,12 +14,14 @@ while true; do
             echo "- help: display this"
             echo "Anything else is just reechoed."
             ;;
-        "hang")
-            while true ; do :; done
-            ;;
         "error")
             echo "In file file.m, line 1, column 1:"
             echo "Error"
+            ;;
+        "hang")
+            while true ; do :; done
+            ;;
+        "silence;")
             ;;
         *)
             echo "Input: $line" # This line should appear
