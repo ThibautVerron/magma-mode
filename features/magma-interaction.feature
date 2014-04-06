@@ -273,7 +273,6 @@ Feature: Interaction with a magma process
     
 
   Scenario: Send a region to multiple processes, broadcast
-Scenario: Send an expression to multiple processes, broadcast
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I insert:
