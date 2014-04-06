@@ -26,7 +26,17 @@
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
 
-(makunbound 'magma-smie-grammar)
+;;;;;
+;; Here we describe the smie grammar for the magma language. Some
+;; tokens are ambiguous, we ask the lexer to lift the ambiguity and
+;; pass unique "phony" token names to the parser. These token names
+;; are all prefixed with '@', so that in case they appear verbatim in
+;; a magma buffer, the lexer will not pick them as tokens: by default,
+;; the lexer picks "\w+" matches as token, and '@' is not a word
+;; consistuant. (Proof : place the point at "token" above, then press
+;; `C-s' and enter "\w". Check that the '@' is not highlighted amongst
+;; the matches)
+;;;;;
 
 (defvar magma-smie-grammar
   (smie-prec2->grammar
@@ -43,12 +53,12 @@
             ("for" expr "do" insts "end for")
             ("while" expr "do" insts "end while")
             ("if" ifbody "end if")
-            ("case" expr "case:" caseinsts "end case")
-            ("try" insts "catche" insts "end try")
-            ("function" id "fun(" funargs "fun)" insts "end function")
-            ("procedure" id "fun(" funargs "fun)" insts "end procedure")
-            ("special1" specialargs)
-            ("special2" specialargs "special:" specialargs)
+            ("case" expr "@case:" caseinsts "end case")
+            ("try" insts "@catche" insts "end try")
+            ("function" id "@fun(" funargs "@fun)" insts "end function")
+            ("procedure" id "@fun(" funargs "@fun)" insts "end procedure")
+            ("@special1" specialargs)
+            ("@special2" specialargs "@special:" specialargs)
             )
 
       ;; Several instructions
@@ -60,7 +70,7 @@
             ;;("(" expr ")")
             ("&")
             (expr "where" id "is" expr)
-            (expr "select" expr "selectelse" expr)
+            (expr "select" expr "@selectelse" expr)
             ("~" expr)
             ("#" expr)
             (expr "+" expr)
@@ -92,14 +102,14 @@
       ;; What appears in a list or a similar construct (basic)
       (listargs (expr)
                 (listargs "," listargs)
-                (listargs "paren:" listargs)
+                (listargs "@paren:" listargs)
                 (listargs "|" listargs))
 
       ;; What appears in a function or procedure arguments
-      ;;(funbody (id "fun(" funargs "fun)" insts))
+      ;;(funbody (id "@fun(" funargs "@fun)" insts))
       (funcall (id "(" funargs ")"))
       (funargs (lfunargs)
-               (lfunargs "paren:" rfunargs))
+               (lfunargs "@paren:" rfunargs))
       (lfunargs (expr)
                 (lfunargs "," lfunargs))
       (rfunargs (assign)
@@ -115,7 +125,7 @@
       (ifthenbody (expr "then" insts))
 
       ;; What appears in a "case" block
-      (caseinsts (caseinsts "when" expr "when:" insts) 
+      (caseinsts (caseinsts "when" expr "@when:" insts) 
                  (caseinsts "else" insts)
                  )
       )
@@ -124,22 +134,22 @@
       (assoc "then" "else"))
     '((left "case")
       (nonassoc "end case")
-      (assoc "case:")
+      (assoc "@case:")
       (assoc "when")
-      (assoc "when:"))
+      (assoc "@when:"))
       ;; (assoc "else")
       ;;(left "ifthen")
-      ;;(left "elifthen" "when:")
+      ;;(left "elifthen" "@when:")
     '((nonassoc "end function" "end procedure")
       ;; (left "(") (right ")")
       ;;(left ":")
       (assoc ",")
-      (left "|") (left "paren:")
+      (left "|") (left "@paren:")
       (assoc ":="))
-    '((assoc "special:"))
+    '((assoc "@special:"))
     '((assoc ";")
       (assoc "::")
-      (assoc "select" "selectelse")
+      (assoc "select" "@selectelse")
       (assoc "where" "is")
       (left "not")
       (assoc "or")
@@ -207,11 +217,11 @@
 (defun magma-identify-colon ()
   "If point is at a colon, returns the appropriate token for that
   colon. The returned value is :
-- \"case:\" if the colon is at the end of a case... : construct
-- \"when:\" if the colon is at the end of a when... : construct
-- \"special:\" if the colon is a separator for one of the special
+- \"@case:\" if the colon is at the end of a case... : construct
+- \"@when:\" if the colon is at the end of a when... : construct
+- \"@special:\" if the colon is a separator for one of the special
   function calls
-- \"paren:\" if the colon is a separator in a pair of
+- \"@paren:\" if the colon is a separator in a pair of
   parens (parameter for a function, specification for a list...)
 - \":\" otherwise (this shouldn't appear)"
   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
@@ -223,18 +233,18 @@
                 (forward-comment (- (point)))
                 (backward-sexp)
                 (cond
-                 ((looking-at "case") (throw 'token "case:"))
-                 ((looking-at "when") (throw 'token "when:"))
+                 ((looking-at "case") (throw 'token "@case:"))
+                 ((looking-at "when") (throw 'token "@when:"))
                  ((looking-at magma-smie-special2-regexp)
-                  (throw 'token "special:"))
+                  (throw 'token "@special:"))
                  ((bobp) (throw 'token ":"))
                  ))
-            (error (throw 'token "paren:"))))
+            (error (throw 'token "@paren:"))))
         ))))
 
 (defun magma-identify-else()
   "Assume the point is before \"else\". Returns:
-- \"selectelse\" : if the \"else\" belongs to a select
+- \"@selectelse\" : if the \"else\" belongs to a select
 - \"else\" : otherwise, that is if the \"else\" belongs to an if
   or a case"
   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
@@ -246,7 +256,7 @@
                 (forward-comment (- (point)))
                 (backward-sexp)
                 (cond
-                 ((looking-at "select") (throw 'token "selectelse"))
+                 ((looking-at "select") (throw 'token "@selectelse"))
                  ((looking-at "\\(case\\|if\\)") (throw 'token "else"))
                  ;; We also need to take care of the case of a select
                  ;; in a if. There is no way we can see two
@@ -300,10 +310,10 @@
   (cond
    ((magma-looking-at-fun-openparen)
     (forward-char)
-    "fun(")
+    "@fun(")
    ((magma-looking-at-fun-closeparen)
     (forward-char)
-    "fun)")
+    "@fun)")
    ((looking-at magma-smie-operators-regexp)
     (goto-char (match-end 0))
     (match-string-no-properties 0))
@@ -312,7 +322,7 @@
     (match-string-no-properties 0))
    ((looking-at "\\<catch [[:alnum:]]+")
     (goto-char (match-end 0))
-    "catche")
+    "@catche")
    ((looking-at "else")
     (let ((elsetoken (save-match-data (magma-identify-else))))
       (goto-char (match-end 0))
@@ -322,10 +332,10 @@
     (match-string-no-properties 0))
    ((looking-at magma-smie-special1-regexp)
     (goto-char (match-end 0))
-    "special1")
+    "@special1")
    ((looking-at magma-smie-special2-regexp)
     (goto-char (match-end 0))
-    "special2")
+    "@special2")
    ;; ((looking-at "then")
    ;;  (goto-char (match-end 0))
    ;;  (magma-identify-then))
@@ -349,10 +359,10 @@
     (cond
      ((magma-looking-back-fun-openparen)
       (forward-char -1)
-      "fun(")
+      "@fun(")
      ((magma-looking-back-fun-closeparen)
       (forward-char -1)
-      "fun)")
+      "@fun)")
      ((looking-back magma-smie-operators-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
@@ -361,7 +371,7 @@
       (match-string-no-properties 0))
      ((looking-back "\\<catch [[:alnum:]]+")
       (goto-char (match-beginning 0))
-      "catche")
+      "@catche")
      ((looking-back "else")
       (goto-char (match-beginning 0))
       (magma-identify-else))
@@ -370,10 +380,10 @@
       (match-string-no-properties 0))
      ((looking-back magma-smie-special1-regexp bolp)
       (goto-char (match-beginning 0))
-      "special1")
+      "@special1")
      ((looking-back magma-smie-special2-regexp bolp)
       (goto-char (match-beginning 0))
-      "special2")
+      "@special2")
      ;; ((looking-back "then")
      ;;  (goto-char (match-beginning 0))
      ;;  (magma-identify-then))
@@ -401,17 +411,17 @@
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args)
      (if (and (boundp 'smie--parent)
-              (smie-rule-parent-p "special1" "special2"))
+              (smie-rule-parent-p "@special1" "@special2"))
          (smie-rule-parent)
        magma-indent-basic))
     (`(,(or `:after `:before) . ":=") (smie-rule-parent))
     (`(:list-intro . ":=") t)
     ;; (`(:list-intro . "then") t)
     ;; (`(:list-intro . "else") t)
-    (`(:after . ,(or `"special1" `"special2")) 0)
-    (`(:after . "special:") 0)
+    (`(:after . ,(or `"@special1" `"@special2")) 0)
+    (`(:after . "@special:") 0)
 
-    (`(:after . "when:") magma-indent-basic)
+    (`(:after . "@when:") magma-indent-basic)
     (`(:before . "when") 0)
 
     (`(:before . "then")
@@ -434,7 +444,7 @@
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
-    ;; (`(:after . "selectelse")
+    ;; (`(:after . "@selectelse")
     ;;  0)
     )
   )
@@ -448,7 +458,7 @@
 ;; Additional functions for movement
 
 (defconst magma-end-of-expr-tokens
-  (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)")
+  (list ";" "then" "else" "do" "try" "@catche" "@when:" "@case:" "@fun)")
   "SMIE tokens marking the end of an expression.")
 
 (defun magma-looking-back-end-of-expr-p ()
