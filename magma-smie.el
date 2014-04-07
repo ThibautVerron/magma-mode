@@ -426,9 +426,7 @@
      ;; (and (magma-smie-backward-token)
      ;;      (back-to-indentation)
      ;;      (cons 'column (current-column))))
-     (if (smie-rule-next-p "function" "procedure")
-         (cons 'column 50)
-       (smie-rule-parent)))
+     (smie-rule-parent magma-indent-basic))
 
      (`(:list-intro . ":=") t)
     ;; (`(:list-intro . "then") t)
@@ -462,11 +460,14 @@
     ;;  0)
 
     ;; Indentation for the functions, with one syntax or the other
-    ;; (`(:after . "function")
-    ;;  (smie-rule-parent magma-indent-basic))
-    (`(:before . "function")
-     (smie-rule-parent))
-    (`(:before . "end function")
+    (`(:after . "@fun)")
+     magma-indent-basic)
+    (`(:before . ,(or `"function" `"procedure"))
+     (if (smie-rule-prev-p ":=")
+         (progn
+           (back-to-indentation)
+           (cons 'column (current-column)))))
+    (`(:before . ,(or `"end function" `"end procedure"))
      (smie-rule-parent))
   ))
 

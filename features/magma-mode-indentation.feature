@@ -314,45 +314,50 @@ Feature: Magma code indentation
             2 - 3;
     """
 
-  @function
   Scenario: Indentation in functions
     When I insert:
     """
+    for x in l do
     function test (x,y : z := 5)
     x:=3+3;
     return z;
     end function;
+    end for;
     """
     And I indent the buffer
     Then I should see:
     """
-    function test (x,y : z := 5)
-        x:=3+3;
-        return z;
-    end function;
+    for x in l do
+        function test (x,y : z := 5)
+            x:=3+3;
+            return z;
+        end function;
+    end for;
     """
 
-  @function
   Scenario: Indentation of function calls out of nowhere
     When I insert:
     """
+    for x in l do
     x := 2+2;
     Reverse(list);
     x := 2+2;
     y := Reverse(list);
     x := 2+2;
+    end for;
     """
     And I indent the buffer
     Then I should see:
     """
-    x := 2+2;
-    Reverse(list);
-    x := 2+2;
-    y := Reverse(list);
-    x := 2+2;
+    for x in l do
+        x := 2+2;
+        Reverse(list);
+        x := 2+2;
+        y := Reverse(list);
+        x := 2+2;
+    end for;
     """
 
-  @function
   Scenario: Indentation of function calls in a block
     When I insert:
     """
@@ -376,7 +381,6 @@ Feature: Magma code indentation
     end for;
     """
     
-  @function
   Scenario: Indentation of function calls in a function block
     When I insert:
     """
@@ -399,7 +403,7 @@ Feature: Magma code indentation
         x := 2+2;
     end function;
     """
-    
+
   @fixedbug
   Scenario: Indentation of expression suffixed with comments
     When I insert:
@@ -599,7 +603,7 @@ Feature: Magma code indentation
                   >;
     """
 
-  Scenario: Indentation of defuns with :=
+  Scenario: Indentation of function definitions with :=
     When I insert:
     """
     toto := function (a, 
@@ -609,6 +613,15 @@ Feature: Magma code indentation
     x := a;
     return x;
     end function;
+    for x in l do
+    toto := function (a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end function;
+    end for;
     """
     And I indent the buffer
     Then I should see:
@@ -620,4 +633,54 @@ Feature: Magma code indentation
         x := a;
         return x;
     end function;
+    for x in l do
+        toto := function (a, 
+                          b : 
+                          c := 1, 
+                          d := 2)
+            x := a;
+            return x;
+        end function;
+    end for;
+    """
+
+  Scenario: Indentation of procedure definitions with :=
+    When I insert:
+    """
+    toto := procedure (a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end procedure;
+    for x in l do
+    toto := procedure (a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end procedure;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    toto := procedure (a, 
+                       b : 
+                       c := 1, 
+                       d := 2)
+        x := a;
+        return x;
+    end procedure;
+    for x in l do
+        toto := procedure (a, 
+                           b : 
+                           c := 1, 
+                           d := 2)
+            x := a;
+            return x;
+        end procedure;
+    end for;
     """
