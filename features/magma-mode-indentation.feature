@@ -598,3 +598,26 @@ Feature: Magma code indentation
     testhom := hom<P -> Q
                   >;
     """
+
+  Scenario: Indentation of defuns with :=
+    When I insert:
+    """
+    toto := function (a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end function;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    toto := function (a, 
+                      b : 
+                      c := 1, 
+                      d := 2)
+        x := a;
+        return x;
+    end function;
+    """

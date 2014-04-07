@@ -38,6 +38,8 @@
 ;; the matches)
 ;;;;;
 
+(makunbound 'magma-smie-grammar)
+
 (defvar magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
@@ -94,6 +96,8 @@
             (expr "gt" expr)
             (expr "ge" expr)
             (expr "in" expr)
+            ("function" "@fun(" funargs "@fun)" insts "end function")
+            ("procedure" "@fun(" funargs "@fun)" insts "end procedure")
             (funcall)
             ("[" listargs "]")
             ("<" listargs ">")
@@ -273,8 +277,11 @@
   (condition-case nil
       (and (looking-at "(")
            (save-excursion
-             (backward-word)
-             (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))
+             (or
+              (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))
+              (progn
+                (backward-word)
+                (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))))
     (error nil) ))
 
 (defun magma-looking-at-fun-closeparen ()
@@ -414,8 +421,16 @@
               (smie-rule-parent-p "@special1" "@special2"))
          (smie-rule-parent)
        magma-indent-basic))
-    (`(,(or `:after `:before) . ":=") (smie-rule-parent))
-    (`(:list-intro . ":=") t)
+    (`(:before . ":=") (smie-rule-parent))
+    (`(:after . ":=")
+     ;; (and (magma-smie-backward-token)
+     ;;      (back-to-indentation)
+     ;;      (cons 'column (current-column))))
+     (if (smie-rule-next-p "function" "procedure")
+         (cons 'column 50)
+       (smie-rule-parent)))
+
+     (`(:list-intro . ":=") t)
     ;; (`(:list-intro . "then") t)
     ;; (`(:list-intro . "else") t)
     (`(:after . ,(or `"@special1" `"@special2")) 0)
@@ -440,14 +455,20 @@
     ;; (`(:after . ,(or `"if" `"elif"))
     ;;  (smie-rule-parent magma-indent-basic))
     
-    
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
     ;; (`(:after . "@selectelse")
     ;;  0)
-    )
-  )
+
+    ;; Indentation for the functions, with one syntax or the other
+    ;; (`(:after . "function")
+    ;;  (smie-rule-parent magma-indent-basic))
+    (`(:before . "function")
+     (smie-rule-parent))
+    (`(:before . "end function")
+     (smie-rule-parent))
+  ))
 
 (defun magma-indent-line ()
   "Indent a line according to the SMIE settings."
