@@ -92,9 +92,8 @@
 
 (require 'magma-font-lock)
 (require 'magma-smie)
-(require 'magma-imenu)
+(require 'magma-extra)
 (require 'magma-interactive)
-(require 'magma-electric-newline)
 
 (define-derived-mode magma-mode
   prog-mode
