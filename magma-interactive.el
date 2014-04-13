@@ -301,7 +301,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
                 (end-of-line)
                 (point))))
     (magma-eval-region beg end i)
-    (next-line)
+    (end-of-line)
+    (or (eobp) (next-line))
     )
   )
 

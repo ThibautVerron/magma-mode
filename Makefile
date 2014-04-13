@@ -1,24 +1,31 @@
 CASK ?= cask
 EMACS ?= emacs
 
-ECUKESFLAGS = 
+ECUKESFLAGS = --no-win
 
 ELFILES = magma-completion.el \
 	magma-electric-newline.el \
 	magma-font-lock.el \
 	magma-interactive.el \
 	magma-mode.el \
+	magma-extra.el \
 	magma-smie.el
 
-STEPFILES = features/step-definitions/magma-mode-steps.el
+ECUKESFOLDER = features
 
-ENVFILES = features/support/env.el
+STEPFILES = $(ECUKESFOLDER)/step-definitions/magma-mode-steps.el
 
-FEATFILES = features/magma-interaction.feature \
-	features/magma-mode-electric-newline.feature \
-	features/magma-mode-indentation.feature
+ENVFILES = $(ECUKESFOLDER)/support/env.el
+
+FEATFILES = $(ECUKESFOLDER)/magma-completion.feature \
+	$(ECUKESFOLDER)/magma-extras-electric-newline.feature \
+	$(ECUKESFOLDER)/magma-extras-hideshow.feature \
+	$(ECUKESFOLDER)/magma-indentation.feature \
+	$(ECUKESFOLDER)/magma-interaction.feature
 
 ECUKESFILES = $(STEPFILES) $(ENVFILES) $(FEATFILES)
+
+export LANG=C
 
 all: test
 

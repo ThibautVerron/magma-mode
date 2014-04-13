@@ -51,6 +51,12 @@
   (lambda (ignored) 
     (not (Then "the buffer should have a process"))))
 
+(When "^I toggle folding at point$"
+  (lambda ()
+    (hs-toggle-hiding)))
+
+
+
 
 ;; Redefinitions of some steps from espuds
 

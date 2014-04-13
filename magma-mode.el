@@ -118,6 +118,8 @@
   (make-local-variable 'indent-line-function)
   (setq indent-line-function 'smie-indent-line)
 
+  (magma--apply-electric-newline-setting)
+  
   (magma-interactive-init))
   
 
