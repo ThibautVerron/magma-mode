@@ -4,7 +4,6 @@ EMACS ?= emacs
 ECUKESFLAGS = --no-win
 
 ELFILES = magma-completion.el \
-	magma-electric-newline.el \
 	magma-font-lock.el \
 	magma-interactive.el \
 	magma-mode.el \
