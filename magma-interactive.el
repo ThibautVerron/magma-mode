@@ -443,9 +443,9 @@ After changing this variable, restarting emacs is required (or reloading the mag
            (save-excursion
              (goto-char (point-max))
              (beginning-of-line)
-             (if (looking-at "^>")
+             (if (looking-at "^[[:alnum:]]*>")
                  (progn
-                   (forward-line -1)
+                   (forward-char -1)
                    (point))
                (point-max)))))
       (flush-lines "\\(^[[:alnum:]]*>\\|^[[:blank:]]*$\\|\^H\\)" (point-min) maxp)

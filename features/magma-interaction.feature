@@ -338,6 +338,7 @@ Feature: Interaction with a magma process
     # And I switch to buffer "magma-2"
     # Then the buffer should have a process
     And I press "C-u C-u C-c C-i"
+    And I wait for an instant
     And I switch to buffer "*magma*"
     And I wait for an instant
     Then the buffer should have no process
@@ -346,3 +347,20 @@ Feature: Interaction with a magma process
     And I wait for an instant
     Then the buffer should have no process
     And I should see "Process magma-2 interrupt"
+
+
+  Scenario: Output filter: debugger prompt
+    Given I am in buffer "*magma*"
+    And I press "RET"
+    And I wait for an instant
+    And I insert "debug;"
+    And I press "RET"
+    And I wait for an instant
+    Then I should see "debug> "
+    And I should not see:
+    """
+    > debug;
+    > debug;
+    """
+    Then I insert "quit;"
+    And I press "RET"
