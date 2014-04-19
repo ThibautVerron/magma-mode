@@ -48,6 +48,23 @@
   :group 'magma
   :type 'string)
 
+(defcustom magma-comint-input-skips-empty-lines nil
+  "If non-nil, strip empty lines before sending input to the
+  magma process.
+
+  This variable can be set to `nil' even if
+  `magma-comint-input-skips-comments' is set to `t'. However,
+  this will probably lead to unwanted behavior, since the
+  commented lines are replaced with blank lines."
+  :group
+  'magma :type 'sexp)
+
+(defcustom magma-comint-input-skips-comments nil
+  "If non-nil, strip empty lines before sending input to the
+  magma process"
+  :group 'magma
+  :type 'sexp)
+
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
     (define-key map "\t" 'completion-at-point)
@@ -160,7 +177,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
-  (let ((command expr)
+  (let ((command (magma-preinput-filter expr))
         (buffer (magma-get-buffer i)))
     (run-hook-with-args 'comint-input-filter-functions expr)
     (with-current-buffer buffer
@@ -223,7 +240,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-term-send (expr &optional ins)
   "Send the expression expr to the magma buffer for evaluation."
   (save-window-excursion
-    (let ((command expr))
+    (let ((command (magma-preinput-filter expr)))
       (magma-switch-to-interactive-buffer)
       (end-of-buffer)
       (insert command)
@@ -445,11 +462,24 @@ After changing this variable, restarting emacs is required (or reloading the mag
              (beginning-of-line)
              (if (looking-at "^[[:alnum:]]*>")
                  (progn
-                   (forward-char -1)
+                   (or (bobp) (forward-char -1))
                    (point))
                (point-max)))))
       (flush-lines "\\(^[[:alnum:]]*>\\|^[[:blank:]]*$\\|\^H\\)" (point-min) maxp)
-    (buffer-substring-no-properties (point-min) (point-max)))))
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun magma-preinput-filter (input)
+  (with-temp-buffer
+    (insert input)
+    (let ((magma-mode-hook nil))
+      (magma-mode))
+    (when magma-comint-input-skips-comments
+      (goto-char (point-min))
+      (insert "\n")
+      (comment-kill (count-lines (point-min) (point-max))))
+    (when magma-comint-input-skips-empty-lines
+      (flush-lines "^[[:blank:]]*$" (point-min) (point-max)))
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 ;; (defun magma-comint-delete-reecho (output)
 ;;   (when (string-match "^\\(\\(.\\|\n\\)*\n\\)[[:alnum:]|]*> \\1" output)
@@ -490,6 +520,9 @@ After changing this variable, restarting emacs is required (or reloading the mag
   ;; (setq comint-highlight-input t)
   (setq comint-scroll-to-bottom-on-output t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
+  ;; (make-local-variable 'comint-input-sender)
+  ;; (setq comint-input-sender 'magma-comint-input-sender)
+  
   (magma-interactive-common-settings)
   ;; (setq font-lock-defaults
   ;;       (list (cons (list "^[[:alnum:]|]*>.*$" 'comint-highlight-input)
