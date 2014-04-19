@@ -126,9 +126,9 @@ does not have this kind of requirements.
     2. Place yourself in the =magma-mode= directory;
     3. Run the script:
 
-       #+begin_src shell-script
-         .../magma-mode$ bin/build_completion_table.sh $pathtomagma
-       #+end_src
+    #+begin_src shell-script
+      .../magma-mode$ bin/build_completion_table.sh $pathtomagma
+    #+end_src
 
     4. The completion table will be in =data/magma_symbols.txt=
     
