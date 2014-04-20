@@ -187,8 +187,10 @@ does not have this kind of requirements.
 | =C-c C-o= | =magma-switch-to-interactive-buffer-same-frame= | start an interactive magma process, |
 |           |                                                 | in the same frame 
 |           |                                                 | and in a different window           |
+|-----------+-------------------------------------------------+-------------------------------------|
 | =C-c o=   | =magma-switch-to-interactive-buffer=            | start an interactive magma process  |
 |           |                                                 | in a different frame                |
+|-----------+-------------------------------------------------+-------------------------------------|
 | =C-c C-k= | =magma-kill=                                    | kill the magma process              |
 | =C-c C-i= | =magma-int=                                     | interrupt the magma process         |
 | =C-c C-a= | =magma-restart=                                 | restart the magma process           |
