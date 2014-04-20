@@ -1,4 +1,4 @@
-# -*- eval: (auto-fill-mode 1); -*-
+# -*- eval: (auto-fill-mode 1); eval: (toggle-truncate-lines 0) -*-
 #LINK: magma      http://magma.maths.usyd.edu.au/magma/
 #LINK: magma-mode http://www-polsys.lip6.fr/~bettale/magma-mode/
 #LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
@@ -184,43 +184,26 @@ does not have this kind of requirements.
 ** Keymap and functions
 *** Managing magma processes
 
-| =C-c C-o= | =magma-switch-to-interactive-buffer-same-frame= | start an interactive magma process, |
-|           |                                                 | in the same frame 
-|           |                                                 | and in a different window           |
-|-----------+-------------------------------------------------+-------------------------------------|
-| =C-c o=   | =magma-switch-to-interactive-buffer=            | start an interactive magma process  |
-|           |                                                 | in a different frame                |
-|-----------+-------------------------------------------------+-------------------------------------|
-| =C-c C-k= | =magma-kill=                                    | kill the magma process              |
-| =C-c C-i= | =magma-int=                                     | interrupt the magma process         |
-| =C-c C-a= | =magma-restart=                                 | restart the magma process           |
+| =C-c C-o= | =magma-switch-to-interactive-buffer-same-frame= | start an interactive magma process, in the same frame and in a different window |
+| =C-c o=   | =magma-switch-to-interactive-buffer=            | start an interactive magma process in a different frame                         |
+| =C-c C-k= | =magma-kill=                                    | kill the magma process                                                          |
+| =C-c C-i= | =magma-int=                                     | interrupt the magma process                                                     |
+| =C-c C-a= | =magma-restart=                                 | restart the magma process                                                       |
 
 *** Evaluation of expressions
 
-| =C-c C-e= | =magma-eval=            | send the expression at point          |
-|           |                         | to the magma-process                  |
-| =C-c C-l= | =magma-eval-line=       | send the current line                 |
-|           |                         | to the magma process                  |
-| =C-c C-r= | =magma-eval-region=     | send the current region               |
-|           |                         | to the magma process                  |
-| =C-c C-b= | =magma-eval-buffer=     | send the content of current           |
-|           |                         | buffer to the magma process           |
-| =C-c C-u= | =magma-eval-until=      | send the content of the current       |
-|           |                         | buffer, until the point, to           |
-|           |                         | the magma process                     |
-| =C-c C-f= | =magma-eval-defun=      | with point in a function              |
-|           |                         | definition, send it to                |
-|           |                         | the magma process                     |
-| =C-c C-p= | =magma-eval-paragraph=  | send the current block                |
-|           |                         | to the magma process                  |
-| =C-c :=   | =magma-send-expression= | prompt for an expression,             |
-|           |                         | send it to the magma process          |
-| =C-c C-w= | =magma-show-word=       | evaluate the variable at point        |
-|           |                         | in the magma buffer                   |
-| =C-c h=   | =magma-show-help=       | prompt for a symbol, and              |
-|           |                         | display the available documentation   |
-|           |                         | about that symbol in the magma buffer |
-  
+| =C-c C-e= | =magma-eval=            | send the expression at point to the magma-process                                                  |
+| =C-c C-l= | =magma-eval-line=       | send the current line to the magma process                                                         |
+| =C-c C-r= | =magma-eval-region=     | send the current region to the magma process                                                       |
+| =C-c C-b= | =magma-eval-buffer=     | send the content of current buffer to the magma process                                            |
+| =C-c C-u= | =magma-eval-until=      | send the content of the current buffer, until the point, to the magma process                      |
+| =C-c C-f= | =magma-eval-defun=      | with point in a function definition, send it to the magma process                                  |
+| =C-c C-p= | =magma-eval-paragraph=  | send the current block to the magma process                                                        |
+| =C-c :=   | =magma-send-expression= | prompt for an expression, send it to the magma process                                             |
+| =C-c C-w= | =magma-show-word=       | evaluate the variable at point in the magma buffer                                                 |
+| =C-c h=   | =magma-show-help=       | prompt for a symbol, and display the available documentation about that symbol in the magma buffer |
+
+
 
 Additionally, all these functions take optional prefix arguments:
 
