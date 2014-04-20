@@ -32,8 +32,8 @@ tested over the years.
       git clone https://github.com/ThibautVerron/magma-mode.git
    #+end_src    
 
-2. If needed, install the required packages [[https://github.com/rejeep/f.el][f.el]] (filenames library)
-   and [[https://github.com/magnars/dash.el][dash.el]] (lists library). 
+2. Make sure that the required packages [[https://github.com/rejeep/f.el][f.el]] (library for managing
+   filenames) and [[https://github.com/magnars/dash.el][dash.el]] (library for managing lists) are installed.
    
 3. Add the following to your emacs init file :
 
@@ -181,47 +181,47 @@ does not have this kind of requirements.
     extensions to the completion engine, and/or suggestions to
     overcome some of its current issues, please file an issue.
 
-** Keymap
+** Keymap and functions
+*** Managing magma processes
 
-Keymap for the =magma-mode=:
+| <10>       | <30>                           | <30>                           |
+| =C-c C-o=  | =magma-switch-to-interactive-buffer-same-frame= | start an interactive magma process, in the same frame and in a different window |
+| =C-c o=    | =magma-switch-to-interactive-buffer= | start an interactive magma process in a different frame |
+| =C-c C-k=  | =magma-kill=                   | kill the magma process         |
+| =C-c C-i=  | =magma-int=                    | interrupt the magma process    |
+| =C-c C-a=  | =magma-restart=                | restart the magma process      |
 
- - =C-c C-o= (=magma-switch-to-interactive-buffer-same-frame=): 
-   start an interactive magma process, in the same frame
-   and in a different buffer
- - =C-c o= (=magma-switch-to-interactive-buffer=): 
-   start an interactive magma process in a different frame
- - =C-c C-k= (=magma-kill=): kill the magma process
- - =C-c C-i= (=magma-int=): interrupt the magma process
- - =C-c C-a= (=magma-restart=): restart the magma process
- - =C-c := (=magma-send-expression=): send an expression to the magma process
- - =C-c C-w (=magma-show-word=): show the value of the word at point
-   in the magma buffer
- - =C-c C-l= (=magma-eval-line=): send the current line to the magma
-   process
- - =C-c C-r= (=magma-eval-region=): send the current region to the
-   magma process
- - =C-c C-b= (=magma-eval-buffer=): send the current buffer to the
-   magma process
- - =C-c C-e= (=magma-eval=): if region is set, send the region to the
-   magma process, else send the current expression
- - =C-c C-f= (=magma-eval-defun=): evaluate the current function definition
- - =C-c C-u= (=magma-eval-until=): send the content of the buffer up
-   to the point to the magma process
- - =C-c C-p= (=magma-eval-paragraph=): send the current paragraph to
-   the magma process
- - =C-c h= (=magma-show-help=): prompt for a symbol, and shows the
-   magma help about that symbol
+*** Evaluation of expressions
 
-Additionally, the evaluation functions take optional prefix arguments:
+| <10>       | <30>                           | <30>                           |
+| =C-c C-e=  | =magma-eval=                   | send the expression at point to the magma-process |
+| =C-c C-l=  | =magma-eval-line=              | send the current line to the magma process |
+| =C-c C-r=  | =magma-eval-region=            | send the current region to the magma process |
+| =C-c C-b=  | =magma-eval-buffer=            | send the content of current buffer to the magma process |
+| =C-c C-u=  | =magma-eval-until=             | send the content of the current buffer, until the point, to the magma process |
+| =C-c C-f=  | =magma-eval-defun=             | with point in a function definition, send it to the magma process |
+| =C-c C-p=  | =magma-eval-paragraph=         | send the current block to the magma process |
+| =C-c :=    | =magma-send-expression=        | prompt for an expression, send it to the magma process |
+| =C-c C-w=  | =magma-show-word=              | evaluate the variable at point in the magma buffer |
+| =C-c h=    | =magma-show-help=              | prompt for a symbol, and display the available documentation about that symbol |
+
+Additionally, all these functions take optional prefix arguments:
 
  - =C-u 3 C-l= : send the current line to the magma process number 3
  - =C-u C-l= : prompts for a magma process, and send the current line
    to this process
  - =C-u C-u C-l= : send the current line to all magma processes
 
-These features are highly untested.
+** Extras
+*** Support for extra modes
 
-Additionally, if you have =magma-use-electric-newline= set to =t=,
+The file `magma-extra.el` provides support for =hs-minor-mode= (code
+folding) and =imenu= based modes (code navigation). To enable them,
+simply turn on the corresponding minor modes.
+
+*** Extra "electric" editting features
+
+If you have =magma-use-electric-newline= set to =t=,
 the following keys are also bound:
     
  - =RET= or =C-j= (=magma-newline-and-indent=): inserts a visual
