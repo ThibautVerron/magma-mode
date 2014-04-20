@@ -245,7 +245,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
       (end-of-buffer)
       (insert command)
       (term-send-input)
-      )))
+      ))))
 
 (defun magma-term-help-word (topic)
   "call-up the handbook in an interactive buffer for topic"
