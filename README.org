@@ -211,7 +211,7 @@ Additionally, all these functions take optional prefix arguments:
 ** Extras
 *** Support for extra modes
 
-The file `magma-extra.el` provides support for =hs-minor-mode= (code
+The file =magma-extra.el= provides support for =hs-minor-mode= (code
 folding) and =imenu= based modes (code navigation). To enable them,
 simply turn on the corresponding minor modes.
 
