@@ -50,22 +50,7 @@ tested over the years.
      (setq auto-mode-alist
      (append '(("\\.mgm$\\|\\.m$" . magma-mode))
      auto-mode-alist))
-     
-     ;; If you need to use a different magma program
-     (setq magma-interactive-program "magma")
-     
-     ;; If you need to pass specific arguments to magma
-     (setq magma-interactive-arguments '())
-           
-     ;; If you want to use comint instead of term.
-     (setq magma-interactive-use-comint t)
-     
-     ;; Electric return key (try RET or C-j, or C-c C-j) while in a
-     ;; string or comment. Like it or hate it, enable it or disable
-     ;; it. This is beta, might ruin the indentation of your document,
-     ;; crash emacs or eat your cat.
-     (setq magma-use-electric-newline t)
-     
+          
    #+end_src
 
 ** Comint vs term
@@ -203,14 +188,25 @@ does not have this kind of requirements.
 | =C-c C-w= | =magma-show-word=       | evaluate the variable at point in the magma buffer                                                 |
 | =C-c h=   | =magma-show-help=       | prompt for a symbol, and display the available documentation about that symbol in the magma buffer |
 
-
-
 Additionally, all these functions take optional prefix arguments:
 
  - =C-u 3 C-l= : send the current line to the magma process number 3
  - =C-u C-l= : prompts for a magma process, and send the current line
    to this process
  - =C-u C-u C-l= : send the current line to all magma processes
+
+** Settings
+
+| Name of the variable                 | Default                      | Details                                       |
+|--------------------------------------+------------------------------+-----------------------------------------------|
+| =magma-completion-table-file=        | =.../data/magma_symbols.txt= | Completion table from the documentation       |
+| =magma-interactive-arguments=        | =\'()=                       | Arguments to pass to magma                    |
+| =magma-interactive-buffer-name=      | =magma=                      | Name of the magma buffer                      |
+| =magma-interactive-program=          | =magma=                      | Name of the magma program                     |
+| =magma-interactive-skip-empty-lines= | =nil=                        | If non =nil=, do not evaluate empty lines.    |
+| =magma-interactive-skip-comments=    | =nil=                        | If non =nil=, do not evaluate comments.       |
+| =magma-interactive-use-comint=       | =nil=                        | If non =nil=, use =comint= instead of =term=. |
+| =magma-use-electric-newline=         | =nil=                        | See the "Extras" section below                |
 
 ** Extras
 *** Support for extra modes

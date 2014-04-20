@@ -48,18 +48,18 @@
   :group 'magma
   :type 'string)
 
-(defcustom magma-comint-input-skips-empty-lines nil
+(defcustom magma-interactive-skip-empty-lines nil
   "If non-nil, strip empty lines before sending input to the
   magma process.
 
   This variable can be set to `nil' even if
-  `magma-comint-input-skips-comments' is set to `t'. However,
+  `magma-interactive-skip-comments' is set to `t'. However,
   this will probably lead to unwanted behavior, since the
   commented lines are replaced with blank lines."
   :group
   'magma :type 'sexp)
 
-(defcustom magma-comint-input-skips-comments nil
+(defcustom magma-interactive-skip-comments nil
   "If non-nil, strip empty lines before sending input to the
   magma process"
   :group 'magma
@@ -240,7 +240,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-term-send (expr &optional ins)
   "Send the expression expr to the magma buffer for evaluation."
   (save-window-excursion
-    (let ((command (magma-preinput-filter expr)))
+    (let ((command (magma-preinput-filter expr))
       (magma-switch-to-interactive-buffer)
       (end-of-buffer)
       (insert command)
@@ -473,11 +473,11 @@ After changing this variable, restarting emacs is required (or reloading the mag
     (insert input)
     (let ((magma-mode-hook nil))
       (magma-mode))
-    (when magma-comint-input-skips-comments
+    (when magma-interactive-skip-comments
       (goto-char (point-min))
       (insert "\n")
       (comment-kill (count-lines (point-min) (point-max))))
-    (when magma-comint-input-skips-empty-lines
+    (when magma-interactive-skip-empty-lines
       (flush-lines "^[[:blank:]]*$" (point-min) (point-max)))
     (buffer-substring-no-properties (point-min) (point-max))))
 
