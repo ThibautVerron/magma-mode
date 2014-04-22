@@ -65,6 +65,16 @@
   :group 'magma
   :type 'sexp)
 
+(defcustom magma-interactive-method 'whole
+  "How should we send instructions to the magma process:
+   - 'whole : send all at once
+   - 'expr  : send one expression at a time
+   - 'line  : send one line at a time"
+  :group 'magma
+  :options '(whole expr line)
+  :type 'symbol
+  )
+
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
     (define-key map "\t" 'completion-at-point)
@@ -86,6 +96,8 @@
   "Should the prompt in the magma buffer be read-only? Setting
   this to `nil' can be confusing to users, but we expose this
   setting for elisp calls.")
+
+;; (defvar-local magma--output-finished t)
 
 (defcustom magma-interactive-use-comint nil
   "If non-nil, communication with the magma process is done using comint. Otherwise, it uses term-mode.
@@ -184,6 +196,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
       (end-of-buffer)
       ;; (goto-char (process-mark (get-buffer-process buffer)))
       (insert command)
+      ;; (setq magma--output-finished t)
       (comint-send-input))))
 
 
@@ -297,14 +310,39 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (pop-to-buffer (magma-get-buffer i))
   )
 
+(defun magma-wait-for-output (&optional i)
+  (let ((buffer (magma-get-buffer i)))
+    (with-current-buffer buffer
+      (goto-char (point-max))
+      (forward-line 0) ;; beginning-of-line won't go across the prompt
+      (while (not (looking-at "^[[:alnum:]|]*> "))
+        (accept-process-output nil 0.001)
+        (redisplay)
+        (goto-char (point-max))
+        (forward-line 0))
+      (end-of-line))))
 
 (defun magma-eval-region (beg end &optional i)
   "Evaluates the current region"
   (interactive "rP")
-  (let ((str (buffer-substring-no-properties beg end)))
-    (magma-send-or-broadcast str i)
-    )
-  )
+  (case magma-interactive-method
+    ('whole
+     (let ((str (buffer-substring-no-properties beg end)))
+       (magma-send-or-broadcast str i)))
+    ('expr
+     (save-excursion
+       (goto-char beg)
+       (let ((magma-interactive-method 'whole))
+         (while (< (point) end)
+           (magma-eval-next-statement i)
+           (magma-wait-or-broadcast i)))))
+    ('line
+     (save-excursion
+       (goto-char beg)
+       (while (< (point) end)
+         ;; (message (format "Point: %s" (point)))
+         (magma-eval-line i)
+         (magma-wait-or-broadcast i))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"
@@ -317,11 +355,10 @@ After changing this variable, restarting emacs is required (or reloading the mag
          (end (save-excursion
                 (end-of-line)
                 (point))))
-    (magma-eval-region beg end i)
+    (let ((magma-interactive-method 'whole))
+      (magma-eval-region beg end i))
     (end-of-line)
-    (or (eobp) (next-line))
-    )
-  )
+    (or (eobp) (next-line))))
 
 (defun magma-eval-paragraph ( &optional i)
   "Evaluate current paragraph (space separated block)"
@@ -336,12 +373,14 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Evaluate current or next statement"
   (interactive "P")
   (let ((regbeg (progn
-                    (magma-beginning-of-expr)
-                    (point)))
-          (regend (progn
-                    (magma-end-of-expr)
-                    (point))))
-    (magma-eval-region regbeg regend i)))
+                  (magma-beginning-of-expr)
+                  (point)))
+        (regend (progn
+                  (magma-end-of-expr)
+                  (point))))
+    (magma-eval-region regbeg regend i)
+    (goto-char regend)
+    (or (eobp) (next-line))))
   
 
 (defun magma-eval (&optional i)
@@ -436,6 +475,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-send-or-broadcast (expr i)
   (magma-broadcast-if-needed (apply-partially 'magma-send expr) i))
+(defun magma-wait-or-broadcast (i)
+  (magma-broadcast-if-needed 'magma-wait-for-output i))
 (defun magma-kill-or-broadcast (i)
   (magma-broadcast-if-needed 'magma--kill-cmd i))
 (defun magma-int-or-broadcast (i)
@@ -463,6 +504,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
              (if (looking-at "^[[:alnum:]]*>")
                  (progn
                    (or (bobp) (forward-char -1))
+                   ;; (setq magma--output-finished t)
                    (point))
                (point-max)))))
       (flush-lines "\\(^[[:alnum:]]*>\\|^[[:blank:]]*$\\|\^H\\)" (point-min) maxp)
