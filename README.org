@@ -242,14 +242,14 @@ the following keys are also bound:
 
    Example: (the [] indicates the point)
 
-   #+begin_src 
+   #+begin_example
       x := "a long sentence, really, a long sentence, [a]nd even a few more words";
       
       <RET> --->
       
       x := "a long sentence, really, a long sentence, "
       cat "and even a few more words";
-   #+end_src
+   #+end_example
     
    This shouldn't change the way your code is evaluated.
 
@@ -258,25 +258,25 @@ the following keys are also bound:
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
 
-   #+begin_src    
+   #+begin_example  
       // Comment []
       
       <C-RET> --->
       
       // Comment 
       // []
-   #+end_src
+   #+end_example
 
    and in a string, it will insert an explicit newline character:
 
-   #+begin_src 
+   #+begin_example 
       x := "a long sentence, really, a long sentence, [a]nd even a few more words";
       
       <RET> --->
       
       x := "a long sentence, really, a long sentence, \\n"
       cat "and even a few more words";"
-   #+end_src
+   #+end_example
 
 *** Initial file contents and file headers
 
