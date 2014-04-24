@@ -286,7 +286,7 @@ Feature: Interaction with a magma process
     And the buffer is empty
     And I insert:
     """
-    6; // Not 6+6 because + gets interpreted as part of a regexp by espuds
+    6; 
     """
     And I select "6;"
     And I press "C-u C-u C-c C-e"
@@ -364,3 +364,73 @@ Feature: Interaction with a magma process
     """
     Then I insert "quit;"
     And I press "RET"
+
+
+  Scenario: Evaluation of a region as a whole
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to 'whole
+    And I insert:
+    """
+    whole_test: 1+1;
+    whole_test: 2+2;
+    """
+    And I press "C-c C-b"
+    And I switch to buffer "*magma*"
+    And I press "RET"
+    And I wait for an instant
+    Then I should see:
+    """
+    > whole_test: 1+1;
+    whole_test: 2+2;
+    Input: whole_test: 1+1;
+    whole_test: 2+2;
+    """
+    
+
+  Scenario: Evaluation of a region line by line
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to 'line
+    And I insert:
+    """
+    line_test: 1+1;
+    line_test: 2+2;
+    """
+    And I press "C-c C-b"
+    And I switch to buffer "*magma*"
+    Then I should see:
+    """
+    > line_test: 1+1;
+    Input: line_test: 1+1;
+    > line_test: 2+2;
+    Input: line_test: 2+2;
+    """
+    
+  Scenario: Evaluation of a region expression by expression
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to 'expr
+    And I insert:
+    """
+    for expr_test in foo do
+        bar;
+    end for;
+    expr_test: 2+2;
+    """
+    And I press "C-c C-b"
+    And I switch to buffer "*magma*"
+    And I wait for 0.5 seconds
+    Then I should see:
+    """
+    > for expr_test in foo do
+        bar;
+    end for;
+    Input: for expr_test in foo do
+        bar;
+    end for;
+    > expr_test: 2+2;
+    Input: expr_test: 2+2;
+    """
+
+    
