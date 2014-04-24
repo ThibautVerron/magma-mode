@@ -209,11 +209,26 @@ Additionally, all these functions take optional prefix arguments:
 | =magma-use-electric-newline=         | =nil=                        | See the "Extras" section below                |
 
 ** Extras
+
+All the features described in this section are disabled by default.
+
 *** Support for extra modes
 
-The file =magma-extra.el= provides support for =hs-minor-mode= (code
-folding) and =imenu= based modes (code navigation). To enable them,
-simply turn on the corresponding minor modes.
+The file =magma-extra.el= provides support for various minor modes:
+ - =hs-minor-mode= : folding of =keyword=... =end keyword;=
+   blocks. It probably will not work correctly in case the code is
+   not syntactically correct (unclosed blocks);
+ - =imenu= : implemented the backend functions, so that code
+   navigation and =which-function= should work fine. At the moment,
+   the defun syntax =foo := function (bar)=... =end function;= is not
+   supported;
+ - =smart-parens= : partial support only, it is mainly a function
+   trying to ensure that the second =>= in =hom<A -> B >= is matched
+   to the opening =<=. 
+ - =yasnippet= : small collection of snippets for the basic blocks and
+   =load=.
+
+To use these features, simply turn the corresponding modes on.
 
 *** Extra "electric" editting features
 
@@ -262,4 +277,20 @@ the following keys are also bound:
       x := "a long sentence, really, a long sentence, \\n"
       cat "and even a few more words";"
    #+end_src
+
+*** Initial file contents and file headers
+
+We offer support for initial file contents and automatically updated
+headers. To use them, set the variables =magma-initial-file= and
+=magma-file-header= to either =\'default= or a function name, which
+then replaces the default function for inserting the default content
+or updating it.
+
+The header inserted by the default functions looks like this:
+
+    // Created: Sun Mar 16 13:31:33 2014
+    // Last modified: Thu Apr 17 11:35:26 2014
+    // Hash: bb0dadd0604bafdaa20282285c2d85ff
+    // load "filename.m";
+
 

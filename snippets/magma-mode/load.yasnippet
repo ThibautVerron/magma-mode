@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: load
+# key: load
+# condition: (looking-at "$")
+# --
+load "${1:$$(unless yas/modified-p (file-relative-name (ido-read-file-name "File to load" nil nil 'confirm "" nil)))}";

@@ -75,15 +75,11 @@ if in an intrinsic description or nil if somewhere else."
   "Returns true only if we are not in a magma comment"
   (let ((lit (magma-in-literal)))
     (and (not (eq lit 'c))
-	 (not (eq lit 'c++))
-	 )
-    )
-  )
+	 (not (eq lit 'c++)))))
 
 (defun looking-at-end-of-line (&optional endchar)
   "Returns t only is the point is at the end of a line."
-  (looking-at (concat endchar "[[:space:]]*$"))
-  )
+  (looking-at (concat endchar "[[:space:]]*$")))
 
 
 ;; Newline
@@ -98,35 +94,26 @@ if in an intrinsic description or nil if somewhere else."
     (if (looking-at-end-of-line)
 	(progn 
           (insert "\"")
-          (backward-char 1)
-          )
-      )
-    )
-  )
+          (backward-char 1)))))
 
 (defun magma-special-newline-when-in-string ()
   "Inserts a newline in a magma string, both on display and in the string"
   (progn
     (insert "\\n")
-    (magma-newline-when-in-string)
-    )
-  )
+    (magma-newline-when-in-string)))
 
 (defun magma-special-newline-when-in-c-comment ()
   "Inserts a newline in a C++-like comment"
   (progn
     (magma-newline-and-indent)
-    (insert "// ")
-    )
-  )
+    (insert "// ")))
 
 (defun magma-newline-when-in-c-comment ()
   "Insert a newline in a C-like comment, preserving the comment
   structure if we're not at the end of line"
   (if (looking-at "[[:space:]]*[^[:space:]\n].*$")
       (magma-special-newline-when-in-c-comment)
-    (magma-newline-and-indent))
-  )
+    (magma-newline-and-indent)))
 
 (defun magma-newline-when-in-cpp-comment ()
   "Inserts a newline in a C++-like comment"
@@ -136,22 +123,15 @@ if in an intrinsic description or nil if somewhere else."
 	   (forward-char 2)
 	   (if (looking-at-end-of-line)
 	       0
-             (+ (current-column) 1)
-	     )
-	   )
-	 )
-	)
+             (+ (current-column) 1)))))
     (newline)
-    (indent-to-column col)
-    )
-  )
+    (indent-to-column col)))
 
 (defun magma-newline-and-indent ()
   "Like newline-and-indent, but without deleting the trailing spaces"
   (interactive)
   (newline)
-  (magma-indent-line)
-  )
+  (magma-indent-line))
 
 (defun magma-insert-newline ()
   "Inserts a newline depending on where the point is"
@@ -160,9 +140,7 @@ if in an intrinsic description or nil if somewhere else."
     ('string (magma-newline-when-in-string))
     ('c (magma-newline-when-in-c-comment))
     ('c++ (magma-newline-when-in-cpp-comment))
-    (t (magma-newline-and-indent))
-    )
-  )
+    (t (magma-newline-and-indent))))
 
 (defun magma-insert-special-newline ()
   "Inserts a special newline depending on where the point is"
@@ -171,16 +149,13 @@ if in an intrinsic description or nil if somewhere else."
     ('string (magma-special-newline-when-in-string))
     ('c (magma-special-newline-when-in-c-comment))
     ('c++ (magma-newline-when-in-cpp-comment))
-    (t (magma-newline-and-indent))
-    )
-  )
+    (t (magma-newline-and-indent))))
 
 
 (defcustom magma-use-electric-newline nil
   "If non nil, C-j and C-c C-j have special behavior in strings and comments"
   :group 'magma
-  :type 'boolean
-  )
+  :type 'boolean)
 
 (defun magma--apply-electric-newline-setting ()
   (if magma-use-electric-newline
@@ -190,8 +165,7 @@ if in an intrinsic description or nil if somewhere else."
         (define-key magma-mode-map (kbd "C-c C-j")
           'magma-insert-special-newline)
         (define-key magma-mode-map (kbd "C-<return>")
-          'magma-insert-special-newline)
-        )
+          'magma-insert-special-newline))
     (progn
       (define-key magma-mode-map (kbd "RET") nil)
       (define-key magma-mode-map (kbd "C-j") nil)
@@ -203,6 +177,119 @@ if in an intrinsic description or nil if somewhere else."
   (setq magma-use-electric-newline (not magma-use-electric-newline))
   (magma--apply-electric-newline-setting))
 
+
+;; Snippets
+;;;;;;;;;;;
+
+(defun magma-should-expand-snippet ()
+  (and
+   (looking-at "$")
+   (save-excursion
+     (not (and (backward-word 2)
+               (looking-at "end"))))))
+
+(eval-after-load "yasnippet"
+  '(push (f-join magma-path "snippets") yas-snippet-dirs))
+;; What will happen if yasnippet is loaded before magma?
+
+
+;; Smartparens
+;;;;;;;;;;;;;;
+
+(defun magma-smartparens-gt-in-an-arrow (id beg end)
+  "Test ensuring that \"->\" does not mark the end of the
+  surrounding \"<...>\" pair."
+  (save-excursion
+    (goto-char (- end 1))
+    (looking-back "-")))
+
+(eval-after-load "smartparens.el"
+  '(sp-with-modes '(magma-mode magma-comint-interactive-mode magma-term-interactive-mode)
+     (sp-local-pair "<" ">" :skip-match 'magma-smartparens-gt-in-an-arrow :actions '(insert wrap navigate))
+     (sp-local-pair "`" nil :actions nil)))
+
+
+;; File header
+;;;;;;;;;;;;;;
+
+(defcustom magma-file-header nil
+  "If non-nil, magma will maintain a file header for the magma
+  files. This variable should then be either `default', in which case
+  we use the default header (see the documentation for
+  `magma-update-header-default'), or the name of a function which
+  will create and update this header.
+
+  This variable can always be overridden as a file-local variable.")
+
+(defun magma-update-header-default ()
+  "Default header for magma files. The first line is the date of
+  creation, the second the date of last modification, and the
+  third a hash of the rest of the buffer. This function is
+  intended to be user together with `yasnippet' and
+  `magma-initial-file' set to `t', in order to create the initial content.
+
+  `magma-update-header-default' will only operate if the file
+  begins with \"// Created\", in order not to accidentally
+  overwrite contents of a file."
+  (save-excursion
+    (goto-char (point-min))
+    (when (looking-at "// Created")
+      (forward-line 1)
+      (when (looking-at "// Last modified:")
+        (delete-region (point) (progn (forward-line 1) (point))))
+      (insert (format "// Last modified: %s\n" (current-time-string)))
+      (when (looking-at "// Hash:")
+        (delete-region (point) (progn (forward-line 1) (point))))
+      (let ((start
+             (save-excursion
+               (forward-line 2)
+               (point))))
+        (insert (format "// Hash: %s\n" (secure-hash 'md5 (current-buffer) start (point-max))))))))
+
+(defun magma-update-header ()
+  (when magma-file-header
+    (if (eq magma-file-header 'default)
+        (magma-update-header-default)
+      (funcall magma-file-header))))
+
+(add-hook
+ 'magma-mode-hook
+ (lambda ()
+   (add-hook 'write-contents-functions
+             'magma-update-header)))
+
+(defcustom magma-initial-file nil
+  "Contents to insert in a new magma file. This can be either
+  `default', in which case we insert a skeleton of the header
+  described in `magma-update-header-default', or a function name which
+  is then evaluated. 
+
+Based on `auto-insert'.")
+
+(defun magma-initial-file-contents-default ()
+  "Insert a skeleton of the header described in `magma-update-header-default'"
+  (insert (format "// Created: %s\n" (current-time-string)))
+  (insert "// Last modified:\n")
+  (insert "// Hash:\n")
+  (insert (format "// load \"%s\";\n"
+                  (replace-regexp-in-string
+                   "/scpc:.*?:" ""
+                   buffer-file-name)))
+  (insert "\n")
+  (insert (format "ChangeDirectory(\"%s\");" (replace-regexp-in-string "/scpc:.*?:" "" default-directory)))
+  (insert "\n"))
+
+
+(defun magma-initial-file-contents ()
+  (when (and magma-initial-file
+             (= (point-max) 1)) ;; Make sure auto-insert has not been already called
+    (if (eq magma-initial-file 'default)
+        (magma-initial-file-contents-default)
+      (funcall magma-initial-file))))
+
+(add-hook 'magma-mode-hook 'auto-insert)
+
+(define-auto-insert 'magma-mode 'magma-initial-file-contents)
 
 
 

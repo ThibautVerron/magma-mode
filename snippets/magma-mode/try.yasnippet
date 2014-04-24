@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: try
+# key: try
+# condition: (magma-should-expand-snippet)
+# --
+try 
+$0
+catch ${2:error}
+${3:code}
+end try;

@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: procedure
+# key: procedure
+# condition: (magma-should-expand-snippet)
+# --
+procedure ${1:name} (${2:argument}${3: : ${4:parameters?} })
+  // {{{ /* Documentation */
+
+  // ${5:Description}
+
+  // }}}
+  $0
+end procedure;
