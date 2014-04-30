@@ -233,6 +233,7 @@ if in an intrinsic description or nil if somewhere else."
   overwrite contents of a file."
   (save-excursion
     (goto-char (point-min))
+    (when (looking-at "/[*/] -\\*-") (forward-line 1)) ;; prop-line
     (when (looking-at "// Created")
       (forward-line 1)
       (when (looking-at "// Last modified:")
