@@ -23,6 +23,9 @@ This is beta software, all features are not yet fully implemented.
 For sensible usage, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] has been more thoroughly
 tested over the years.
 
+Please report any bug you may encounter through the issue
+tracker. Suggestions are welcome as well.
+
 ** Installation instructions
 
 1. Clone the repository in your favorite elisp folder
@@ -52,38 +55,6 @@ tested over the years.
      auto-mode-alist))
           
    #+end_src
-
-** Comint vs term
-
-=Term-mode= will basically render the magma experience you would have in
-a regular terminal emulator, regardless of emacs. Only the prompt can be
-written, =C-p= and =C-n= browse the history instead of scrolling the
-window, /et caetera/.
-
-Another specificity of term-mode is that it intercepts some prefix
-keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
-be replaced with =C-c=.  So for example, if you need to switch from
-your magma code buffer to the magma process buffer, then switch back,
-you'll first press =C-x o= (=other-window=), then =C-c o=.
-
-This can be changed by turning on =term-line-mode= (=C-c C-j=), but
-this changes the behavior of =term-mode= way beyond the mere
-interception of signal keys. To change back to the regular behavior,
-turn on =term-char-mode= (=C-x C-k=). Another option is to use =C-c o=
-(=magma-switch-to-interactive-buffer-same-frame=) instead of =C-x o=
-in the editting window.
-
-On the other hand, =comint-mode= spawns an interactive process in a
-full-featured emacs buffer. You can scroll using the usual keys, you
-can edit the output of previous commands... It is mostly equivalent to
-=term-mode= with =term-line-mode=, but in my experience, it suffers
-from less minor bugs.
-
-Another point to note is that =term-mode= sends input to a terminal,
-and magma is run in that terminal. Getting the whole thing to run
-under different systems (windows...) can prove tricky. On the other
-hand, =comint= starts the magma process directly from emacs, and so
-does not have this kind of requirements.
 
 ** Completion
 *** Introduction
@@ -207,6 +178,68 @@ Additionally, all these functions take optional prefix arguments:
 | =magma-interactive-skip-comments=    | =nil=                        | If non =nil=, do not evaluate comments.       |
 | =magma-interactive-use-comint=       | =nil=                        | If non =nil=, use =comint= instead of =term=. |
 | =magma-use-electric-newline=         | =nil=                        | See the "Extras" section below                |
+
+*** Comint vs term
+
+=Term-mode= will basically render the magma experience you would have in
+a regular terminal emulator, regardless of emacs. Only the prompt can be
+written, =C-p= and =C-n= browse the history instead of scrolling the
+window, /et caetera/.
+
+Another specificity of term-mode is that it intercepts some prefix
+keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
+be replaced with =C-c=.  So for example, if you need to switch from
+your magma code buffer to the magma process buffer, then switch back,
+you'll first press =C-x o= (=other-window=), then =C-c o=.
+
+This can be changed by turning on =term-line-mode= (=C-c C-j=), but
+this changes the behavior of =term-mode= way beyond the mere
+interception of signal keys. To change back to the regular behavior,
+turn on =term-char-mode= (=C-x C-k=). Another option is to use =C-c o=
+(=magma-switch-to-interactive-buffer-same-frame=) instead of =C-x o=
+in the editting window.
+
+On the other hand, =comint-mode= spawns an interactive process in a
+full-featured emacs buffer. You can scroll using the usual keys, you
+can edit the output of previous commands... It is mostly equivalent to
+=term-mode= with =term-line-mode=, but in my experience, it suffers
+from less minor bugs.
+
+Another point to note is that =term-mode= sends input to a terminal,
+and =magma= is run in that terminal. Getting the whole thing to run
+under different systems (windows...) can prove tricky. On the other
+hand, =comint= starts the magma process directly from emacs, and so
+does not have this kind of requirements.
+
+
+*** Methods for sending input to the magma buffer
+
+The =magma-mode= supports three ways of sending large blocks of input
+to the magma buffer, and this is controlled with the variable
+=magma-interactive-method=:
+ - =whole= : the input is passed without any modification to the
+   magma buffer;
+ - =expr= : the input is cut in magma expressions, and then sent to
+   the magma buffer;
+ - =line= (default) : the input is sent to the magma buffer
+   line-per-line. 
+
+This variable has no noticeable effect in most cases, but on very
+large inputs (for example =magma-eval-buffer= in a large buffer),
+sending the input as a whole will cause =comint= or =term= to cut the
+input at arbitrary locations, effectively confusing =magma=. Cutting
+at end of lines or end of expressions helps ensuring that what is
+sent to magma makes sense.
+
+Additionally, the variable =magma-interactive-wait-between-inputs=
+controls whether we want to wait for magma to output before sending
+the next line of input. The default is =nil=, because this can cause
+a noticeable slowdown for large buffers, especially when the
+computations would otherwise be very fast.
+
+However, if using =comint= and due to the way magma processes its
+input, if this option is set to =nil=, in the magma buffer, the
+results will no longer be correlated to their input.
 
 ** Extras
 
