@@ -18,6 +18,11 @@
 (Setup
  ;; Before anything has run
  ;;(setq condition-error-function )
+
+ (setq auto-insert-query nil)
+
+ (setq magma-interactive-method 'whole)
+ 
  (setq magma-interactive-use-comint t)
  (setq magma-prompt-read-only nil)
  (setq magma-use-electric-newline t)

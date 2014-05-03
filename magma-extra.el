@@ -263,9 +263,9 @@ if in an intrinsic description or nil if somewhere else."
   "Contents to insert in a new magma file. This can be either
   `default', in which case we insert a skeleton of the header
   described in `magma-update-header-default', or a function name which
-  is then evaluated. 
+  is then evaluated.
 
-Based on `auto-insert'.")
+Based on `auto-insert'")
 
 (defun magma-initial-file-contents-default ()
   "Insert a skeleton of the header described in `magma-update-header-default'"
@@ -277,13 +277,18 @@ Based on `auto-insert'.")
                    "/scpc:.*?:" ""
                    buffer-file-name)))
   (insert "\n")
-  (insert (format "ChangeDirectory(\"%s\");" (replace-regexp-in-string "/scpc:.*?:" "" default-directory)))
+  (insert (format "ChangeDirectory(\"%s\");"
+                  (replace-regexp-in-string
+                   "/scpc:.*?:" ""
+                   default-directory)))
   (insert "\n"))
 
 
 (defun magma-initial-file-contents ()
   (when (and magma-initial-file
-             (= (point-max) 1)) ;; Make sure auto-insert has not been already called
+             buffer-file-name
+             ;; Make sure auto-insert has not been already called
+             (= (point-max) 1))
     (if (eq magma-initial-file 'default)
         (magma-initial-file-contents-default)
       (funcall magma-initial-file))))
