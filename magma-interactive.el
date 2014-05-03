@@ -65,15 +65,34 @@
   :group 'magma
   :type 'sexp)
 
-(defcustom magma-interactive-method 'whole
+(defcustom magma-interactive-method 'line
   "How should we send instructions to the magma process:
    - 'whole : send all at once
    - 'expr  : send one expression at a time
-   - 'line  : send one line at a time"
+   - 'line  : send one line at a time.
+
+  If `magma-interactive-wait-between-inputs' is `nil', this
+  setting does not change anything to the visible
+  result. However, it should prevent some edge cases, when the
+  input is too long to be sent to the magma process at once. In
+  this case, `emacs' will cut the input in half at an arbitrary
+  location, effectively confusing `magma'. Sending line per line
+  or expression per expression reduces the risk of having too
+  long input by forcing cuts at syntactically correct places."
+
   :group 'magma
   :options '(whole expr line)
-  :type 'symbol
-  )
+  :type 'symbol)
+
+(defcustom magma-interactive-wait-between-inputs nil
+  "If non nil and `magma-interactive-method' is set to `expr' or
+  `line', wait for the magma process to output before sending the
+  next input.
+
+  It can make the evaluation of a long buffer slower by a few
+  seconds."
+  :group 'magma
+  :type 'sexp)
 
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
@@ -325,24 +344,28 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-eval-region (beg end &optional i)
   "Evaluates the current region"
   (interactive "rP")
-  (case magma-interactive-method
-    ('whole
-     (let ((str (buffer-substring-no-properties beg end)))
-       (magma-send-or-broadcast str i)))
-    ('expr
-     (save-excursion
-       (goto-char beg)
-       (let ((magma-interactive-method 'whole))
+  (let* ((ignore (lambda (i) nil))
+         (wait (if magma-interactive-wait-between-inputs
+                   'magma-wait-or-broadcast
+                 'ignore)))
+    (case magma-interactive-method
+      ('whole
+       (let ((str (buffer-substring-no-properties beg end)))
+         (magma-send-or-broadcast str i)))
+      ('expr
+       (save-excursion
+         (goto-char beg)
+         (let ((magma-interactive-method 'whole))
+           (while (< (point) end)
+             (magma-eval-next-statement i)
+             (funcall wait i)))))
+      ('line
+       (save-excursion
+         (goto-char beg)
          (while (< (point) end)
-           (magma-eval-next-statement i)
-           (magma-wait-or-broadcast i)))))
-    ('line
-     (save-excursion
-       (goto-char beg)
-       (while (< (point) end)
-         ;; (message (format "Point: %s" (point)))
-         (magma-eval-line i)
-         (magma-wait-or-broadcast i))))))
+           ;; (message (format "Point: %s" (point)))
+           (magma-eval-line i)
+           (funcall wait i)))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"
