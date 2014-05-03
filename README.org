@@ -258,8 +258,9 @@ The file =magma-extra.el= provides support for various minor modes:
  - =smart-parens= : partial support only, it is mainly a function
    trying to ensure that the second =>= in =hom<A -> B >= is matched
    to the opening =<=. 
- - =yasnippet= : small collection of snippets for the basic blocks and
-   =load=.
+ - =yasnippet= : small collection of snippets: at the moment,
+   contains snippets for =case=, =for=, =if=, =try=, =while=, =function=,
+   =procedure=, and =load=.
 
 To use these features, simply turn the corresponding modes on.
 
