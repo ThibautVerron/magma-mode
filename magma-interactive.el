@@ -56,20 +56,32 @@
   `magma-interactive-skip-comments' is set to `t'. However,
   this will probably lead to unwanted behavior, since the
   commented lines are replaced with blank lines."
-  :group
-  'magma :type 'sexp)
+  :group 'magma
+  :set 'magma-set-skip
+  :type 'boolean)
 
 (defcustom magma-interactive-skip-comments nil
-  "If non-nil, strip empty lines before sending input to the
+  "If non-nil, strip comment lines before sending input to the
   magma process"
   :group 'magma
-  :type 'sexp)
+  :set 'magma-set-skip
+  :type 'boolean)
+
+(defun magma-set-skip (symbol value)
+  (set-default symbol value)
+  (when (and magma-interactive-skip-comments
+             (not magma-interactive-skip-empty-lines))
+    (warn "magma-interactive-skip-empty-lines is nil, magma-interactive-skip-comments is t. Expect lots of empty lines replacing the comments.")))
 
 (defcustom magma-interactive-method 'line
-  "How should we send instructions to the magma process:
+  "How should we send instructions to the magma process
+
+Can be one of the following symbols
    - 'whole : send all at once
    - 'expr  : send one expression at a time
-   - 'line  : send one line at a time.
+   - 'line  : send one line at a time
+   - 'file : write the region to a temporary file, and use
+     magma's load feature to evaluate it
 
   If `magma-interactive-wait-between-inputs' is `nil', this
   setting does not change anything to the visible
@@ -81,7 +93,25 @@
   long input by forcing cuts at syntactically correct places."
 
   :group 'magma
-  :options '(whole expr line)
+  :options '(whole expr line file)
+  :type 'symbol)
+
+(defvar magma-temp-file-name "_temp_.m")
+
+(defcustom magma-interactive-use-load nil
+  "See `magma-eval-buffer'"
+  :group 'magma
+  :type 'boolean)
+
+(defcustom magma-interactive-auto-save 'confirm
+  "This variable controls what to do if
+  `magma-interactive-use-load' is non-nil, and if the current
+  buffer has been modified. It takes one of the following three values:
+- `confirm' : ask for confirmation (default)
+- `always' : always save, no confirmation
+- `never' : never save, no confirmation"
+  :group 'magma
+  :options '(confirm always never)
   :type 'symbol)
 
 (defcustom magma-interactive-wait-between-inputs nil
@@ -92,7 +122,7 @@
   It can make the evaluation of a long buffer slower by a few
   seconds."
   :group 'magma
-  :type 'sexp)
+  :type 'boolean)
 
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
@@ -210,13 +240,14 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (magma-preinput-filter expr))
         (buffer (magma-get-buffer i)))
-    (run-hook-with-args 'comint-input-filter-functions expr)
-    (with-current-buffer buffer
-      (end-of-buffer)
-      ;; (goto-char (process-mark (get-buffer-process buffer)))
-      (insert command)
-      ;; (setq magma--output-finished t)
-      (comint-send-input))))
+    (unless (s-equals? command "")
+      (run-hook-with-args 'comint-input-filter-functions command)
+      (with-current-buffer buffer
+        (end-of-buffer)
+        ;; (goto-char (process-mark (get-buffer-process buffer)))
+        (insert command)
+        ;; (setq magma--output-finished t)
+        (comint-send-input)))))
 
 
 (defun magma-comint-help-word (topic)
@@ -272,12 +303,12 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-term-send (expr &optional ins)
   "Send the expression expr to the magma buffer for evaluation."
   (save-window-excursion
-    (let ((command (magma-preinput-filter expr))
-      (magma-switch-to-interactive-buffer)
-      (end-of-buffer)
-      (insert command)
-      (term-send-input)
-      ))))
+    (let ((command (magma-preinput-filter expr)))
+      (unless (s-equals? command "")
+        (magma-switch-to-interactive-buffer)
+        (end-of-buffer)
+        (insert command)
+        (term-send-input)))))
 
 (defun magma-term-help-word (topic)
   "call-up the handbook in an interactive buffer for topic"
@@ -341,13 +372,40 @@ After changing this variable, restarting emacs is required (or reloading the mag
         (forward-line 0))
       (end-of-line))))
 
+(defun magma--at-end (end)
+  (or (looking-at "\\([[:blank:]]\\|\n\\)*\\'")
+                  (>= (point) end)))
+    
 (defun magma-eval-region (beg end &optional i)
-  "Evaluates the current region"
+  "Evaluate the current region.
+
+The behavior of this function depends on the value of
+`magma-interactive-method':
+- if `whole', send the whole region to comint. Emacs may decide
+  that this block of text is too long for input, and cut it and
+  send it in batches. In this case, it will cut it
+  at (apparently) random points, which may cause syntax errors if
+  the cut happened in the middle of an identifier for example;
+- if `line', send the region one line at a time;
+- if `expr', send the region one expr at a time;
+- if `file', copy the region to a temporary file and use \"load ...;\" to evaluate it in magma. 
+
+Additionally, if `magma-interactive-wait-between-inputs' is non
+nil, and if `magma-interactive-method' is either `line' or
+`expr', emacs will wait until magma has processed the input
+before sending the next part. The result is that the buffer is
+more nicely structured, with each output located right after the
+corresponding input. However, this will cause comint to wait for
+a fraction of a second after each input, causing a subsequent
+delay on large buffers.
+"
   (interactive "rP")
   (let* ((ignore (lambda (i) nil))
-         (wait (if magma-interactive-wait-between-inputs
-                   'magma-wait-or-broadcast
-                 'ignore)))
+         (wait
+          ;; wait only if `magma-interactive-wait-between-inputs' is non nil
+          (if magma-interactive-wait-between-inputs
+              'magma-wait-or-broadcast
+            'ignore)))
     (case magma-interactive-method
       ('whole
        (let ((str (buffer-substring-no-properties beg end)))
@@ -356,16 +414,25 @@ After changing this variable, restarting emacs is required (or reloading the mag
        (save-excursion
          (goto-char beg)
          (let ((magma-interactive-method 'whole))
-           (while (< (point) end)
+           (while (not (magma--at-end end))
              (magma-eval-next-statement i)
              (funcall wait i)))))
       ('line
        (save-excursion
          (goto-char beg)
-         (while (< (point) end)
+         (while (not (magma--at-end end))
            ;; (message (format "Point: %s" (point)))
            (magma-eval-line i)
-           (funcall wait i)))))))
+           (funcall wait i))))
+      ('file
+       (let ((buf (current-buffer)))
+         (with-temp-buffer
+           (find-file-literally magma-temp-file-name)
+           (insert-buffer-substring-no-properties buf beg end)
+           (let ((magma-interactive-use-load t)
+                 (magma-interactive-auto-save 'always))
+             (magma-eval-buffer i))
+           (kill-buffer)))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"
@@ -435,9 +502,42 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
-  "Evaluates all code in the buffer"
+  "Evaluates all code in the buffer
+
+If `magma-interactive-use-load' is non-nil and if the current
+buffer is associated to a file, use \"load ...;\" to evaluate the
+buffer, instead of sending it line per line. Note that if you use
+magma on a remote host, this method will require that you save
+the file to the remote host when needed.
+
+If needed, confirm saving through `magma-confirm-save-buffer'.
+
+Otherwise, send the whole buffer to `magma-eval-region'.
+"
   (interactive "P")
-  (magma-eval-region (point-min) (point-max) i))
+  (if (and (buffer-file-name) magma-interactive-use-load)
+      (progn
+        (when (buffer-modified-p)
+          (magma-confirm-save-buffer))
+        (magma-send-or-broadcast
+         (format "load \"%s\";" (file-name-nondirectory (buffer-file-name))) i))
+  (magma-eval-region (point-min) (point-max) i)))
+
+(defun magma-confirm-save-buffer ()
+  "Prompt for confirmation, then save the current buffer.
+
+The behavior of this function is controlled by
+`magma-interactive-auto-save'."
+  (let ((should-save
+         (case magma-interactive-auto-save
+           ('always t)
+           ('never nil)
+           ('confirm
+            (let ((prompt (format "File %s modified. Save? "
+                                  (buffer-file-name))))
+              (yes-or-no-p prompt))))))
+  (when should-save
+    (save-buffer))))
 
 (defun magma-help-word (&optional browser)
   "call-up the handbook in the interactive buffer for the current word"
