@@ -48,6 +48,12 @@
   :group 'magma
   :type 'string)
 
+(defun magma-set-skip (symbol value)
+  (set-default symbol value)
+  (when (and magma-interactive-skip-comments
+             (not magma-interactive-skip-empty-lines))
+    (warn "magma-interactive-skip-empty-lines is nil, magma-interactive-skip-comments is t. Expect lots of empty lines replacing the comments.")))
+
 (defcustom magma-interactive-skip-empty-lines nil
   "If non-nil, strip empty lines before sending input to the
   magma process.
@@ -57,7 +63,7 @@
   this will probably lead to unwanted behavior, since the
   commented lines are replaced with blank lines."
   :group 'magma
-  :set 'magma-set-skip
+  ;; :set 'magma-set-skip ;; FIXME: find a way to uncomment this without error
   :type 'boolean)
 
 (defcustom magma-interactive-skip-comments nil
@@ -66,12 +72,6 @@
   :group 'magma
   :set 'magma-set-skip
   :type 'boolean)
-
-(defun magma-set-skip (symbol value)
-  (set-default symbol value)
-  (when (and magma-interactive-skip-comments
-             (not magma-interactive-skip-empty-lines))
-    (warn "magma-interactive-skip-empty-lines is nil, magma-interactive-skip-comments is t. Expect lots of empty lines replacing the comments.")))
 
 (defcustom magma-interactive-method 'line
   "How should we send instructions to the magma process
@@ -428,6 +428,7 @@ delay on large buffers.
        (let ((buf (current-buffer)))
          (with-temp-buffer
            (find-file-literally magma-temp-file-name)
+           (erase-buffer)
            (insert-buffer-substring-no-properties buf beg end)
            (let ((magma-interactive-use-load t)
                  (magma-interactive-auto-save 'always))
