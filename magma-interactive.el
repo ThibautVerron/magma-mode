@@ -96,7 +96,7 @@ Can be one of the following symbols
   :options '(whole expr line file)
   :type 'symbol)
 
-(defvar magma-temp-file-name "_temp_.m")
+(defvar magma-temp-file-name "/tmp/magma_temp.m")
 
 (defcustom magma-interactive-use-load nil
   "See `magma-eval-buffer'"
@@ -471,7 +471,7 @@ delay on large buffers.
                   (point))))
     (magma-eval-region regbeg regend i)
     (goto-char regend)
-    (or (eobp) (next-line))))
+    (or (eobp) (forward-char 1))))
   
 
 (defun magma-eval (&optional i)
@@ -499,7 +499,7 @@ delay on large buffers.
 (defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
   (interactive "P")
-  (magma-end-of-statement-1)
+  (magma-end-of-expr)
   (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
@@ -521,7 +521,12 @@ Otherwise, send the whole buffer to `magma-eval-region'.
         (when (buffer-modified-p)
           (magma-confirm-save-buffer))
         (magma-send-or-broadcast
-         (format "load \"%s\";" (file-name-nondirectory (buffer-file-name))) i))
+         (format "load \"%s\";"
+                 ; (f-relative (buffer-file-name) magma-working-directory)
+                 ;; ^ This would work if magma-working-directory was
+                 ;;   correctly kept up to date. Instead, as a fallback, we use:
+                 (f-long (buffer-file-name))
+                 ) i))
   (magma-eval-region (point-min) (point-max) i)))
 
 (defun magma-confirm-save-buffer ()
