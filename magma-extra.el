@@ -152,10 +152,9 @@ if in an intrinsic description or nil if somewhere else."
     (t (magma-newline-and-indent))))
 
 
-(defcustom magma-use-electric-newline nil
-  "If non nil, C-j and C-c C-j have special behavior in strings and comments"
-  :group 'magma
-  :type 'boolean)
+(defun magma-set-electric-newline (symbol value)
+  (set-default symbol value)
+  (magma--apply-electric-newline-setting))
 
 (defun magma--apply-electric-newline-setting ()
   (if magma-use-electric-newline
@@ -177,6 +176,13 @@ if in an intrinsic description or nil if somewhere else."
   (setq magma-use-electric-newline (not magma-use-electric-newline))
   (magma--apply-electric-newline-setting))
 
+(defcustom magma-use-electric-newline nil
+  "If non nil, C-j and C-c C-j have special behavior in strings and comments"
+  :group 'magma
+  :set 'magma-set-electric-newline
+  :type 'boolean)
+
+
 
 ;; Snippets
 ;;;;;;;;;;;
@@ -189,8 +195,17 @@ if in an intrinsic description or nil if somewhere else."
                (looking-at "end"))))))
 
 (eval-after-load "yasnippet"
-  '(push (f-join magma-path "snippets") yas-snippet-dirs))
-;; What will happen if yasnippet is loaded before magma?
+  '(let ((magma-snippets-dir (f-join magma-path "snippets")))
+     (setq yas-snippet-dirs 
+           (cons (car yas-snippet-dirs)
+                 (cons magma-snippets-dir
+                       (cddr yas-snippet-dirs))))))
+;;;;;
+;; The above evaluation is a bit complicated, because yasnippet
+;; requires the first item in `yas-snippet-dir' to be for user-defined
+;; snippets. So we insert the magma snippets directory in second
+;; position in that list.
+;;;;;
 
 
 ;; Smartparens

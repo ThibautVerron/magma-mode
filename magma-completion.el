@@ -52,7 +52,6 @@
   (setq magma-completion-table
          (let ((prev-table magma-completion-table))
            (with-temp-buffer
-             ;; FIXME : integrate that into magma-scan
              (let ((magma-mode-hook nil))
                (magma-mode))
              (setq magma-completion-table prev-table)

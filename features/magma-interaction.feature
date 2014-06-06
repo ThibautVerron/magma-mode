@@ -365,11 +365,13 @@ Feature: Interaction with a magma process
     Then I insert "quit;"
     And I press "RET"
 
-
+    
+  @wait-between-inputs
   Scenario: Evaluation of a region as a whole
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I set magma-interactive-method to 'whole
+    And I set magma-interactive-wait-between-inputs to t
     And I insert:
     """
     whole_test: 1+1;
@@ -387,11 +389,12 @@ Feature: Interaction with a magma process
     whole_test: 2+2;
     """
     
-
+  @wait-between-inputs
   Scenario: Evaluation of a region line by line
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I set magma-interactive-method to 'line
+    And I set magma-interactive-wait-between-inputs to t
     And I insert:
     """
     line_test: 1+1;
@@ -407,10 +410,12 @@ Feature: Interaction with a magma process
     Input: line_test: 2+2;
     """
     
+  @wait-between-inputs
   Scenario: Evaluation of a region expression by expression
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I set magma-interactive-method to 'expr
+    And I set magma-interactive-wait-between-inputs to t
     And I insert:
     """
     for expr_test in foo do
