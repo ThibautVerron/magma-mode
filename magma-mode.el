@@ -64,6 +64,7 @@
     (define-key map (kbd "C-c C-w") 'magma-show-word)
     (define-key map [remap forward-paragraph] 'magma-end-of-expr)
     (define-key map [remap backward-paragraph] 'magma-previous-expr)
+    (define-key map (kbd "C-c ]") 'magma-close-block) ;; Similar to AUCTeX
     map)
   "Keymap for magma-mode"
   )

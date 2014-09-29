@@ -85,7 +85,8 @@
   "*Operators used by magma")
 
 (defconst magma-proc-keywords
-  '("assert" "assert2" "assert3" "break" "clear" "continue" "declare" "delete" "error" "eval" "exit"
+  '("assert" "assert2" "assert3" "break" "clear" "continue" "declare" "delete"
+    "error" "error if" "eval" "exit"
     "forward" "fprintf" "freeze" "iload" "import" "load" "local" "print"
     "printf" "quit" "random" "read" "readi" "require" "requirege"
     "requirerange" "restore" "return" "save" "time" "vprint" "vprintf" "vtime")

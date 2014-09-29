@@ -211,7 +211,12 @@
 
 
 (defvar magma-smie-special1-regexp
-  (regexp-opt '("print" "printf" "load" "save" "restore") 'words)
+  (regexp-opt
+   '("assert" "assert2" "assert3" "break" "clear" "continue" "declare" "delete"
+     "error" "error if" "eval" "exit" "forward" "fprintf" "freeze" "iload"
+     "import" "load" "local" "print" "printf" "quit" "random" "read" "readi"
+     "require" "requirege" "requirerange" "restore" "return" "save")
+   'words)
   "Regexp matching special functions requiring no parentheses and no colon")
 
 (defvar magma-smie-special2-regexp
@@ -382,15 +387,16 @@
      ((looking-back "else")
       (goto-char (match-beginning 0))
       (magma-identify-else))
-     ((looking-back magma-smie-tokens-regexp bolp)
-      (goto-char (match-beginning 0))
-      (match-string-no-properties 0))
      ((looking-back magma-smie-special1-regexp bolp)
       (goto-char (match-beginning 0))
       "@special1")
+     ;; Check for @special1 before tokens, because of "error if" and "if"
      ((looking-back magma-smie-special2-regexp bolp)
       (goto-char (match-beginning 0))
       "@special2")
+     ((looking-back magma-smie-tokens-regexp bolp)
+      (goto-char (match-beginning 0))
+      (match-string-no-properties 0))
      ;; ((looking-back "then")
      ;;  (goto-char (match-beginning 0))
      ;;  (magma-identify-then))
@@ -549,6 +555,19 @@
   (or (looking-at magma-defun-regexp)
       (magma-beginning-of-defun))
   (magma-end-of-expr))
+
+
+(defun magma-close-block ()
+  "Close the innermost open block at point
+
+This function is experimental and cannot reliably be used."
+  (interactive)
+  (smie-close-block)
+  (insert ";"))
+
+;;;;;; Auto-fill
+
+;; WIP
 
 
 (provide 'magma-smie)
