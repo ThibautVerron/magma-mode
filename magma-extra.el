@@ -1,14 +1,14 @@
-;;; magma-extra.el --- 
+;;; magma-extra.el ---
 
 ;; Copyright (C) 2014  Thibaut VERRON
 
 ;; Author: Thibaut VERRON <verron@ilithye.calsci.lip6.fr>
 ;; Keywords: 
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -183,31 +183,6 @@ if in an intrinsic description or nil if somewhere else."
   :type 'boolean)
 
 
-
-;; Snippets
-;;;;;;;;;;;
-
-(defun magma-should-expand-snippet ()
-  (and
-   (looking-at "$")
-   (save-excursion
-     (not (and (backward-word 2)
-               (looking-at "end"))))))
-
-(eval-after-load "yasnippet"
-  '(let ((magma-snippets-dir (f-join magma-path "snippets")))
-     (setq yas-snippet-dirs 
-           (cons (car yas-snippet-dirs)
-                 (cons magma-snippets-dir
-                       (cddr yas-snippet-dirs))))))
-;;;;;
-;; The above evaluation is a bit complicated, because yasnippet
-;; requires the first item in `yas-snippet-dir' to be for user-defined
-;; snippets. So we insert the magma snippets directory in second
-;; position in that list.
-;;;;;
-
-
 ;; Smartparens
 ;;;;;;;;;;;;;;
 
@@ -249,7 +224,7 @@ if in an intrinsic description or nil if somewhere else."
   (save-excursion
     (goto-char (point-min))
     (when (looking-at "/[*/] -\\*-") (forward-line 1)) ;; prop-line
-    (when (looking-at "// Created")
+    (when (looking-at "// Created:")
       (forward-line 1)
       (when (looking-at "// Last modified:")
         (delete-region (point) (progn (forward-line 1) (point))))

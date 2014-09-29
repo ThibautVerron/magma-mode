@@ -23,8 +23,8 @@ This is beta software, all features are not yet fully implemented.
 For sensible usage, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] has been more thoroughly
 tested over the years.
 
-Please report any bug you may encounter through the issue
-tracker. Suggestions are welcome as well.
+Please report any bug you may encounter, or suggestions you have,
+through the issue tracker. 
 
 ** Installation instructions
 
@@ -52,7 +52,7 @@ tracker. Suggestions are welcome as well.
      ;; If you want to load the mode automatically with some file extensions
      (setq auto-mode-alist
      (append '(("\\.mgm$\\|\\.m$" . magma-mode))
-     auto-mode-alist))
+             auto-mode-alist))
           
    #+end_src
 
@@ -208,8 +208,8 @@ from less minor bugs.
 Another point to note is that =term-mode= sends input to a terminal,
 and =magma= is run in that terminal. Getting the whole thing to run
 under different systems (windows...) can prove tricky. On the other
-hand, =comint= starts the magma process directly from emacs, and so
-does not have this kind of requirements.
+hand, =comint= starts the magma process directly from emacs, and does
+not depend on anything apart from emacs and =magma=.
 
 
 *** Methods for sending input to the magma buffer
@@ -258,11 +258,21 @@ The file =magma-extra.el= provides support for various minor modes:
  - =smart-parens= : partial support only, it is mainly a function
    trying to ensure that the second =>= in =hom<A -> B >= is matched
    to the opening =<=. 
- - =yasnippet= : small collection of snippets: at the moment,
-   contains snippets for =case=, =for=, =if=, =try=, =while=, =function=,
-   =procedure=, and =load=.
 
 To use these features, simply turn the corresponding modes on.
+
+*** Yasnippet snippets
+
+=magma-mode= comes with a small collection of snippets. At the moment, we
+contains snippets for =case=, =for=, =if=, =try=, =while=, =function=,
+=procedure=, and =load=.
+
+To use this, add the following to your init file:
+
+#+begin_src emacs-lisp
+    (require 'magma-snippets)
+#+end_src
+
 
 *** Extra "electric" editting features
 
