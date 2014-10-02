@@ -48,8 +48,11 @@
 ;; (if, while, for, etc.) and load (with file name completion). More
 ;; will be added in the future.
 ;;
-;; The complete documentation is available in README.org or on
+;; The complete documentation is available on
 ;; https://github.com/ThibautVerron/magma-mode
+;;
+;; Bug reports and suggestions are welcome, please use the github
+;; issue tracker.
 
 ;;; Code:
 
