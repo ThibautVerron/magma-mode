@@ -24,6 +24,7 @@
  (setq magma-interactive-method 'whole)
  
  (setq magma-interactive-use-comint t)
+ ;;(message "Test1")
  (setq magma-prompt-read-only nil)
  (setq magma-use-electric-newline t)
  (setq-default indent-tabs-mode nil)
@@ -33,7 +34,7 @@
  (setq magma-completion-table-file (f-join magma-mode-root-path
                                            "data/dummymagma_symbols.txt"))
  (require 'magma-mode)
- (setq magma-delay "0.001")
+ (setq magma-delay "0.5")
 )
 
 (Before

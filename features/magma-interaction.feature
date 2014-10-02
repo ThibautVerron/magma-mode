@@ -12,6 +12,7 @@ Feature: Interaction with a magma process
     And the buffer is empty
     And I turn on magma-mode 
     And I press "C-c C-a"
+    And I wait for an instant
     And I switch to buffer "*magma*"
     And I wait for an instant
     And I press "RET"
@@ -376,8 +377,10 @@ Feature: Interaction with a magma process
     """
     whole_test: 1+1;
     whole_test: 2+2;
+    
     """
     And I press "C-c C-b"
+    And I wait for an instant
     And I switch to buffer "*magma*"
     And I press "RET"
     And I wait for an instant
@@ -401,7 +404,9 @@ Feature: Interaction with a magma process
     line_test: 2+2;
     """
     And I press "C-c C-b"
+    And I wait for an instant
     And I switch to buffer "*magma*"
+    And I wait for an instant
     Then I should see:
     """
     > line_test: 1+1;
@@ -424,8 +429,9 @@ Feature: Interaction with a magma process
     expr_test: 2+2;
     """
     And I press "C-c C-b"
+    And I wait for an instant
     And I switch to buffer "*magma*"
-    And I wait for 0.5 seconds
+    And I wait for an instant
     Then I should see:
     """
     > for expr_test in foo do
