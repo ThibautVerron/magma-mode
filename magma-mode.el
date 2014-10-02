@@ -26,7 +26,8 @@
 ;;
 ;;     (require 'magma-mode)
 ;;
-;; Additionally, if you want to load the mode automatically with some file extensions, you can add the following to your init file:
+;; Additionally, if you want to load the mode automatically with some
+;; file extensions, you can add the following to your init file:
 ;;
 ;;     (setq auto-mode-alist
 ;;     (append '(("\\.mgm$\\|\\.m$" . magma-mode))
