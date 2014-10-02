@@ -1,8 +1,10 @@
-;;; magma-mode.el --- Magma mode for GNU Emacs. ;
+;;; magma-mode.el --- Magma mode for Emacs
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;;               2013-2014 Thibaut Verron
 ;; Licensed under the GNU General Public License.
+
+;; Package-requires: ((cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -16,17 +18,47 @@
 
 ;;; Commentary:
 
-;; Documentation available in README.org or on
+;; Basic setup:
+;;
+;; Ensure that the installation directory is in your `load-path' (it
+;; is done for you if installing from melpa), and add the following
+;; line to your emacs init file:
+;;
+;;     (require 'magma-mode)
+;;
+;; Additionally, if you want to load the mode automatically with some file extensions, you can add the following to your init file:
+;;
+;;     (setq auto-mode-alist
+;;     (append '(("\\.mgm$\\|\\.m$" . magma-mode))
+;;             auto-mode-alist))
+;;
+;; Some features are available in `magma-extra.el'. They are disabled
+;; because they are more intrusive than the others. Feel free to
+;; browse the customize interface to enable some of them!
+;;
+;; Some support for `hs-minor-mode', `imenu' and `smart-parens' is
+;; also provided.
+;;
+;; If you are using `yasnippet', you can enable some snippets for
+;; `magma-mode' by adding the following to your init file.
+;;
+;;     (require 'magma-snippet)
+;;
+;; At the moment, these snippets include basic syntactic constructs
+;; (if, while, for, etc.) and load (with file name completion). More
+;; will be added in the future.
+;;
+;; The complete documentation is available in README.org or on
 ;; https://github.com/ThibautVerron/magma-mode
 
 ;;; Code:
-
-(defgroup magma nil "Major mode for editting magma-code")
 
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
 (require 'thingatpt)
+
+(defgroup magma nil "Major mode for editting magma-code")
 
 (defconst magma-path (f-dirname (f-this-file)) "magma-mode install folder")
 ;;(add-to-list 'load-path magma-path)
@@ -96,6 +128,7 @@
 (require 'magma-extra)
 (require 'magma-interactive)
 
+;;;###autoload
 (define-derived-mode magma-mode
   prog-mode
   "Magma"
@@ -116,8 +149,8 @@
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(magma-font-lock-keywords nil nil ((?_ . "w"))))
 
-  (make-local-variable 'indent-line-function)
-  (setq indent-line-function 'smie-indent-line)
+  (set (make-local-variable 'indent-line-function)
+       'smie-indent-line)
 
   (magma--apply-electric-newline-setting)
   

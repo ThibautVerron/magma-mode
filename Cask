@@ -15,6 +15,7 @@
  (depends-on "wrap-region")
  )
 
-(depends-on "f")
+(depends-on "cl-lib")
 (depends-on "dash")
+(depends-on "f")
 
