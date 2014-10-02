@@ -243,7 +243,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
     (unless (s-equals? command "")
       (run-hook-with-args 'comint-input-filter-functions command)
       (with-current-buffer buffer
-        (end-of-buffer)
+        (goto-char (point-max))
         ;; (goto-char (process-mark (get-buffer-process buffer)))
         (insert command)
         ;; (setq magma--output-finished t)
@@ -257,10 +257,8 @@ After changing this variable, restarting emacs is required (or reloading the mag
                          (magma-make-buffer-name "help")
                          magma-interactive-program
                          magma-interactive-arguments)
-  (save-excursion
-    (set-buffer (magma-get-buffer "help"))
-    (magma-interactive-mode)
-    )
+  (with-current-buffer (magma-get-buffer "help")
+    (magma-interactive-mode))
   (comint-send-string
    (magma-get-buffer "help")
    (format "?%s\n" topic))
@@ -285,18 +283,14 @@ After changing this variable, restarting emacs is required (or reloading the mag
   "Interrupt the magma process in buffer i"
   ;;(interactive "P")
   (if (term-check-proc (magma-get-buffer i))
-      (save-excursion
-        (set-buffer (magma-get-buffer i))
+      (with-current-buffer (magma-get-buffer i)
         (term-send-string (magma-get-buffer i) "\C-c"))))
 
 (defun magma-term-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
   (if (term-check-proc (magma-get-buffer i))
-      (save-excursion
-        ;; (setq magma-active-buffers-list
-        ;;       (delq (or i 0) magma-active-buffers-list))
-        (set-buffer (magma-get-buffer i))
+      (with-current-buffer (magma-get-buffer i)
         (term-kill-subjob))))
 
 
@@ -306,7 +300,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
     (let ((command (magma-preinput-filter expr)))
       (unless (s-equals? command "")
         (magma-switch-to-interactive-buffer)
-        (end-of-buffer)
+        (goto-char (point-max))
         (insert command)
         (term-send-input)))))
 
@@ -315,8 +309,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "sMagma help topic: ")
   (make-term (magma-get-buffer-name "help")
              magma-interactive-program)
-  (save-excursion
-    (set-buffer (magma-get-buffer "help"))
+  (with-current-buffer (magma-get-buffer "help")
     (magma-interactive-mode)
     (term-line-mode)
     (term-show-maximum-output))
@@ -449,7 +442,7 @@ delay on large buffers.
     (let ((magma-interactive-method 'whole))
       (magma-eval-region beg end i))
     (end-of-line)
-    (or (eobp) (next-line))))
+    (or (eobp) (forward-line 1))))
 
 (defun magma-eval-paragraph ( &optional i)
   "Evaluate current paragraph (space separated block)"
@@ -737,3 +730,4 @@ The behavior of this function is controlled by
 
 (provide 'magma-interactive)
 
+;;; magma-interactive.el ends here

@@ -94,3 +94,5 @@
   (completion-at-point))
 
 (provide 'magma-completion)
+
+;;; magma-completion.el ends here

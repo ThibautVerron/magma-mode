@@ -23,7 +23,7 @@
 
 (defgroup magma nil "Major mode for editting magma-code")
 
-(require 'cl)
+(require 'cl-lib)
 (require 'dash)
 (require 'f)
 (require 'thingatpt)

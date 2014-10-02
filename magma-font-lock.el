@@ -20,8 +20,6 @@
 
 ;;; Code:
 
-(provide 'magma-font-lock)
-
 ;; Useful regexps
 (defconst magma-space-comments-regexp
   (concat
@@ -186,3 +184,7 @@
     '(2 font-lock-type-face))
    )
   "*Default expressions to highlight in Magma Interactive mode.")
+
+(provide 'magma-font-lock)
+
+;;; magma-font-lock.el ends here
