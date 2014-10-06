@@ -357,7 +357,7 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (let ((buffer (magma-get-buffer i)))
     (with-current-buffer buffer
       (goto-char (point-max))
-      (forward-line 0) ;; beginning-of-line won't go across the prompt
+      (forward-line 0) 
       (while (not (looking-at "^[[:alnum:]|]*> "))
         (accept-process-output nil 0.001)
         (redisplay)
@@ -372,7 +372,11 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-eval-region (beg end &optional i)
   "Evaluate the current region.
 
-The behavior of this function depends on the value of
+If the optional argument onlyone is set to `t',
+`magma-eval-region' simply sends the current region to the magma
+process. 
+
+Otherwise, the behavior of this function depends on the value of
 `magma-interactive-method':
 - if `whole', send the whole region to comint. Emacs may decide
   that this block of text is too long for input, and cut it and
@@ -390,8 +394,7 @@ before sending the next part. The result is that the buffer is
 more nicely structured, with each output located right after the
 corresponding input. However, this will cause comint to wait for
 a fraction of a second after each input, causing a subsequent
-delay on large buffers.
-"
+delay on large buffers."
   (interactive "rP")
   (let* ((ignore (lambda (i) nil))
          (wait

@@ -1,20 +1,20 @@
 # -*- eval: (auto-fill-mode 1); eval: (toggle-truncate-lines 0) -*-
-#LINK: magma      http://magma.maths.usyd.edu.au/magma/
-#LINK: magma-mode http://www-polsys.lip6.fr/~bettale/magma-mode/
-#LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
+#+LINK: magma      http://magma.maths.usyd.edu.au/magma/
+#+LINK: magma-mode http://www-polsys.lip6.fr/~bettale/magma-mode/
+#+LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
 
 * Magma-mode
 ** Basics
 
 This is a mode for editting input files for the computer algebra
-software [[http://magma.maths.usyd.edu.au/magma/][Magma]] in emacs.
+software [[magma][Magma]] in emacs.
 
-It is based on the [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] written by Luk Bettale.  The font-lock
+It is based on the [[magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
 The new features of this mode are principally a new indentation
-engine, based on [[http://www.gnu.org/software/emacs/manual/html_node/elisp/SMIE.html][SMIE]] and a new way of interacting with a magma
+engine, based on [[emacs-lisp/SMIE.html][SMIE]] and a new way of interacting with a magma
 process, through comint. 
 
 ** Information
