@@ -148,10 +148,12 @@ Can be one of the following symbols
 
 ;; (defvar-local magma--output-finished t)
 
-(defcustom magma-interactive-use-comint nil
-  "If non-nil, communication with the magma process is done using comint. Otherwise, it uses term-mode.
+(defcustom magma-interactive-use-comint t
+  "If non-nil, communication with the magma process is done using comint.
 
-After changing this variable, restarting emacs is required (or reloading the magma-mode load file)."
+Otherwise, it uses term-mode.  After changing this variable,
+restarting emacs is required (or reloading the magma-mode load
+file)."
   :group 'magma
   :type 'boolean)
 
@@ -270,12 +272,23 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-term-run (&optional i)
   "Run an inferior instance of magma inside emacs, using term."
-  (let ((new-interactive-buffer
-         (make-term (magma-get-buffer-name i) magma-interactive-program)))
+  (let* ((magma-buffer-name (magma-get-buffer-name i))
+         (reusing-buff
+          (get-buffer-process (concat "*" magma-buffer-name "*")))
+         (new-interactive-buffer
+          (make-term magma-buffer-name magma-interactive-program)))
     (save-excursion
       (if (not (memq (or i 0) magma-active-buffers-list))
           (push (or i 0) magma-active-buffers-list))
       (set-buffer new-interactive-buffer)
+      (unless reusing-buff
+        (insert
+         (concat "// WARNING: term mode for the magma interactive buffer is\n"
+                 "// deprecated and may be removed from future releases.\n"
+                 "// You can activate comint mode (recommended) by setting\n "
+                 "// the variable `magma-interactive-use-comint' to `t'.\n"
+                 "// If you encounter problems with comint but not with term,\n"
+                 "// please report them by mail or through the issue tracker.\n")))
       (magma-interactive-mode)
       (term-char-mode))))
     
@@ -351,6 +364,10 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (interactive "P")
   (magma-run i)
   (pop-to-buffer (magma-get-buffer i))
+  )
+
+(defun magma--output-filter (string)
+  
   )
 
 (defun magma-wait-for-output (&optional i)
