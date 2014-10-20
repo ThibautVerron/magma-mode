@@ -155,12 +155,15 @@ After changing this variable, restarting emacs is required (or reloading the mag
   :group 'magma
   :type 'boolean)
 
-(defun magma-get-buffer-name (&optional i)
-  (if (not i) (magma-get-buffer-name magma-working-buffer-number)
-    (if (integerp i)
-        (if (= i 0) magma-interactive-buffer-name
-          (concat magma-interactive-buffer-name "-" (int-to-string i)))
-      (concat magma-interactive-buffer-name "-" i))))
+(defun magma-get-buffer-name (&optional i app)
+  (let ((name
+         (if app (concat magma-interactive-buffer-name "-" app)
+           magma-interactive-buffer-name)))
+    (if (not i) (magma-get-buffer-name magma-working-buffer-number)
+      (if (integerp i)
+          (if (= i 0) name
+            (concat name "-" (int-to-string i)))
+        (concat name "-" i)))))
 
 (defun magma-set-working-buffer (i)
   "set the i-th buffer as the working buffer"
@@ -170,9 +173,13 @@ After changing this variable, restarting emacs is required (or reloading the mag
   (message (concat "Working buffer set to " (int-to-string i)))
   (magma-get-buffer i))
 
-(defun magma-make-buffer-name (&optional i)
-  "Return the name of the i-th magma buffer"
-  (concat "*" (magma-get-buffer-name i) "*"))
+(defun magma-make-buffer-name (&optional i app)
+  "Return the name of the i-th magma buffer.
+
+If `app' is not nil, it is a string which will be added before
+the buffer number."
+  
+  (concat "*" (magma-get-buffer-name i app) "*"))
 
 (defun magma-get-buffer (&optional i)
   "return the i-th magma buffer"
@@ -183,31 +190,26 @@ After changing this variable, restarting emacs is required (or reloading the mag
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
   ;;(interactive)
-  (let* ((default-directory
-           ;;(if
-           ;; (or
-           ;;  (not (file-remote-p default-directory)) 
-           ;;  (tramp-sh-handle-executable-find magma-interactive-program))
-           ;;   default-directory
-            magma-default-directory
-            ;;   )
-         )
+  (let* ((default-directory magma-default-directory))
          (new-interactive-buffer
           (progn
-;;            (set-buffer (magma-make-buffer-name i))
-            ;; ^ Force default-directory to be taken into account if needed
             (make-comint-in-buffer (magma-get-buffer-name i)
                                    (magma-make-buffer-name i)
                                    magma-interactive-program
                                    magma-interactive-arguments
-                                   )
-            )))
+                                   ))))
     (if (not (memq (or i 0) magma-active-buffers-list))
         (push (or i 0) magma-active-buffers-list))
     (set-buffer new-interactive-buffer)
-    ;;(magma-send "SetIgnorePrompt(true);")
+    (magma--comint-setup i)
     (magma-interactive-mode)
   ))
+
+(defun magma--comint-setup (&optional i)
+  "Create the structures required for asynchronous evaluation"
+  (set (make-local-variable 'magma-pending-input-buffer)
+       (magma-get-buffer-name i "input"))
+  )
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
@@ -672,26 +674,14 @@ The behavior of this function is controlled by
   "Magma-Interactive"
   "Magma interactive mode (using comint)
 \\<magma-comint-interactive-mode-map>"
-  ;;(setq comint-process-echoes t)
-  ;; This doesn't work because magma outputs the prompting "> ", together
-  ;; with the input line.
   (setq comint-use-prompt-regexp nil)
   (setq comint-prompt-read-only magma-prompt-read-only)
   (setq comint-prompt-regexp magma-prompt-regexp)
   (make-local-variable 'comint-highlight-prompt)
   (setq comint-highlight-prompt t)
-  ;; (make-local-variable 'comint-highlight-input)
-  ;; (setq comint-highlight-input t)
   (setq comint-scroll-to-bottom-on-output t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
-  ;; (make-local-variable 'comint-input-sender)
-  ;; (setq comint-input-sender 'magma-comint-input-sender)
-  
   (magma-interactive-common-settings)
-  ;; (setq font-lock-defaults
-  ;;       (list (cons (list "^[[:alnum:]|]*>.*$" 'comint-highlight-input)
-  ;;                   magma-interactive-font-lock-keywords)
-  ;;             nil nil))
   )  
 
 (define-derived-mode magma-term-interactive-mode
