@@ -209,7 +209,9 @@ the buffer number."
   "Create the structures required for asynchronous evaluation"
   (set (make-local-variable 'magma-pending-input-buffer)
        (magma-get-buffer-name i "input"))
-  )
+  (add-hook 'comint-output-filter-functions 'magma-comint-next-input))
+
+
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
@@ -250,6 +252,24 @@ the buffer number."
         (insert command)
         ;; (setq magma--output-finished t)
         (comint-send-input)))))
+
+(defun magma-comint-next-input (string)
+  "Send next input if the buffer is ready for it."
+  (when (save-excursion
+          (forward-line 0)
+          (looking-at "^[[:alnum:]|]*> ")) 
+    (let ((input (magma--next-input-batch))) 
+      (magma-comint-send-string input))))
+
+(defun magma--next-input-batch
+  (with-current-buffer magma-pending-buffer
+    (if (= (point-min) (point-max)) ""
+      ;; Don't duplicate code. magma-interactive-method is applied in
+      ;; magma-eval-region using the corresponding commands, in the
+      ;; pending buffer, input batches are separated by... (à préciser)
+        )))
+
+
 
 
 (defun magma-comint-help-word (topic)
@@ -404,7 +424,7 @@ delay on large buffers.
     (case magma-interactive-method
       ('whole
        (let ((str (buffer-substring-no-properties beg end)))
-         (magma-send-or-broadcast str i)))
+         (magma-sendin-or-broadcast str i)))
       ('expr
        (save-excursion
          (goto-char beg)
