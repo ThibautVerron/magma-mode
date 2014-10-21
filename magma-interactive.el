@@ -42,6 +42,13 @@
 (defvar magma-active-buffers-list '()
   "*List of active magma buffers.")
 
+(defvar-local magma-pending-input '()
+  "List of strings to be sent to the magma process.
+
+Do not modify this variable directly, the consequences could be
+unprevisible. This variable can be useful for use in a
+user-function sending input to a process.")
+
 (defcustom magma-interactive-buffer-name "magma"
   "*Name of the buffer to be used for using magma
   interactively (will be surrounded by `*')"
@@ -189,19 +196,16 @@ the buffer number."
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  ;;(interactive)
   (let* ((default-directory magma-default-directory))
          (new-interactive-buffer
           (progn
             (make-comint-in-buffer (magma-get-buffer-name i)
                                    (magma-make-buffer-name i)
                                    magma-interactive-program
-                                   magma-interactive-arguments
-                                   ))))
+                                   magma-interactive-arguments))))
     (if (not (memq (or i 0) magma-active-buffers-list))
         (push (or i 0) magma-active-buffers-list))
     (set-buffer new-interactive-buffer)
-    (magma--comint-setup i)
     (magma-interactive-mode)
   ))
 
@@ -230,6 +234,7 @@ the buffer number."
   ;;(comint-kill-subjob)
   (or (not (comint-check-proc (current-buffer)))
       (kill-process nil comint-ptyp))
+  (setq magma-pending-input '())
   ;; ^ Same as comint-kill-subjob, without comint extras.
   )
 
