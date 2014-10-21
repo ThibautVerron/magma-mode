@@ -200,7 +200,7 @@ the buffer number."
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  (let* ((default-directory magma-default-directory))
+  (let* ((default-directory magma-default-directory)
          (new-interactive-buffer
           (progn
             (make-comint-in-buffer (magma-get-buffer-name i)
@@ -211,7 +211,7 @@ the buffer number."
         (push (or i 0) magma-active-buffers-list))
     (set-buffer new-interactive-buffer)
     (magma-interactive-mode)
-  )
+  ))
 
 
 
@@ -417,30 +417,21 @@ before sending the next part. The result is that the buffer is
 more nicely structured, with each output located right after the
 corresponding input."
   (interactive "rP")
-  (let* ((ignore (lambda (i) nil))
-         (wait
-          ;; wait only if `magma-interactive-wait-between-inputs' is non nil
-          (if magma-interactive-wait-between-inputs
-              'magma-wait-or-broadcast
-            'ignore)))
-    (case magma-interactive-method
-      ('whole
-       (let ((str (buffer-substring-no-properties beg end)))
-         (magma-sendin-or-broadcast str i)))
-      ('expr
-       (save-excursion
-         (goto-char beg)
-         (let ((magma-interactive-method 'whole))
-           (while (not (magma--at-end end))
-             (magma-eval-next-statement i)
-             (funcall wait i)))))
+  (case magma-interactive-method
+    ('whole
+     (let ((str (buffer-substring-no-properties beg end)))
+       (magma-sendin-or-broadcast str i)))
+    ('expr
+     (save-excursion
+       (goto-char beg)
+       (let ((magma-interactive-method 'whole))
+         (while (not (magma--at-end end))
+           (magma-eval-next-statement i)))))
       ('line
        (save-excursion
          (goto-char beg)
          (while (not (magma--at-end end))
-           ;; (message (format "Point: %s" (point)))
-           (magma-eval-line i)
-           (funcall wait i))))
+           (magma-eval-line i))))
       ('file
        (let ((buf (current-buffer)))
          (with-temp-buffer
@@ -450,7 +441,7 @@ corresponding input."
            (let ((magma-interactive-use-load t)
                  (magma-interactive-auto-save 'always))
              (magma-eval-buffer i))
-           (kill-buffer)))))))
+           (kill-buffer))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"
