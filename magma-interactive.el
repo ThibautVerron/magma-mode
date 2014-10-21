@@ -182,30 +182,18 @@ After changing this variable, restarting emacs is required (or reloading the mag
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  ;;(interactive)
   (let* ((default-directory
-           ;;(if
-           ;; (or
-           ;;  (not (file-remote-p default-directory)) 
-           ;;  (tramp-sh-handle-executable-find magma-interactive-program))
-           ;;   default-directory
             magma-default-directory
-            ;;   )
          )
          (new-interactive-buffer
           (progn
-;;            (set-buffer (magma-make-buffer-name i))
-            ;; ^ Force default-directory to be taken into account if needed
             (make-comint-in-buffer (magma-get-buffer-name i)
                                    (magma-make-buffer-name i)
                                    magma-interactive-program
-                                   magma-interactive-arguments
-                                   )
-            )))
+                                   magma-interactive-arguments))))
     (if (not (memq (or i 0) magma-active-buffers-list))
         (push (or i 0) magma-active-buffers-list))
     (set-buffer new-interactive-buffer)
-    ;;(magma-send "SetIgnorePrompt(true);")
     (magma-interactive-mode)
   ))
 
