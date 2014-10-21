@@ -51,6 +51,9 @@ Do not modify this variable directly, the consequences could be
 unprevisible. This variable can be useful for use in a
 user-function sending input to a process.")
 
+(defvar-local magma-ready t
+  "Whether there is still input or output pending in that buffer.")
+
 (defcustom magma-interactive-buffer-name "magma"
   "*Name of the buffer to be used for using magma
   interactively (will be surrounded by `*')"
@@ -210,10 +213,10 @@ the buffer number."
     (if (not (memq (or i 0) magma-active-buffers-list))
         (push (or i 0) magma-active-buffers-list))
     (set-buffer new-interactive-buffer)
+    (setq magma-pending-input (magma-q-create))
+    (setq magma-ready t)
     (magma-interactive-mode)
   ))
-
-
 
 
 (defun magma-comint-int (&optional i)
@@ -229,13 +232,12 @@ the buffer number."
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
-  (set-buffer (magma-get-buffer i))
-  ;;(comint-kill-subjob)
-  (or (not (comint-check-proc (current-buffer)))
-      (kill-process nil comint-ptyp))
-  ;; ^ Same as comint-kill-subjob, without comint extras.
-  (setq magma-pending-input (magma-q-create))
-  )
+  (with-current-buffer (magma-get-buffer i)
+    ;;(comint-kill-subjob)
+    (or (not (comint-check-proc (current-buffer)))
+        (kill-process nil comint-ptyp))
+    ;; ^ Same as comint-kill-subjob, without comint extras.
+    ))
 
 (defun magma-comint-send-string (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
@@ -252,18 +254,22 @@ so that it will be evaluated whenever the magma process is ready
 for it."
   (let ((buffer (magma-get-buffer i)))
     (with-current-buffer buffer
-      (magma-q-push magma-pending-input expr))))
+      (if magma-ready
+          (progn
+            (setq magma-ready nil)
+            (magma-comint-evaluate-here expr))
+        (magma-q-push magma-pending-input expr)))))
   
 (defun magma-comint-next-input (string)
   "Send next input if the buffer is ready for it."
-  (when (and
-         (or
-          (not magma-interactive-wait-between-inputs)
-          (save-excursion
+  (when (or
+         (not magma-interactive-wait-between-inputs)
+         (save-excursion
            (forward-line 0)
            (looking-at "^[[:alnum:]|]*> ")))
-         (not (magma-q-is-empty? magma-pending-input)))
-    (magma-comint-evaluate-here (magma-q-pop magma-pending-input))))
+    (if (magma-q-is-empty? magma-pending-input)
+        (setq magma-ready t)
+      (magma-comint-evaluate-here (magma-q-pop magma-pending-input)))))
          
 (defun magma-comint-evaluate-here (expr)
   "Evaluate the expression expr in the current buffer.
@@ -420,7 +426,7 @@ corresponding input."
   (case magma-interactive-method
     ('whole
      (let ((str (buffer-substring-no-properties beg end)))
-       (magma-sendin-or-broadcast str i)))
+       (magma-send-or-broadcast str i)))
     ('expr
      (save-excursion
        (goto-char beg)
@@ -694,6 +700,7 @@ The behavior of this function is controlled by
   (setq comint-highlight-prompt t)
   (setq comint-scroll-to-bottom-on-output t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
+  (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
   (magma-interactive-common-settings)
   )  
 
