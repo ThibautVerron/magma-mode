@@ -134,7 +134,9 @@ Can be one of the following symbols
 With the current implementation, this should not induce any
 overhead, so this variable is set to `t' by default. If you need
 to set it to `nil', please file an issue explaining why, it is
-likely to be a bug or a design flaw."
+likely to be a bug or a design flaw.
+
+Setting this variable has no effect in term mode."
   :group 'magma
   :type 'boolean)
 
@@ -386,17 +388,6 @@ magma evaluation buffer."
   (pop-to-buffer (magma-get-buffer i))
   )
 
-(defun magma-wait-for-output (&optional i)
-  (let ((buffer (magma-get-buffer i)))
-    (with-current-buffer buffer
-      (goto-char (point-max))
-      (forward-line 0) ;; beginning-of-line won't go across the prompt
-      (while (not (looking-at "^[[:alnum:]|]*> "))
-        (accept-process-output nil 0.001)
-        (redisplay)
-        (goto-char (point-max))
-        (forward-line 0))
-      (end-of-line))))
 
 (defun magma--at-end (end)
   (or (looking-at "\\([[:blank:]]\\|\n\\)*\\'")
@@ -618,8 +609,6 @@ The behavior of this function is controlled by
 
 (defun magma-send-or-broadcast (expr i)
   (magma-broadcast-if-needed (apply-partially 'magma-send expr) i))
-(defun magma-wait-or-broadcast (i)
-  (magma-broadcast-if-needed 'magma-wait-for-output i))
 (defun magma-kill-or-broadcast (i)
   (magma-broadcast-if-needed 'magma--kill-cmd i))
 (defun magma-int-or-broadcast (i)
