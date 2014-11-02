@@ -514,6 +514,7 @@
   (interactive)
   (magma-beginning-of-expr)
   (smie-forward-sexp ";")
+  (forward-comment (point-max))
   (when (looking-at ";") (forward-char 1)))
 ;; We should always be looking at a ";" there
 

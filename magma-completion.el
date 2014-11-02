@@ -56,7 +56,7 @@
                (magma-mode))
              (setq magma-completion-table prev-table)
              (insert str)
-             (magma-scan)
+             (magma-scan t)
              magma-completion-table))))
 
 

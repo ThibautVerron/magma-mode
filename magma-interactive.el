@@ -437,21 +437,21 @@ corresponding input."
        (let ((magma-interactive-method 'whole))
          (while (not (magma--at-end end))
            (magma-eval-next-statement i)))))
-      ('line
-       (save-excursion
-         (goto-char beg)
-         (while (not (magma--at-end end))
-           (magma-eval-line i))))
-      ('file
-       (let ((buf (current-buffer)))
-         (with-temp-buffer
-           (find-file-literally magma-temp-file-name)
-           (erase-buffer)
-           (insert-buffer-substring-no-properties buf beg end)
-           (let ((magma-interactive-use-load t)
-                 (magma-interactive-auto-save 'always))
-             (magma-eval-buffer i))
-           (kill-buffer))))))
+    ('line
+     (save-excursion
+       (goto-char beg)
+       (while (not (magma--at-end end))
+         (magma-eval-line i))))
+    ('file
+     (let ((buf (current-buffer)))
+       (with-temp-buffer
+         (find-file-literally magma-temp-file-name)
+         (erase-buffer)
+         (insert-buffer-substring-no-properties buf beg end)
+         (let ((magma-interactive-use-load t)
+               (magma-interactive-auto-save 'always))
+           (magma-eval-buffer i))
+         (kill-buffer))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"

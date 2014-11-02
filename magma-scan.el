@@ -106,15 +106,17 @@
              (setq moreLines (= 0 (forward-line 1))))
              defs)))
     (let ((defsline
-            (concat "(setq magma-completion-table (-union '("
+            (concat "(setq magma-completion-table "
+                    "(-union magma-completion-table '("
                     (-reduce-r-from
                      (apply-partially 'format "\"%s\" %s") "" defs)
-                            ") magma-completion-table))\n")))
+                    ")))\n")))
       (magma-scan-write-to-file defsline outfile ))))
     
 (defun magma-load-or-rescan (file &optional forcerescan)
-  "Load the completion file associated to file, rebuilding it if
-  needed. If FILE is nil, use the filename stored in `magma-scan-anonymous-temp-file', and always rebuild the table."
+  "Load the completion file associated to file, rebuilding it if needed.
+
+If FILE is nil, always rebuild the table."
   (if (or (not file) (f-exists? file))
       (let ((loadfile (magma-scan-make-filename file)))
         (when (or forcerescan
