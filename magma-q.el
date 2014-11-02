@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; 
+;; Basic mutable queue implementation, used for the magma input queue. 
 
 ;;; Code:
 

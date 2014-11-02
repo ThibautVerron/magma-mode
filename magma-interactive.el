@@ -215,12 +215,13 @@ the buffer number."
                                    magma-interactive-program
                                    magma-interactive-arguments))))
     (if (not (memq (or i 0) magma-active-buffers-list))
-        (push (or i 0) magma-active-buffers-list))
-    (set-buffer new-interactive-buffer)
-    (setq magma-pending-input (magma-q-create))
-    (setq magma-ready t)
-    (magma-interactive-mode)
-  ))
+        ; Steps to take if the buffer is new
+        (progn
+          (push (or i 0) magma-active-buffers-list)
+          (set-buffer new-interactive-buffer)
+          (setq magma-pending-input (magma-q-create))
+          (setq magma-ready t)
+          (magma-interactive-mode)))))
 
 
 (defun magma-comint-int (&optional i)
@@ -240,6 +241,8 @@ the buffer number."
     ;;(comint-kill-subjob)
     (or (not (comint-check-proc (current-buffer)))
         (kill-process nil comint-ptyp))
+    (setq magma-ready t)
+    (setq magma-pending-input (magma-q-create))
     ;; ^ Same as comint-kill-subjob, without comint extras.
     ))
 
@@ -253,9 +256,8 @@ the buffer number."
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation.
 
-This function actually pushes the expression to the input queue,
-so that it will be evaluated whenever the magma process is ready
-for it."
+If the magma process is currently processing some previous input,
+pushes `expr' onto the `magma-pending-input' queue."
   (let ((buffer (magma-get-buffer i)))
     (with-current-buffer buffer
       (if magma-ready
@@ -265,7 +267,10 @@ for it."
         (magma-q-push magma-pending-input expr)))))
   
 (defun magma-comint-next-input (string)
-  "Send next input if the buffer is ready for it."
+  "Send next input if the buffer is ready for it.
+
+This function should only be called when the current buffer is a
+magma evaluation buffer."
   (when (or
          (not magma-interactive-wait-between-inputs)
          (save-excursion
@@ -278,7 +283,7 @@ for it."
 (defun magma-comint-evaluate-here (expr)
   "Evaluate the expression expr in the current buffer.
 
-This function should not be called if the current buffer is not a
+This function should only be called when the current buffer is not a
 magma evaluation buffer."
   (let ((command (magma-preinput-filter expr)))
     (unless (s-equals? command "")
