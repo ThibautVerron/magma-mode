@@ -657,7 +657,10 @@ The behavior of this function is controlled by
                    ;; (setq magma--output-finished t)
                    (point))
                (point-max)))))
-      (flush-lines "\\(^[[:alnum:]]*>\\|^[[:blank:]]*$\\|\^H\\)" (point-min) maxp)
+      (flush-lines (concat "\\(^[[:alnum:]]*>"
+                           ;"\\|^[[:blank:]]*$"
+                           "\\|\^H\\)")
+                   (point-min) maxp)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun magma-preinput-filter (input)
