@@ -264,8 +264,8 @@ To use these features, simply turn the corresponding modes on.
 *** Yasnippet snippets
 
 =magma-mode= comes with a small collection of snippets. At the moment, we
-contains snippets for =case=, =for=, =if=, =try=, =while=, =function=,
-=procedure=, and =load=.
+provide snippets for =case=, =for=, =if=, =try=, =while=, =function=,
+=procedure=, and =load= (with filename completion).
 
 To use this, add the following to your init file:
 
@@ -298,7 +298,7 @@ the following keys are also bound:
    This shouldn't change the way your code is evaluated.
 
  - =C-RET= or =C-c C-j= (=magma-special-newline-and-indent=): inserts
-   an "evaluated" newline in the buffer. It is a regular
+   an "stronger" newline in the buffer. It is a regular
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
 
@@ -322,20 +322,5 @@ the following keys are also bound:
       cat "and even a few more words";"
    #+end_example
 
-*** Initial file contents and file headers
 
-We offer support for initial file contents and automatically updated
-headers. To use them, set the variables =magma-initial-file= and
-=magma-file-header= to either =\'default= (remove the backslash) or a function name, which
-then replaces the default function for inserting the default content
-or updating it.
-
-The header inserted by the default functions looks like this:
-
-#+begin_src c
-  // Created: Sun Mar 16 13:31:33 2014
-  // Last modified: Thu Apr 17 11:35:26 2014
-  // Hash: bb0dadd0604bafdaa20282285c2d85ff
-  // load "filename.m";
-#+end_src
 
