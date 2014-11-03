@@ -201,7 +201,9 @@ the buffer number."
 
 (defun magma-get-buffer (&optional i)
   "return the i-th magma buffer"
-  (get-buffer (magma-make-buffer-name i)))
+  (or (get-buffer (magma-make-buffer-name i))
+      (error "No evaluation buffer found.")))
+  
 
 ;; Comint definitions
 
@@ -432,7 +434,7 @@ before sending the next part. The result is that the buffer is
 more nicely structured, with each output located right after the
 corresponding input."
   (interactive "rP")
-  (case magma-interactive-method
+  (cl-case magma-interactive-method
     ('whole
      (let ((str (buffer-substring-no-properties beg end)))
        (magma-send-or-broadcast str i)))
@@ -558,7 +560,7 @@ Otherwise, send the whole buffer to `magma-eval-region'.
 The behavior of this function is controlled by
 `magma-interactive-auto-save'."
   (let ((should-save
-         (case magma-interactive-auto-save
+         (cl-case magma-interactive-auto-save
            ('always t)
            ('never nil)
            ('confirm
