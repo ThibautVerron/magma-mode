@@ -357,7 +357,7 @@
       token))
    (t (buffer-substring-no-properties
        (point)
-       (progn (skip-syntax-forward "w_")
+       (progn (skip-syntax-forward "w_\"")
               (point))))
    ))
 
@@ -397,15 +397,12 @@
      ((looking-back magma-smie-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
-     ;; ((looking-back "then")
-     ;;  (goto-char (match-beginning 0))
-     ;;  (magma-identify-then))
      ((looking-back ":")
       (forward-char -1)
       (magma-identify-colon))
      (t (buffer-substring-no-properties
          (point)
-         (progn (skip-syntax-backward "w_")
+         (progn (skip-syntax-backward "w_\"")
                 (point))))
      )))
 
@@ -429,41 +426,24 @@
        magma-indent-basic))
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
-     ;; (and (magma-smie-backward-token)
-     ;;      (back-to-indentation)
-     ;;      (cons 'column (current-column))))
      (smie-rule-parent magma-indent-basic))
-
-     (`(:list-intro . ":=") t)
-    ;; (`(:list-intro . "then") t)
-    ;; (`(:list-intro . "else") t)
+    (`(:list-intro . ":=") t)
     (`(:after . ,(or `"@special1" `"@special2")) 0)
     (`(:after . "@special:") 0)
-
     (`(:after . "@when:") magma-indent-basic)
     (`(:before . "when") 0)
-
     (`(:before . "then")
      (smie-rule-parent magma-indent-basic))
     (`(:after . "then")
      (smie-rule-parent magma-indent-basic))
-
     (`(:after . "else")
      (smie-rule-parent magma-indent-basic))
 
     ;; The parent of an "else" in "if then else" is the corresponding
     ;; "then", not the "if"
-    ;; (`(:before . "then")
-    ;;  (smie-rule-parent magma-indent-basic))
-    
-    ;; (`(:after . ,(or `"if" `"elif"))
-    ;;  (smie-rule-parent magma-indent-basic))
-    
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
-    ;; (`(:after . "@selectelse")
-    ;;  0)
 
     ;; Indentation for the functions, with one syntax or the other
     (`(:after . "@fun)")
@@ -507,7 +487,6 @@
   (interactive)
   (while (not (magma-looking-back-end-of-expr-p))
     (magma-smie-backward-token)))
-;; FIXME What if the point is in a string or comment?
 
 (defun magma-end-of-expr ()
   "Go to the end of the current expression."
