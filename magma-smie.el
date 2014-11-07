@@ -283,10 +283,12 @@
       (and (looking-at "(")
            (save-excursion
              (or
-              (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))
+              (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+                            (- (point) 10))
               (progn
                 (backward-word)
-                (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))))
+                (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+                              (- (point) 10))))))
     (error nil) ))
 
 (defun magma-looking-at-fun-closeparen ()
@@ -428,6 +430,7 @@
     (`(:after . ":=")
      (smie-rule-parent magma-indent-basic))
     (`(:list-intro . ":=") t)
+    (`(:after . "@paren:") (smie-rule-parent))
     (`(:after . ,(or `"@special1" `"@special2")) 0)
     (`(:after . "@special:") 0)
     (`(:after . "@when:") magma-indent-basic)
@@ -454,8 +457,7 @@
            (back-to-indentation)
            (cons 'column (current-column)))))
     (`(:before . ,(or `"end function" `"end procedure"))
-     (smie-rule-parent))
-  ))
+     (smie-rule-parent))))
 
 (defun magma-indent-line ()
   "Indent a line according to the SMIE settings."

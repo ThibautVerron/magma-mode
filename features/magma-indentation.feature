@@ -603,9 +603,17 @@ Feature: Magma code indentation
                   >;
     """
 
-  Scenario: Indentation of function definitions with :=
+  Scenario: Indentation of function definitions 
     When I insert:
     """
+    for x in l do
+    function toto (a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end function;
     toto := function (a, 
     b : 
     c := 1, 
@@ -613,9 +621,13 @@ Feature: Magma code indentation
     x := a;
     return x;
     end function;
-    for x in l do
-    toto := function (a, 
-    b : 
+    toto := function (a, b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    return x;
+    end function;
+    toto := function (a, b : 
     c := 1, 
     d := 2)
     x := a;
@@ -626,16 +638,28 @@ Feature: Magma code indentation
     And I indent the buffer
     Then I should see:
     """
-    toto := function (a, 
-                      b : 
-                      c := 1, 
-                      d := 2)
-        x := a;
-        return x;
-    end function;
     for x in l do
-        toto := function (a, 
+        function toto (~a, 
+                       b : 
+                       c := 1, 
+                       d := 2)
+            x := a;
+            return x;
+        end function;
+        toto := function (~a, 
                           b : 
+                          c := 1, 
+                          d := 2)
+            x := a;
+            return x;
+        end function;
+        toto := function (~a, b : 
+                          c := 1, 
+                          d := 2)
+            x := a;
+            return x;
+        end function;
+        toto := function (~a, b : 
                           c := 1, 
                           d := 2)
             x := a;
@@ -644,43 +668,59 @@ Feature: Magma code indentation
     end for;
     """
 
-  Scenario: Indentation of procedure definitions with :=
+  Scenario: Indentation of procedure definitions
     When I insert:
     """
-    toto := procedure (a, 
-    b : 
-    c := 1, 
-    d := 2)
-    x := a;
-    return x;
-    end procedure;
     for x in l do
-    toto := procedure (a, 
+    procedure toto (~a, 
     b : 
     c := 1, 
     d := 2)
     x := a;
-    return x;
+    end procedure;
+    toto := procedure (~a, 
+    b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    end procedure;
+    procedure toto (~a, b : 
+    c := 1, 
+    d := 2)
+    x := a;
+    end procedure;
+    toto := procedure (~a, b : 
+    c := 1, 
+    d := 2)
+    x := a;
     end procedure;
     end for;
     """
     And I indent the buffer
     Then I should see:
     """
-    toto := procedure (a, 
-                       b : 
-                       c := 1, 
-                       d := 2)
-        x := a;
-        return x;
-    end procedure;
     for x in l do
+        procedure toto (a, 
+                        b : 
+                        c := 1, 
+                        d := 2)
+            x := a;
+        end procedure;
         toto := procedure (a, 
                            b : 
                            c := 1, 
                            d := 2)
             x := a;
-            return x;
+        end procedure;
+        procedure toto (a, b : 
+                        c := 1, 
+                        d := 2)
+            x := a;
+        end procedure;
+        toto := procedure (a, b : 
+                           c := 1, 
+                           d := 2)
+            x := a;
         end procedure;
     end for;
     """
