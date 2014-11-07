@@ -9,12 +9,13 @@ if [ $1 ]; then
     magmadir=$1
 else
     echo "Usage : \"bin/build_completion_table.sh <path_to_magma.exe>\""
-    echo "No path provided, using which to guess one..."
+    echo "No path provided, looking for the magma executable"
     magmadir=$(dirname $(which magma))
-    echo "Guessed $magmadir"
+    echo "Found magma in $magmadir"
 fi;
 
 magmadoc="$magmadir/doc/html"
+echo "Reading data in $magmadoc"
 indexfile="data/magma_symbols.txt"
 
 tmp=$(mktemp)
@@ -22,14 +23,12 @@ tmp=$(mktemp)
 cat ${magmadoc}/*.htm > $tmp
 
 cat $tmp \
-    | grep "NAME" \
-    | sed -r "s/<[^>]*>//g" \
-    | grep ":" \
-    | sed -r "s/^([[:alnum:]]+)\(.*$/\1/" \
-    | sed -r "s/^([[:alnum:]]+)&lt.*$/\1/" \
-    | grep -v ":" \
-    | sort  | uniq > $indexfile
+    | sed -nr "s/^.*NAME = \"([A-Z][[:alnum:]]*)\".*$/\1/p" \
+    | sort > $indexfile
 
-echo "Finished preparing the index file, output is in $indexfile"
+
+
+    
+echo "Done, output is in $indexfile"
 
 rm -f $tmp
