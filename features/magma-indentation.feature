@@ -639,27 +639,27 @@ Feature: Magma code indentation
     Then I should see:
     """
     for x in l do
-        function toto (~a, 
+        function toto (a, 
                        b : 
                        c := 1, 
                        d := 2)
             x := a;
             return x;
         end function;
-        toto := function (~a, 
+        toto := function (a, 
                           b : 
                           c := 1, 
                           d := 2)
             x := a;
             return x;
         end function;
-        toto := function (~a, b : 
+        toto := function (a, b : 
                           c := 1, 
                           d := 2)
             x := a;
             return x;
         end function;
-        toto := function (~a, b : 
+        toto := function (a, b : 
                           c := 1, 
                           d := 2)
             x := a;
@@ -700,24 +700,24 @@ Feature: Magma code indentation
     Then I should see:
     """
     for x in l do
-        procedure toto (a, 
+        procedure toto (~a, 
                         b : 
                         c := 1, 
                         d := 2)
             x := a;
         end procedure;
-        toto := procedure (a, 
+        toto := procedure (~a, 
                            b : 
                            c := 1, 
                            d := 2)
             x := a;
         end procedure;
-        procedure toto (a, b : 
+        procedure toto (~a, b : 
                         c := 1, 
                         d := 2)
             x := a;
         end procedure;
-        toto := procedure (a, b : 
+        toto := procedure (~a, b : 
                            c := 1, 
                            d := 2)
             x := a;
