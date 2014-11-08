@@ -10,7 +10,8 @@ ELFILES = magma-completion.el \
 	magma-extra.el \
 	magma-smie.el \
 	magma-scan.el \
-	magma-q.el
+	magma-q.el \
+	magma-vars.el
 
 ELCFILES = $(subst .el,.elc,$(ELFILES))
 

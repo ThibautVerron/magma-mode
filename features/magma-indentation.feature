@@ -725,17 +725,19 @@ Feature: Magma code indentation
     end for;
     """
 
-  @bug
-  Scenario: Indentation after special statements
+  @fixedbug
+  Scenario: Indentation in strings containing magma keywords
     When I insert:
     """
-    eval Sprintf("test1"
-    cat "test2");
+    eval Sprintf("x := 2+2;"
+    cat "return 3;",
+    5);
     """
     And I indent the buffer
     Then I should see:
     """
-    eval Sprintf("test1"
-                 cat "test2");
+    eval Sprintf("x := 2+2;"
+                 cat "return 3;",
+                 5);
     """
     

@@ -11,7 +11,8 @@
        "magma-extra.el"
        "magma-scan.el"
        "magma-q.el"
-       "magma-smie.el")
+       "magma-smie.el"
+       "magma-vars.el")
 
 (development
  (depends-on "ecukes")
