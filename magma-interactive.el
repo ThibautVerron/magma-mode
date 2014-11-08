@@ -24,7 +24,9 @@
 
 (require 'comint)
 (require 'term)
+(require 'compile)
 
+(require 'magma-vars)
 (require 'magma-completion)
 (require 'magma-q)
 
@@ -708,8 +710,6 @@ The behavior of this function is controlled by
   (setq comint-use-prompt-regexp nil)
   (setq comint-prompt-read-only magma-prompt-read-only)
   (setq comint-prompt-regexp magma-prompt-regexp)
-  (make-local-variable 'comint-highlight-prompt)
-  (setq comint-highlight-prompt t)
   (setq comint-scroll-to-bottom-on-output t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)

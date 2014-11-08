@@ -23,6 +23,8 @@
 
 (require 'smie)
 
+(require 'magma-vars)
+
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
 

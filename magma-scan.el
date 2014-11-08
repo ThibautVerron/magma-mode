@@ -21,6 +21,9 @@
 
 ;;; Code:
 
+(require 'magma-vars)
+(declare-function magma-mode "magma-mode.el")
+
 (defvar-local magma-working-directory magma-default-directory)
 
 (defun magma-scan-completion-file (file)

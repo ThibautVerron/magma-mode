@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'magma-vars)
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; Support for imenu
 ;;;;;;;;;;;;;;;;;;;;
@@ -186,6 +188,8 @@ if in an intrinsic description or nil if somewhere else."
 ;; Smartparens
 ;;;;;;;;;;;;;;
 
+(require 'smartparens nil 'noerror)
+
 (defun magma-smartparens-gt-in-an-arrow (id beg end)
   "Test ensuring that \"->\" does not mark the end of the
   surrounding \"<...>\" pair."
@@ -209,7 +213,8 @@ if in an intrinsic description or nil if somewhere else."
   `magma-update-header-default'), or the name of a function which
   will create and update this header.
 
-  This variable can always be overridden as a file-local variable.")
+  This variable can always be overridden as a file-local variable."
+  :group 'magma)
 
 (defun magma-update-header-default ()
   "Default header for magma files. The first line is the date of
@@ -255,7 +260,8 @@ if in an intrinsic description or nil if somewhere else."
   described in `magma-update-header-default', or a function name which
   is then evaluated.
 
-Based on `auto-insert'")
+Based on `auto-insert'"
+  :group 'magma)
 
 (defun magma-initial-file-contents-default ()
   "Insert a skeleton of the header described in `magma-update-header-default'"

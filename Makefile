@@ -8,7 +8,11 @@ ELFILES = magma-completion.el \
 	magma-interactive.el \
 	magma-mode.el \
 	magma-extra.el \
-	magma-smie.el
+	magma-smie.el \
+	magma-scan.el \
+	magma-q.el
+
+ELCFILES = $(subst .el,.elc,$(ELFILES))
 
 ECUKESFOLDER = features
 
@@ -30,7 +34,7 @@ all: test
 
 test: unit ecukes
 
-unit: $(ELFILES)
+unit: $(ELCFILES)
 	${CASK} exec ert-runner
 
 .ecukes-failing-scenarios: ecukes-all
@@ -41,11 +45,13 @@ ecukes-debug: .ecukes-failing-scenarios
 ecukes-fail: .ecukes-failing-scenarios 
 	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing
 
-ecukes-all: $(ELFILES) $(ECUKESFILES)
+ecukes-all: $(ELCFILES) $(ECUKESFILES)
 	${CASK} exec ecukes $(ECUKESFLAGS)
 
 ecukes: ecukes-all
 
+%.elc : %.el
+	${CASK} build
 
 install:
 	${CASK} install
