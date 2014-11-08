@@ -724,3 +724,18 @@ Feature: Magma code indentation
         end procedure;
     end for;
     """
+
+  @bug
+  Scenario: Indentation after special statements
+    When I insert:
+    """
+    eval Sprintf("test1"
+    cat "test2");
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    eval Sprintf("test1"
+                 cat "test2");
+    """
+    
