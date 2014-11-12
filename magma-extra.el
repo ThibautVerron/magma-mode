@@ -156,8 +156,6 @@
 ;; Smartparens
 ;;;;;;;;;;;;;;
 
-(require 'smartparens nil 'noerror)
-
 (defun magma-smartparens-gt-in-an-arrow (id beg end)
   "Test ensuring that \"->\" does not mark the end of the
   surrounding \"<...>\" pair."
