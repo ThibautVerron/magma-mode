@@ -30,6 +30,8 @@
 (require 'magma-completion)
 (require 'magma-q)
 
+(declare-function magma-mode "magma-mode.el")
+
 (defcustom magma-interactive-program "magma"
   "*Program to be launched to use magma (usually magma)"
   :group 'magma
@@ -726,7 +728,6 @@ The behavior of this function is controlled by
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
 
-
 (defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
@@ -749,6 +750,9 @@ The behavior of this function is controlled by
   (if magma-interactive-use-comint
       (magma-interactive-init-with-comint)
     (magma-interactive-init-with-term)))
+
+(eval-when-compile
+  (magma-interactive-init))
 
 (provide 'magma-interactive)
 

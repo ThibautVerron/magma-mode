@@ -40,9 +40,7 @@
 ;; the matches)
 ;;;;;
 
-(makunbound 'magma-smie-grammar)
-
-(defvar magma-smie-grammar
+(defconst magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
     '(;; Identifier
