@@ -181,10 +181,10 @@ Additionally, all these functions take optional prefix arguments:
 
 *** Comint vs term
 
-=Term-mode= will basically render the magma experience you would have in
-a regular terminal emulator, regardless of emacs. Only the prompt can be
-written, =C-p= and =C-n= browse the history instead of scrolling the
-window, /et caetera/.
+=Term-mode= will basically render the magma experience you would have
+in a regular terminal emulator, regardless of emacs. The buffer is
+read-only except for the prompt, =C-p= and =C-n= browse the history
+instead of scrolling the window, /et caetera/.
 
 Another specificity of term-mode is that it intercepts some prefix
 keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
@@ -213,7 +213,7 @@ not depend on anything apart from emacs and =magma=.
 
 As of today, =term-mode= is disabled by default and no longer
 maintained (it still works, but it won't recieve new features). It may
-be removed in the future, so please let me know if your workflow
+be removed in the future, so please create an issue if your workflow
 absolutely requires that you use =term-mode= instead of =comint=.
 
 
@@ -278,7 +278,6 @@ To use this, add the following to your init file:
     (require 'magma-snippets)
 #+end_src
 
-
 *** Extra "electric" editting features
 
 If you have =magma-use-electric-newline= set to =t=,
@@ -328,4 +327,21 @@ the following keys are also bound:
    #+end_example
 
 
+
+*** Initial file contents and file headers
+
+We offer support for initial file contents and automatically updated
+headers. To use them, set the variables =magma-initial-file= and
+=magma-file-header= to either =\'default= (remove the backslash) or a function name, which
+then replaces the default function for inserting the default content
+or updating it.
+
+The header inserted by the default functions looks like this:
+
+#+begin_src c
+  // Created: Sun Mar 16 13:31:33 2014
+  // Last modified: Thu Apr 17 11:35:26 2014
+  // Hash: bb0dadd0604bafdaa20282285c2d85ff
+  // load "filename.m";
+#+end_src
 
