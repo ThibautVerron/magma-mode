@@ -746,10 +746,11 @@ The behavior of this function is controlled by
   (defalias 'magma-help-word-text 'magma-term-help-word)
   )
 
-(defun magma-interactive-init ()
-  (if magma-interactive-use-comint
-      (magma-interactive-init-with-comint)
-    (magma-interactive-init-with-term)))
+(eval-and-compile 
+  (defun magma-interactive-init ()
+    (if magma-interactive-use-comint
+        (magma-interactive-init-with-comint)
+      (magma-interactive-init-with-term))))
 
 (eval-when-compile
   (magma-interactive-init))
