@@ -23,6 +23,8 @@
 
 (require 'smie)
 
+(require 'magma-vars)
+
 (defvar magma-smie-verbose-p nil "Information about syntax state")
 ;; Not used atm
 
@@ -38,9 +40,7 @@
 ;; the matches)
 ;;;;;
 
-(makunbound 'magma-smie-grammar)
-
-(defvar magma-smie-grammar
+(defconst magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
     '(;; Identifier
@@ -223,6 +223,41 @@
   (regexp-opt '("vprint" "vprintf") 'words)
   "Regexp matching special functions requiring no parentheses but a colon")
 
+;; Functions lifting ambiguities
+
+(defun magma-in-literal ()
+  "Return the type of literal point is in, if any.
+The return value is `c' if in a C-style comment, `c++' if in a
+C++ style comment, `string' if in a string literal, `intrinsic'
+if in an intrinsic description or nil if somewhere else."
+  (let ((state (parse-partial-sexp (point-min) (point))))
+    (cond
+     ((and
+       (= (elt state 0) 1)
+       (= (char-after (elt state 1)) ?{)
+       (save-match-data
+         (looking-back
+          (concat
+           "\\<intrinsic\\>[^;]*"
+           (regexp-quote
+            (buffer-substring-no-properties
+             (elt state 1) (point)))))))
+      'intrinsic)
+     ((elt state 3) (cons 'string (elt state 8)))
+     ((elt state 4) (cons (if (elt state 7) 'c++ 'c) (elt state 8)))
+     (t nil))))
+
+(defun magma-not-in-comment-p ()
+  "Returns true only if we are not in a magma comment"
+  (let ((lit (car (magma-in-literal))))
+    (and (not (eq lit 'c))
+	 (not (eq lit 'c++)))))
+
+(defun magma-looking-at-end-of-line (&optional endchar)
+  "Returns t only is the point is at the end of a line."
+  (looking-at (concat endchar "[[:space:]]*$")))
+
+
 (defun magma-identify-colon ()
   "If point is at a colon, returns the appropriate token for that
   colon. The returned value is :
@@ -283,10 +318,12 @@
       (and (looking-at "(")
            (save-excursion
              (or
-              (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))
+              (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+                            (- (point) 10))
               (progn
                 (backward-word)
-                (looking-back "\\(function\\|procedure\\)[[:space:]]*" (- (point) 10))))))
+                (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+                              (- (point) 10))))))
     (error nil) ))
 
 (defun magma-looking-at-fun-closeparen ()
@@ -397,9 +434,6 @@
      ((looking-back magma-smie-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
-     ;; ((looking-back "then")
-     ;;  (goto-char (match-beginning 0))
-     ;;  (magma-identify-then))
      ((looking-back ":")
       (forward-char -1)
       (magma-identify-colon))
@@ -429,41 +463,25 @@
        magma-indent-basic))
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
-     ;; (and (magma-smie-backward-token)
-     ;;      (back-to-indentation)
-     ;;      (cons 'column (current-column))))
      (smie-rule-parent magma-indent-basic))
-
-     (`(:list-intro . ":=") t)
-    ;; (`(:list-intro . "then") t)
-    ;; (`(:list-intro . "else") t)
+    (`(:list-intro . ":=") t)
+    (`(:after . "@paren:") (smie-rule-parent))
     (`(:after . ,(or `"@special1" `"@special2")) 0)
     (`(:after . "@special:") 0)
-
     (`(:after . "@when:") magma-indent-basic)
     (`(:before . "when") 0)
-
     (`(:before . "then")
      (smie-rule-parent magma-indent-basic))
     (`(:after . "then")
      (smie-rule-parent magma-indent-basic))
-
     (`(:after . "else")
      (smie-rule-parent magma-indent-basic))
 
     ;; The parent of an "else" in "if then else" is the corresponding
     ;; "then", not the "if"
-    ;; (`(:before . "then")
-    ;;  (smie-rule-parent magma-indent-basic))
-    
-    ;; (`(:after . ,(or `"if" `"elif"))
-    ;;  (smie-rule-parent magma-indent-basic))
-    
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
      (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
-    ;; (`(:after . "@selectelse")
-    ;;  0)
 
     ;; Indentation for the functions, with one syntax or the other
     (`(:after . "@fun)")
@@ -474,8 +492,7 @@
            (back-to-indentation)
            (cons 'column (current-column)))))
     (`(:before . ,(or `"end function" `"end procedure"))
-     (smie-rule-parent))
-  ))
+     (smie-rule-parent))))
 
 (defun magma-indent-line ()
   "Indent a line according to the SMIE settings."
@@ -505,15 +522,18 @@
 (defun magma-beginning-of-expr ()
   "Go to the beginning of the current expression."
   (interactive)
+  (let ((lit (magma-in-literal)))
+    (when (eq (car lit) 'string)
+      (goto-char (- (cdr lit) 1))))
   (while (not (magma-looking-back-end-of-expr-p))
     (magma-smie-backward-token)))
-;; FIXME What if the point is in a string or comment?
 
 (defun magma-end-of-expr ()
   "Go to the end of the current expression."
   (interactive)
   (magma-beginning-of-expr)
   (smie-forward-sexp ";")
+  (forward-comment (point-max))
   (when (looking-at ";") (forward-char 1)))
 ;; We should always be looking at a ";" there
 

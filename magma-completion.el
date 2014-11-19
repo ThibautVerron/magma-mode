@@ -21,7 +21,10 @@
 
 ;;; Code:
 
+(require 'magma-smie)
 (require 'magma-scan)
+
+(declare-function magma-mode "magma-mode.el")
 
 (defvar magma-completion-table-file (f-join magma-path "data/magma_symbols.txt"))
 
@@ -56,7 +59,7 @@
                (magma-mode))
              (setq magma-completion-table prev-table)
              (insert str)
-             (magma-scan)
+             (magma-scan t)
              magma-completion-table))))
 
 

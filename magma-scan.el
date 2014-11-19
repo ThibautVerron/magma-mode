@@ -21,6 +21,9 @@
 
 ;;; Code:
 
+(require 'magma-vars)
+(declare-function magma-mode "magma-mode.el")
+
 (defvar-local magma-working-directory magma-default-directory)
 
 (defun magma-scan-completion-file (file)
@@ -64,57 +67,60 @@
 (defun magma-scan-file (file outfile)
   "Scan the file file for definitions, and write the result into file OUTFILE."
   (magma-scan-write-to-file ";;; This file was generated automatically.\n\n" outfile t)
-  
   (let* ((buf (current-buffer))
-         (defs
-           (with-temp-buffer
-             (let ((magma-mode-hook nil))
-               (magma-mode))
-             (insert "\n")
-             (if file
-                 (insert-file-contents-literally file)
-               (insert-buffer-substring-no-properties buf))
-             (goto-char (point-min))
-           
-           ;; Get rid of the comments
-           (comment-kill (count-lines (point-min) (point-max)))
-           (goto-char (point-min))
-           
-           ;; And scan
-           (setq moreLines t)
-           (setq defs nil)
-           
-           (while moreLines
-             (beginning-of-line)
-             (cond
-              ((looking-at "ChangeDirectory(\"\\(.*\\)\");")
-               (magma-scan-write-to-file
-                (magma-scan-changedirectory-el
-                 (match-string-no-properties 1))
-                outfile))
-              ((looking-at "load \"\\(.*\\)\";")
-               (let* ((file (match-string-no-properties 1)))
-                 (magma-scan-write-to-file (magma-scan-load-el file)
-                               outfile)))
-              ((looking-at magma-scan-defun-regexp)
-               (setq defs
-                     (-union (list (match-string-no-properties 2))
-                             defs))
-               )
-              )
-             (end-of-line) ;; So that forward-line really goes to the next line
-             (setq moreLines (= 0 (forward-line 1))))
-             defs)))
+         (alldefs
+          (let ((moreLines nil)
+                (defs nil))
+            (with-temp-buffer
+              (let ((magma-mode-hook nil))
+                (magma-mode))
+              (insert "\n")
+              (if file
+                  (insert-file-contents-literally file)
+                (insert-buffer-substring-no-properties buf))
+              (goto-char (point-min))
+              
+              ;; Get rid of the comments
+              (comment-kill (count-lines (point-min) (point-max)))
+              (goto-char (point-min))
+              
+              ;; And scan
+              (setq moreLines t)
+              (setq defs nil)
+              
+              (while moreLines
+                (beginning-of-line)
+                (cond
+                 ((looking-at "ChangeDirectory(\"\\(.*\\)\");")
+                  (magma-scan-write-to-file
+                   (magma-scan-changedirectory-el
+                    (match-string-no-properties 1))
+                   outfile))
+                 ((looking-at "load \"\\(.*\\)\";")
+                  (let* ((file (match-string-no-properties 1)))
+                    (magma-scan-write-to-file (magma-scan-load-el file)
+                                              outfile)))
+                 ((looking-at magma-scan-defun-regexp)
+                  (setq defs
+                        (-union (list (match-string-no-properties 2))
+                                defs))
+                  )
+                 )
+                (end-of-line) ;; So that forward-line really goes to the next line
+                (setq moreLines (= 0 (forward-line 1))))
+              defs))))
     (let ((defsline
-            (concat "(setq magma-completion-table (-union '("
+            (concat "(setq magma-completion-table "
+                    "(-union magma-completion-table '("
                     (-reduce-r-from
-                     (apply-partially 'format "\"%s\" %s") "" defs)
-                            ") magma-completion-table))\n")))
+                     (apply-partially 'format "\"%s\" %s") "" alldefs)
+                    ")))\n")))
       (magma-scan-write-to-file defsline outfile ))))
-    
+
 (defun magma-load-or-rescan (file &optional forcerescan)
-  "Load the completion file associated to file, rebuilding it if
-  needed. If FILE is nil, use the filename stored in `magma-scan-anonymous-temp-file', and always rebuild the table."
+  "Load the completion file associated to file, rebuilding it if needed.
+
+If FILE is nil, always rebuild the table."
   (if (or (not file) (f-exists? file))
       (let ((loadfile (magma-scan-make-filename file)))
         (when (or forcerescan

@@ -2,7 +2,17 @@
 
 (source melpa)
 
-(package "magma-mode" "0.0.0" "Revamp of the Magma mode for emacs")
+(package "magma-mode" "1.0.0" "Revamp of the Magma mode for emacs")
+
+(files "magma-mode.el"
+       "magma-completion.el"
+       "magma-font-lock.el"
+       "magma-interactive.el"
+       "magma-extra.el"
+       "magma-scan.el"
+       "magma-q.el"
+       "magma-smie.el"
+       "magma-vars.el")
 
 (development
  (depends-on "ecukes")

@@ -211,6 +211,11 @@ under different systems (windows...) can prove tricky. On the other
 hand, =comint= starts the magma process directly from emacs, and does
 not depend on anything apart from emacs and =magma=.
 
+As of today, =term-mode= is disabled by default and no longer
+maintained (it still works, but it won't recieve new features). It may
+be removed in the future, so please let me know if your workflow
+absolutely requires that you use =term-mode= instead of =comint=.
+
 
 *** Methods for sending input to the magma buffer
 
