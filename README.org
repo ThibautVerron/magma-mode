@@ -345,3 +345,21 @@ The header inserted by the default functions looks like this:
   // load "filename.m";
 #+end_src
 
+*** Changelog
+
+**** 2014-11-19
+
+ - *Change* =comint-mode= is made the default mode
+ - *Change* Step-by-step evaluation mechanism changed, no more hardcoded waiting time between instructions
+ - *Bugfix* Incorrect indentation in some situations
+ - *Bugfix* Performance improvement when scanning the buffer for new completion candidates (noticeable in the interactive buffer)
+ - *Bugfix* The smie parser was unable to get out of strings
+ - *Bugfix* =build-completion-table.sh= was ignoring some functions
+  
+**** 2014-10-02  
+  
+ - Package added on melpa
+ 
+**** 2014-01-07 
+
+ - Initial release
