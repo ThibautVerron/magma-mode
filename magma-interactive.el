@@ -168,15 +168,14 @@ Setting this variable has no effect in term mode."
 
 ;; (defvar-local magma--output-finished t)
 
-(eval-and-compile
-  (defcustom magma-interactive-use-comint t
+(defcustom magma-interactive-use-comint t
     "If non-nil, communication with the magma process is done using comint.
 
 Otherwise, it uses term-mode.  After changing this variable,
 restarting emacs is required (or reloading the magma-mode load
 file)."
     :group 'magma
-    :type 'boolean))
+    :type 'boolean)
 
 (defun magma-get-buffer-name (&optional i app)
   (let ((name
@@ -747,14 +746,12 @@ The behavior of this function is controlled by
   (defalias 'magma-help-word-text 'magma-term-help-word)
   )
 
-(eval-and-compile 
-  (defun magma-interactive-init ()
-    (if magma-interactive-use-comint
-        (magma-interactive-init-with-comint)
-      (magma-interactive-init-with-term))))
+(defun magma-interactive-init ()
+  (if magma-interactive-use-comint
+      (magma-interactive-init-with-comint)
+    (magma-interactive-init-with-term)))
 
-(eval-when-compile
-  (magma-interactive-init))
+;; (magma-interactive-init)
 
 (provide 'magma-interactive)
 
