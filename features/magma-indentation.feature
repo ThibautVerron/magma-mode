@@ -740,4 +740,18 @@ Feature: Magma code indentation
                  cat "return 3;",
                  5);
     """
-    
+   
+  @bug
+  Scenario: Indentation in a set with multiple iterations + restriction
+    When I insert:
+    """
+    x := {<a,b> : a in A, b in B 
+    | test(a,b)}; 
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    x := {<a,b> : a in A, b in B 
+                | test(a,b)}; 
+    """
+

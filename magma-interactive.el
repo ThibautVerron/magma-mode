@@ -233,12 +233,11 @@ the buffer number."
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
   ;;(interactive "P")
-  (set-buffer (magma-get-buffer i))
-  ;;(comint-interrupt-subjob)
-  (or (not (comint-check-proc (current-buffer)))
-      (interrupt-process nil comint-ptyp))
-  ;; ^ Same as comint-kill-subjob, without comint extras.
-  )
+  (with-current-buffer (magma-get-buffer i)
+    (or (not (comint-check-proc (current-buffer)))
+        (interrupt-process nil comint-ptyp))
+    (setq magma-ready t)
+    (setq magma-pending-input (magma-q-create))))
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"

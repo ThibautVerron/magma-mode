@@ -299,56 +299,6 @@ Feature: Interaction with a magma process
     Then I should see "Input: 6;"
   
 
-  Scenario: Kill a magma process
-    Given I am in buffer "*magma-test*"
-    And I press "C-c C-k"
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma killed"
-
-
-  Scenario: Interrupt a magma process
-    Given I am in buffer "*magma-test*"
-    And I press "C-c C-i"
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma interrupt"
-
-
-  Scenario: Kill multiple magma processes
-    Given I am in buffer "*magma-test*"
-    And I press "C-c C-a"
-    And I press "C-u 2 C-a"
-    And I press "C-u C-u C-c C-k"
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma killed"
-    When I switch to buffer "*magma-2*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma-2 killed"
-    
-    
-  Scenario: Interrupt multiple magma processes
-    Given I am in buffer "*magma-test*"
-    And I press "C-c C-a"
-    And I press "C-u 2 C-c C-a"
-    # And I switch to buffer "magma-2"
-    # Then the buffer should have a process
-    And I press "C-u C-u C-c C-i"
-    And I wait for an instant
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma interrupt"
-    When I switch to buffer "*magma-2*"
-    And I wait for an instant
-    Then the buffer should have no process
-    And I should see "Process magma-2 interrupt"
-
 
   Scenario: Output filter: debugger prompt
     Given I am in buffer "*magma*"
@@ -357,6 +307,7 @@ Feature: Interaction with a magma process
     And I insert "debug;"
     And I press "RET"
     And I wait for an instant
+    And I wait for an instant T
     Then I should see "debug> "
     And I should not see:
     """
@@ -445,3 +396,53 @@ Feature: Interaction with a magma process
     """
 
     
+  Scenario: Kill a magma process
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-k"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma killed"
+
+
+  Scenario: Interrupt a magma process
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-i"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma interrupt"
+
+
+  Scenario: Kill multiple magma processes
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-a"
+    And I press "C-u 2 C-a"
+    And I press "C-u C-u C-c C-k"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma killed"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma-2 killed"
+    
+    
+  Scenario: Interrupt multiple magma processes
+    Given I am in buffer "*magma-test*"
+    And I press "C-c C-a"
+    And I press "C-u 2 C-c C-a"
+    # And I switch to buffer "magma-2"
+    # Then the buffer should have a process
+    And I press "C-u C-u C-c C-i"
+    And I wait for an instant
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma interrupt"
+    When I switch to buffer "*magma-2*"
+    And I wait for an instant
+    Then the buffer should have no process
+    And I should see "Process magma-2 interrupt"
+
