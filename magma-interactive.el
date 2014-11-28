@@ -144,11 +144,19 @@ Setting this variable has no effect in term mode."
   :group 'magma
   :type 'boolean)
 
+(defvar magma--comint-interactive-escape-map
+  (if magma-interactive-comint-emulates-term
+      (let ((map (copy-keymap ctl-x-map)))
+        (define-key map (kbd "C-c C-c") 'comint-interrupt-subjob)
+        map)
+    nil))
+
 (defvar magma-comint-interactive-mode-map
-  (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
+  (let ((map (nconc (make-sparse-keymap) comint-mode-map )))
     (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "RET") 'comint-send-input)
     (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
+    ;(define-key map (kbd "C-c") magma--comint-interactive-escape-map)
     map)
   "Keymap for magma-interactive-mode")
 
@@ -744,18 +752,14 @@ The behavior of this function is controlled by
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
 
+
 (defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
   (defalias 'magma--int-cmd 'magma-comint-int)
   (defalias 'magma--kill-cmd 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
-  (defalias 'magma-help-word-text 'magma-comint-help-word)
-
-  ;; (when magma-interactive-comint-emulates-term
-  ;;   (local-set-key (kbd "C-c") ctl-x-map)
-  ;;   (local-set-key (kbd "C-c C-c") 'comint-interrupt-subjob))
-  ;; )
+  (defalias 'magma-help-word-text 'magma-comint-help-word))
 
 (defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
