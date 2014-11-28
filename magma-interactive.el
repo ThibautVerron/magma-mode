@@ -171,11 +171,28 @@ Setting this variable has no effect in term mode."
 (defcustom magma-interactive-use-comint t
   "If non-nil, communication with the magma process is done using comint.
 
-Otherwise, it uses term-mode.  After changing this variable,
+Otherwise, it uses term-mode.  After setting this variable,
 restarting emacs is required (or reloading the magma-mode load
 file)."
   :group 'magma
   :type 'boolean)
+
+(defcustom magma-interactive-comint-emulates-term nil
+  "Should comint buffers try to emulate term buffers?
+
+If non-nil, interactive buffers using comint-mode try to emulate
+the behavior of term-mode buffers. At the moment, it only means
+that `C-c' can be used as a synonym for `C-x' (e.g. `C-c o' for
+other-buffer), with the exception of `C-c C-c' which remains
+bound to comint-interrupt-subjob.
+
+After setting this variable,
+restarting emacs is required (or reloading the magma-mode load
+file)."
+  :group 'magma
+  :type 'boolean)
+
+
 
 (defun magma-get-buffer-name (&optional i app)
   (let ((name
@@ -734,7 +751,11 @@ The behavior of this function is controlled by
   (defalias 'magma--kill-cmd 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
   (defalias 'magma-help-word-text 'magma-comint-help-word)
-  )
+
+  ;; (when magma-interactive-comint-emulates-term
+  ;;   (local-set-key (kbd "C-c") ctl-x-map)
+  ;;   (local-set-key (kbd "C-c C-c") 'comint-interrupt-subjob))
+  ;; )
 
 (defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
