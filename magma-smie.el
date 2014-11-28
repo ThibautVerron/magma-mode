@@ -468,7 +468,7 @@ if in an intrinsic description or nil if somewhere else."
        magma-indent-basic))
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
-     (smie-rule-parent magma-indent-basic))
+     (smie-rule-parent))
     ;;(`(:list-intro . ,(or `":=" `"paren:" `"|")) t)
     (`(:list-intro . ":=") t)
     (`(:after . ,(or `"paren:" `"|")) 0)
