@@ -113,19 +113,6 @@ Feature: Magma code indentation
             tete]
     """
     
-  @wishlist
-  Scenario: Indentation of assignments
-    When I insert:
-    """
-    longvariablename := 2 + 2;
-    """
-    And I cut the line before "+"
-    Then I should see:
-    """
-    longvariablename := 2
-        + 2;
-    """
-    
   Scenario: Indentation of expressions without parens
     When I insert:
     """
@@ -741,7 +728,7 @@ Feature: Magma code indentation
                  5);
     """
    
-  @bug
+  @fixedbug
   Scenario: Indentation in a set with multiple iterations + restriction
     When I insert:
     """
@@ -755,3 +742,50 @@ Feature: Magma code indentation
                 | test(a,b)}; 
     """
 
+  Scenario: Indentation of hanging assignments
+    When I insert:
+    """
+    longvariablename := 
+    2 + 2;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    longvariablename := 
+        2 + 2;
+    """
+
+  Scenario: Indentation of hanging parenthesed expressions
+    When I insert:
+    """
+    x := [
+    <a,b>  
+    : a in A, b in B 
+    | test 
+    ];
+    x := function (
+    a,
+    b 
+    : c := 3
+    ) 
+    return a; 
+    end function;
+    """
+    And I indent the buffer
+    Then I should see
+    """
+    x := [
+        <a,b>  
+        : a in A, b in B 
+        | test 
+    ];
+    x := function (
+            a,
+            b 
+            : c := 3
+        ) 
+        return a; 
+    end function;
+    """
+    
+ 
