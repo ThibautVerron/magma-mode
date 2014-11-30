@@ -568,13 +568,13 @@ Feature: Magma code indentation
   Scenario: Indentation of type definitions in records
     When I insert:
     """
-    x := recformat<toto : Type1, tata : Type2>
+    x := recformat<toto : Type1, tata : Type2>;
     """
     And I cut the line after "Type1,"
     Then I should see:
     """
     x := recformat<toto : Type1,
-                   tata : Type2>
+                   tata : Type2>;
     """
 
   @fixedbug
