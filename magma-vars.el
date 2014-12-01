@@ -32,9 +32,6 @@
 (defgroup magma nil "Major mode for editting magma-code"
   :group 'Programming)
 
-(defconst magma-mode-version "Developement snapshot, 2014-11-02"
-  "Current version of the magma mode")
-
 (defconst magma-path (f-dirname (f-this-file)) "magma-mode install folder")
 ;;(add-to-list 'load-path magma-path)
 
