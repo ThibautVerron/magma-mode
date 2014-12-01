@@ -144,12 +144,12 @@ Setting this variable has no effect in term mode."
   :group 'magma
   :type 'boolean)
 
-(defvar magma--comint-interactive-escape-map
-  (if magma-interactive-comint-emulates-term
-      (let ((map (copy-keymap ctl-x-map)))
-        (define-key map (kbd "C-c C-c") 'comint-interrupt-subjob)
-        map)
-    nil))
+;; (defvar magma--comint-interactive-escape-map
+;;   (if magma-interactive-comint-emulates-term
+;;       (let ((map (copy-keymap ctl-x-map)))
+;;         (define-key map (kbd "C-c C-c") 'comint-interrupt-subjob)
+;;         map)
+;;     nil))
 
 (defvar magma-comint-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) comint-mode-map )))
@@ -185,20 +185,20 @@ file)."
   :group 'magma
   :type 'boolean)
 
-(defcustom magma-interactive-comint-emulates-term nil
-  "Should comint buffers try to emulate term buffers?
+;; (defcustom magma-interactive-comint-emulates-term nil
+;;   "Should comint buffers try to emulate term buffers?
 
-If non-nil, interactive buffers using comint-mode try to emulate
-the behavior of term-mode buffers. At the moment, it only means
-that `C-c' can be used as a synonym for `C-x' (e.g. `C-c o' for
-other-buffer), with the exception of `C-c C-c' which remains
-bound to comint-interrupt-subjob.
+;; If non-nil, interactive buffers using comint-mode try to emulate
+;; the behavior of term-mode buffers. At the moment, it only means
+;; that `C-c' can be used as a synonym for `C-x' (e.g. `C-c o' for
+;; other-buffer), with the exception of `C-c C-c' which remains
+;; bound to comint-interrupt-subjob.
 
-After setting this variable,
-restarting emacs is required (or reloading the magma-mode load
-file)."
-  :group 'magma
-  :type 'boolean)
+;; After setting this variable,
+;; restarting emacs is required (or reloading the magma-mode load
+;; file)."
+;;   :group 'magma
+;;   :type 'boolean)
 
 
 
