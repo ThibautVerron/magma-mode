@@ -56,8 +56,6 @@
     (hs-toggle-hiding)))
 
 
-
-
 ;; Redefinitions of some steps from espuds
 
 (Then "^I should see\\(?: \"\\(.+\\)\"\\|:\\)$"

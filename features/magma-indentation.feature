@@ -571,6 +571,7 @@ Feature: Magma code indentation
     x := recformat<toto : Type1, tata : Type2>;
     """
     And I cut the line after "Type1,"
+    And I indent the buffer
     Then I should see:
     """
     x := recformat<toto : Type1,
@@ -584,6 +585,7 @@ Feature: Magma code indentation
     testhom := hom<P -> Q>;
     """
     And I cut the line after "Q"
+    And I indent the buffer
     Then I should see:
     """
     testhom := hom<P -> Q
