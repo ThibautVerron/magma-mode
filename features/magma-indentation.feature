@@ -568,13 +568,14 @@ Feature: Magma code indentation
   Scenario: Indentation of type definitions in records
     When I insert:
     """
-    x := recformat<toto : Type1, tata : Type2>
+    x := recformat<toto : Type1, tata : Type2>;
     """
     And I cut the line after "Type1,"
+    And I indent the buffer
     Then I should see:
     """
     x := recformat<toto : Type1,
-                   tata : Type2>
+                   tata : Type2>;
     """
 
   @fixedbug
@@ -584,6 +585,7 @@ Feature: Magma code indentation
     testhom := hom<P -> Q>;
     """
     And I cut the line after "Q"
+    And I indent the buffer
     Then I should see:
     """
     testhom := hom<P -> Q
@@ -739,7 +741,7 @@ Feature: Magma code indentation
     Then I should see:
     """
     x := {<a,b> : a in A, b in B 
-                | test(a,b)}; 
+          | test(a,b)}; 
     """
 
   Scenario: Indentation of hanging assignments
@@ -755,6 +757,7 @@ Feature: Magma code indentation
         2 + 2;
     """
 
+  @wishlist
   Scenario: Indentation of hanging parenthesed expressions
     When I insert:
     """
@@ -772,7 +775,7 @@ Feature: Magma code indentation
     end function;
     """
     And I indent the buffer
-    Then I should see
+    Then I should see:
     """
     x := [
         <a,b>  

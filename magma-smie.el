@@ -77,6 +77,7 @@
             ("#" expr)
             (expr "+" expr)
             ;; (expr "::" expr) ;; For intrinsics only
+            (id "type:" id) ;; In recformat only
             (expr "-" expr)
             (expr "*" expr)
             (expr "/" expr)
@@ -179,6 +180,7 @@
       (assoc "^")
       (assoc ".")
       (assoc "!")
+      (assoc "type:")
       (left "#")
       (left "&")
       (left "~"))
@@ -288,6 +290,8 @@ if in an intrinsic description or nil if somewhere else."
                  ((looking-at "when") (throw 'token "when:"))
                  ((looking-at magma-smie-special2-regexp)
                   (throw 'token "special:"))
+                 ((looking-back "recformat<")
+                  (throw 'token "type:"))
                  ((bobp) (throw 'token ":"))
                  ))
             (error (throw 'token "paren:"))))
@@ -472,7 +476,9 @@ robust in any way."
 
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
-  ;; (message (format "%s %s parent:%s" kind token smie--parent))
+  ;; (message (format "%s %s parent:%s"
+  ;;                  kind token
+  ;;                  (and (boundp 'smie--parent) smie--parent)))
   (pcase (cons kind token)
     (`(:elem . 'basic) magma-indent-basic)
     (`(:elem . 'arg)
@@ -487,17 +493,19 @@ robust in any way."
     (`(:before . "paren:")
      (when (magma-smie--parent-hanging-p)
        magma-indent-basic))
-    (`(:before . "|") 0)
+    (`(:before . "|") (smie-rule-parent))
     (`(:after . ",")
      (when (smie-rule-parent-p "(" "{" "[" "<")
-       (smie-rule-parent magma-indent-basic)))
+       0))
 
-    (`(:after . ";") (smie-rule-parent))
+    (`(:after . ";") 0)
     
     ;; (`(:after . ,(or `"{" `"(" `"[" `"<"))
     ;;  (if (smie-rule-hanging-p)
     ;;      (smie-rule-parent)
     ;;    (smie-rule-parent (- magma-indent-basic))))
+
+    ;; (`(:close-all . ,(or `">" `")" `"fun)" `"]" `"]")) t)
     (`(:after . ,(or `"special1" `"special2")) 0)
     (`(:after . "special:") 0)
     (`(:after . "when:") magma-indent-basic)

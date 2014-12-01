@@ -775,8 +775,8 @@ The behavior of this function is controlled by
       (magma-interactive-init-with-comint)
     (magma-interactive-init-with-term)))
 
-(eval-when-compile
-  (magma-interactive-init))
+;; (eval-when-compile
+;;   (magma-interactive-init))
 
 (provide 'magma-interactive)
 
