@@ -144,11 +144,19 @@ Setting this variable has no effect in term mode."
   :group 'magma
   :type 'boolean)
 
+(defvar magma--comint-interactive-escape-map
+  (if magma-interactive-comint-emulates-term
+      (let ((map (copy-keymap ctl-x-map)))
+        (define-key map (kbd "C-c C-c") 'comint-interrupt-subjob)
+        map)
+    nil))
+
 (defvar magma-comint-interactive-mode-map
-  (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
+  (let ((map (nconc (make-sparse-keymap) comint-mode-map )))
     (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "RET") 'comint-send-input)
     (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
+    ;(define-key map (kbd "C-c") magma--comint-interactive-escape-map)
     map)
   "Keymap for magma-interactive-mode")
 
@@ -171,11 +179,28 @@ Setting this variable has no effect in term mode."
 (defcustom magma-interactive-use-comint t
   "If non-nil, communication with the magma process is done using comint.
 
-Otherwise, it uses term-mode.  After changing this variable,
+Otherwise, it uses term-mode.  After setting this variable,
 restarting emacs is required (or reloading the magma-mode load
 file)."
   :group 'magma
   :type 'boolean)
+
+(defcustom magma-interactive-comint-emulates-term nil
+  "Should comint buffers try to emulate term buffers?
+
+If non-nil, interactive buffers using comint-mode try to emulate
+the behavior of term-mode buffers. At the moment, it only means
+that `C-c' can be used as a synonym for `C-x' (e.g. `C-c o' for
+other-buffer), with the exception of `C-c C-c' which remains
+bound to comint-interrupt-subjob.
+
+After setting this variable,
+restarting emacs is required (or reloading the magma-mode load
+file)."
+  :group 'magma
+  :type 'boolean)
+
+
 
 (defun magma-get-buffer-name (&optional i app)
   (let ((name
@@ -727,14 +752,14 @@ The behavior of this function is controlled by
   (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
 
+
 (defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
   (defalias 'magma-run 'magma-comint-run)
   (defalias 'magma--int-cmd 'magma-comint-int)
   (defalias 'magma--kill-cmd 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
-  (defalias 'magma-help-word-text 'magma-comint-help-word)
-  )
+  (defalias 'magma-help-word-text 'magma-comint-help-word))
 
 (defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)

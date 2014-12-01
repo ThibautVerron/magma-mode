@@ -99,14 +99,16 @@
             ("function" "fun(" funargs "fun)" insts "end function")
             ("procedure" "fun(" funargs "fun)" insts "end procedure")
             (funcall)
-            ("[" listargs "]")
-            ("<" listargs ">")
+            ;; ("[" listargs "]")
+            ;; ("<" listargs ">")
             )
 
       ;; What appears in a list or a similar construct (basic)
       (listargs (enum)
-                (enum "paren:" enum)
-                (enum "|" enum))
+                (enum "paren:" listargspipe))
+
+      (listargspipe (enum)
+                    (enum "|" enum))
 
       (enum (expr)
             (enum "," enum))
@@ -457,25 +459,45 @@ if in an intrinsic description or nil if somewhere else."
   :group 'magma
   :type 'integer)
 
+(defun magma-smie--parent-hanging-p ()
+  "Return t if parent of the current token is hanging.
+
+Should only be used in `magma-smie-rules', and probably not
+robust in any way."
+  (and
+   (boundp 'smie-parent)
+   (save-excursion
+     (goto-char (car (cdr smie--parent)))
+     (smie-rule-hanging-p))))
+
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
+  ;; (message (format "%s %s parent:%s" kind token smie--parent))
   (pcase (cons kind token)
-    (`(:elem . basic) magma-indent-basic)
-    (`(:elem . args)
-     (if (and (boundp 'smie--parent)
-              (smie-rule-parent-p "special1" "special2"))
+    (`(:elem . 'basic) magma-indent-basic)
+    (`(:elem . 'arg)
+     (if (smie-rule-parent-p "special1" "special2")
          (smie-rule-parent)
        magma-indent-basic))
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
-     (smie-rule-parent magma-indent-basic))
-    ;;(`(:list-intro . ,(or `":=" `"paren:" `"|")) t)
-    (`(:list-intro . ":=") t)
-    (`(:after . ,(or `"paren:" `"|")) 0)
-    (`(:before . ,(or `"paren:" `"|"))  magma-indent-basic)
+     (if (smie-rule-hanging-p)
+         magma-indent-basic
+         (smie-rule-parent)))
+    (`(:before . "paren:")
+     (when (magma-smie--parent-hanging-p)
+       magma-indent-basic))
+    (`(:before . "|") 0)
     (`(:after . ",")
-     (when (smie-rule-parent-p "(" "{" "[")
+     (when (smie-rule-parent-p "(" "{" "[" "<")
        (smie-rule-parent magma-indent-basic)))
+
+    (`(:after . ";") (smie-rule-parent))
+    
+    ;; (`(:after . ,(or `"{" `"(" `"[" `"<"))
+    ;;  (if (smie-rule-hanging-p)
+    ;;      (smie-rule-parent)
+    ;;    (smie-rule-parent (- magma-indent-basic))))
     (`(:after . ,(or `"special1" `"special2")) 0)
     (`(:after . "special:") 0)
     (`(:after . "when:") magma-indent-basic)
