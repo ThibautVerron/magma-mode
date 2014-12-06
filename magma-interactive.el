@@ -215,10 +215,16 @@ file)."
 (defun magma-set-working-buffer (i)
   "set the i-th buffer as the working buffer"
   (interactive "NBuffer number ?: ")
-  (magma-run i)
+  (save-window-excursion
+    (magma-run i))
   (setq magma-working-buffer-number i)
   (message (concat "Working buffer set to " (int-to-string i)))
   (magma-get-buffer i))
+
+(defun magma-set-working-buffer-locally ()
+  (interactive)
+  (make-local-variable 'magma-working-buffer-number)
+  (call-interactively #'magma-set-working-buffer))
 
 (defun magma-make-buffer-name (&optional i app)
   "Return the name of the i-th magma buffer.
@@ -552,7 +558,6 @@ corresponding input."
 (defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
   (interactive "P")
-  (magma-end-of-expr)
   (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
