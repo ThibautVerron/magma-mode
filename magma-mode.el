@@ -70,6 +70,7 @@
   "Magma mode"
   (use-local-map magma-mode-map)
   (set-syntax-table magma-mode-syntax-table)
+  (setq-local syntax-propertize-function magma-syntax-propertize-function)
   (make-local-variable 'comment-start)
   (setq comment-start "/* ")
   (make-local-variable 'comment-end)

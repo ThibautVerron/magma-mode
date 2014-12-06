@@ -101,7 +101,7 @@
             ("procedure" "fun(" funargs "fun)" insts "end procedure")
             (funcall)
             ;; ("[" listargs "]")
-            ;; ("<" listargs ">")
+            ;; ("<" id "->" listargs ">")
             )
 
       ;; What appears in a list or a similar construct (basic)
@@ -113,6 +113,9 @@
 
       (enum (expr)
             (enum "," enum))
+
+      ;; (angleargs (listargs)
+      ;;            (id "->" listargspipe))
 
       ;; What appears in a function or procedure arguments
       ;;(funbody (id "fun(" funargs "fun)" insts))
@@ -152,6 +155,7 @@
     '((nonassoc "end function" "end procedure")
       ;; (left "(") (right ")")
       ;;(left ":")
+      ;; (left "<") (right ">")
       (assoc ",")
       (left "|") (left "paren:")
       (assoc ":="))
@@ -187,12 +191,12 @@
    ))
   "BNF grammar for the SMIEngine.")
 
-(defvar magma-smie-tokens-regexp
+(defconst magma-smie-tokens-regexp
   (concat
    "\\("
    (regexp-opt '("," "|" ";"
-                 ;"(" ")" "[" "]"
-                 "<" ">"
+                 ;;"(" ")" "[" "]"
+                 ;; "<" ">"
                  ":="))
    "\\|" 
    (regexp-opt '("for" "while" "do" "if" "else" "elif" 
@@ -201,12 +205,12 @@
    "\\)")
   "SMIE tokens for magma keywords, except for block ends.")
 
-(defvar magma-smie-end-tokens-regexp
+(defconst magma-smie-end-tokens-regexp
   (regexp-opt '("end while" "end if" "end case" "end try" "end for"
                 "end function" "end procedure") 'words)
   "SMIE tokens for block ends.")
 
-(defvar magma-smie-operators-regexp
+(defconst magma-smie-operators-regexp
   (concat
    "\\("
    (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->" "&"))
@@ -219,7 +223,7 @@
   "Regexp matching magma operators.")
 
 
-(defvar magma-smie-special1-regexp
+(defconst magma-smie-special1-regexp
   (regexp-opt
    '("assert" "assert2" "assert3" "break" "clear" "continue" "declare" "delete"
      "error" "error if" "eval" "exit" "forward" "fprintf" "freeze" "iload"
@@ -228,7 +232,7 @@
    'words)
   "Regexp matching special functions requiring no parentheses and no colon")
 
-(defvar magma-smie-special2-regexp
+(defconst magma-smie-special2-regexp
   (regexp-opt '("vprint" "vprintf") 'words)
   "Regexp matching special functions requiring no parentheses but a colon")
 
@@ -290,7 +294,7 @@ if in an intrinsic description or nil if somewhere else."
                  ((looking-at "when") (throw 'token "when:"))
                  ((looking-at magma-smie-special2-regexp)
                   (throw 'token "special:"))
-                 ((looking-back "recformat<")
+                 ((looking-back "recformat<[[:space:]]*")
                   (throw 'token "type:"))
                  ((bobp) (throw 'token ":"))
                  ))
@@ -469,7 +473,7 @@ if in an intrinsic description or nil if somewhere else."
 Should only be used in `magma-smie-rules', and probably not
 robust in any way."
   (and
-   (boundp 'smie-parent)
+   (boundp 'smie--parent)
    (save-excursion
      (goto-char (car (cdr smie--parent)))
      (smie-rule-hanging-p))))

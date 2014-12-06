@@ -48,7 +48,7 @@
 (defun magma--debug2-message (str)
   (when (>= magma--debug-level 2) (message str)))
 
-(defvar magma-mode-map
+(defconst magma-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c :") 'magma-send-expression)
     (define-key map (kbd "C-c C-e") 'magma-eval)
@@ -73,7 +73,7 @@
   "Keymap for magma-mode"
   )
 
-(defvar magma-mode-syntax-table
+(defconst magma-mode-syntax-table
   (let ((st (make-syntax-table)))
     (modify-syntax-entry ?/  ". 142"  st) 
     (modify-syntax-entry ?*  ". 23b"  st) 
@@ -83,8 +83,8 @@
     (modify-syntax-entry ?-  "."      st)
     (modify-syntax-entry ?=  "."      st)
     (modify-syntax-entry ?!  "."      st)
-    (modify-syntax-entry ?<  "("      st) 
-    (modify-syntax-entry ?>  ")"      st) 
+    (modify-syntax-entry ?<  "(>"     st) 
+    (modify-syntax-entry ?>  ")<"     st) 
     (modify-syntax-entry ?&  "."      st)
     (modify-syntax-entry ?#  "."      st)
     (modify-syntax-entry ?`  "."      st)
@@ -95,6 +95,8 @@
     st)
   "*Syntax table used while in `magma-mode'.")
 
+(defconst magma-syntax-propertize-function 
+  (syntax-propertize-rules ("-\\(>\\)" (1 "."))))
 
 (provide 'magma-vars)
 ;;; magma-vars.el ends here
