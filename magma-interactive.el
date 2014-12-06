@@ -724,14 +724,15 @@ The behavior of this function is controlled by
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
-  (compilation-shell-minor-mode 1)
-  (set (make-local-variable 'compilation-mode-font-lock-keywords)
-        nil)
-  (set (make-local-variable 'font-lock-keywords) nil)
+  ;; (set (make-local-variable 'font-lock-keywords) nil)
   (add-to-list
    'compilation-error-regexp-alist
    '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-     1 2 3 2 1)))
+     1 2 3 2 1))
+  (set (make-local-variable 'compilation-mode-font-lock-keywords)
+        nil)
+  (compilation-shell-minor-mode 1)
+  )
 
 (define-derived-mode magma-comint-interactive-mode
   comint-mode
