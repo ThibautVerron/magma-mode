@@ -7,7 +7,7 @@ prompt="> "
 debuggerOn=0;
 
 while true; do
-    read -p "$prompt" line
+    IFS='' read -p "$prompt" line
     echo "> $line" # This line should be deleted by comint
     case "$line" in
         "help")
