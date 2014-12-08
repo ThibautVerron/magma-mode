@@ -241,13 +241,17 @@ sent to magma makes sense.
 
 Additionally, the variable =magma-interactive-wait-between-inputs=
 controls whether we want to wait for magma to output before sending
-the next line of input. The default is =nil=, because this can cause
-a noticeable slowdown for large buffers, especially when the
-computations would otherwise be very fast.
+the next line of input. With the latest version, the default is =t=. 
+If you experience a noticeable slowdown for large buffers, you can 
+try setting it to =nil=.
 
-However, if using =comint= and due to the way magma processes its
+Note that, if using =comint= and due to the way magma processes its
 input, if this option is set to =nil=, in the magma buffer, the
 results will no longer be correlated to their input.
+
+The function =magma-eval-buffer= obeys to one more variable 
+=magma-interactive-use-load=: if set to =t=, =magma-eval-buffer= will 
+try to evaluate the buffer by sending =load <filename>;=.
 
 ** Extras
 
