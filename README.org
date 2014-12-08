@@ -19,14 +19,20 @@ process, through comint.
 
 ** Information
 
-This is beta software, all features are not yet fully implemented.
-For sensible usage, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] has been more thoroughly
-tested over the years.
-
 Please report any bug you may encounter, or suggestions you have,
 through the issue tracker. 
 
 ** Installation instructions
+
+*** With Melpa (regular usage)
+
+magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
+
+1. =M-x package-install magma-mode=
+
+2. Add =(require 'magma-mode)= to your init file.
+
+*** With Git (regular usage or contribution)
 
 1. Clone the repository in your favorite elisp folder
 
@@ -46,7 +52,7 @@ through the issue tracker.
       ;; Or simply (require 'magma-mode) if you aren't using any other magma-mode
    #+end_src
 
-4. Additional setup:
+*** Additional setup:
 
    #+begin_src emacs-lisp 
      ;; If you want to load the mode automatically with some file extensions
