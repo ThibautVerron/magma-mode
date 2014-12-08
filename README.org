@@ -265,7 +265,7 @@ The file =magma-extra.el= provides support for various minor modes:
    not syntactically correct (unclosed blocks);
  - =imenu= : implemented the backend functions, so that code
    navigation and =which-function= should work fine. At the moment,
-   the defun syntax =foo := function (bar)=... =end function;= is not
+   the defun syntax =foo :== =function (bar)=... =end function;= is not
    supported;
  - =smart-parens= : partial support only, it is mainly a function
    trying to ensure that the second =>= in =hom<A -> B >= is matched
