@@ -19,8 +19,7 @@ process, through comint.
 
 ** Information
 
-Please report any bug you may encounter, or suggestions you have,
-through the issue tracker. 
+Suggestions and bug reports are welcome, please use the github issue tracker. 
 
 ** Installation instructions
 
@@ -61,6 +60,8 @@ magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
              auto-mode-alist))
           
    #+end_src
+   
+If you want to use auto-completion against magma keywords, please see the next section. 
 
 ** Completion
 *** Introduction
@@ -115,15 +116,15 @@ magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
     #+end_src
     
     then follow the above instructions to build the completion table,
-    but use =~/tmpmagma/= as the path to the magma installation.
+    but use =~/.tmpmagma/= as the path to the magma installation.
     
     Afterwards, you can remove the directory =.tmpmagma= and the file =magmadoc.htm=.
 
 *** Invoking the completion
 
     In =magma-mode= and =magma-comint-interactive-mode=, the
-    dictionary supplies =completion-at-point= with completion
-    candidates. In =magma-comint-interactive-mode=,
+    dictionary provides completion candidates for =completion-at-point=. 
+    In =magma-comint-interactive-mode=,
     =completion-at-point= is bound to =TAB=, and in =magma-mode= it
     is not bound to any key by default. 
 
@@ -135,13 +136,9 @@ magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
     Context-dependent completion is not supported at the moment.
 
     The dictionary is only updated with function, procedure and
-    intrinsics definitions. The reason is that I deem unlikely that a
-    user will want completion for variables and inline-defined
-    functions without any decent scoping. 
-
-    However, it is not a frozen feature, so if you have usecases for
-    extensions to the completion engine, and/or suggestions to
-    overcome some of its current issues, please file an issue.
+    intrinsics definitions. If there are requests to be able to 
+    complete variable names, it may be implemented in the future.
+    However, without proper scoping, it would probably not be very useful.
 
 ** Keymap and functions
 *** Managing magma processes
