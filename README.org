@@ -13,9 +13,6 @@ It is based on the [[magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
-The new features of this mode are principally a new indentation
-engine, based on [[emacs-lisp/SMIE.html][SMIE]] and a new way of interacting with a magma
-process, through comint. 
 
 ** Information
 
