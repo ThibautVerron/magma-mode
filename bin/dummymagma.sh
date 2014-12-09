@@ -1,10 +1,12 @@
 #!/bin/bash
 
 echo "Welcome to dummymagma v1.0!"
+echo "Current working directory: ${PWD}"
 echo "(Type \"help\" for help)"
 
 prompt="> "
 debuggerOn=0;
+
 
 while true; do
     IFS='' read -p "$prompt" line
@@ -25,7 +27,7 @@ while true; do
             debuggerOn=1
             ;;
         "error;")
-            echo "In file file.m, line 1, column 1:"
+            echo "In file \"${PWD}/features/testfiles/error.m\", line 2, column 4:"
             echo "Error"
             ;;
         "hang;")

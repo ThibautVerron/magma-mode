@@ -244,7 +244,7 @@ the buffer number."
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  (let* ((default-directory magma-default-directory)
+  (let* (;(default-directory magma-default-directory)
          (new-interactive-buffer
           (progn
             (make-comint-in-buffer (magma-get-buffer-name i)
@@ -256,6 +256,7 @@ the buffer number."
         (progn
           (push (or i 0) magma-active-buffers-list)
           (set-buffer new-interactive-buffer)
+          (cd magma-default-directory)
           (setq magma-pending-input (magma-q-create))
           (setq magma-ready t)
           (magma-interactive-mode)))))

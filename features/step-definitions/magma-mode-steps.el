@@ -86,6 +86,7 @@
 (When "^I show the result of \"\\(.+\\)\""
   (lambda (expr) (message (format "%s : %s" expr (eval (read expr))))))
 
-
+(When "^I evaluate \"\\(.+\\)\""
+  (lambda (expr) (eval (read expr))))
 
 

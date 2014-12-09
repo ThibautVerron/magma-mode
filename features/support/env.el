@@ -33,6 +33,8 @@
        (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
  (setq magma-completion-table-file (f-join magma-mode-root-path
                                            "data/dummymagma_symbols.txt"))
+ (setq magma-default-directory magma-mode-root-path)
+ ;; (message (format "%s" magma-default-directory))
  (require 'magma-mode)
  (setq magma-delay "0.5")
 )
