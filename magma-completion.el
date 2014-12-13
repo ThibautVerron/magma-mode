@@ -96,6 +96,11 @@
   ;; Fixme: maybe rebuild only if called twice, or something...
   (completion-at-point))
 
+;; Extra functions for the snippets
+
+(defun magma-filename-p (str)
+  (string-match-p "\\.m$" str))
+
 (provide 'magma-completion)
 
 ;;; magma-completion.el ends here
