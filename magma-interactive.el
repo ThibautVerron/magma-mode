@@ -58,6 +58,12 @@ user-function sending input to a process.")
 (defvar-local magma-ready t
   "Whether there is still input or output pending in that buffer.")
 
+(defvar-local magma-timer (current-time))
+
+(put 'magma-ready 'permanent-local t)
+(put 'magma-pending-input 'permanent-local t)
+(put 'magma-timer 'permanent-local t)
+
 (defcustom magma-interactive-buffer-name "magma"
   "*Name of the buffer to be used for using magma
   interactively (will be surrounded by `*')"
@@ -300,6 +306,7 @@ pushes `expr' onto the `magma-pending-input' queue."
       (if magma-ready
           (progn
             (setq magma-ready nil)
+            (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))))
   
@@ -722,10 +729,21 @@ The behavior of this function is controlled by
   (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
   (comint-send-input))
 
+(defun magma-interactive-make-mode-line-process ()
+  (format
+   ":%s"
+   (if (comint-check-proc (current-buffer))
+       (if magma-ready "ready"
+         (concat
+          "run:["
+          (format-seconds
+          "%d:%h:%m:%z%02s]"
+          (float-time (time-subtract (current-time) magma-timer)))))
+     "stop")))
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
-  ;; (set (make-local-variable 'font-lock-keywords) nil)
+  ;; Compilation shell mode
   (add-to-list
    'compilation-error-regexp-alist
    '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
@@ -733,6 +751,9 @@ The behavior of this function is controlled by
   (set (make-local-variable 'compilation-mode-font-lock-keywords)
         nil)
   (compilation-shell-minor-mode 1)
+  ;; Mode line name
+  (setq mode-name "Magma-eval")
+  (setq mode-line-process '(:eval (magma-interactive-make-mode-line-process)))
   )
 
 (define-derived-mode magma-comint-interactive-mode
