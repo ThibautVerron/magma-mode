@@ -13,20 +13,22 @@ It is based on the [[magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
-The new features of this mode are principally a new indentation
-engine, based on [[emacs-lisp/SMIE.html][SMIE]] and a new way of interacting with a magma
-process, through comint. 
 
 ** Information
 
-This is beta software, all features are not yet fully implemented.
-For sensible usage, Luk Bettale's [[http://www-polsys.lip6.fr/~bettale/magma-mode/][magma-mode]] has been more thoroughly
-tested over the years.
-
-Please report any bug you may encounter, or suggestions you have,
-through the issue tracker. 
+Suggestions and bug reports are welcome, please use the github issue tracker. 
 
 ** Installation instructions
+
+*** With Melpa (regular usage)
+
+magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
+
+1. =M-x package-install magma-mode=
+
+2. Add =(require 'magma-mode)= to your init file.
+
+*** With Git (regular usage or contribution)
 
 1. Clone the repository in your favorite elisp folder
 
@@ -46,7 +48,7 @@ through the issue tracker.
       ;; Or simply (require 'magma-mode) if you aren't using any other magma-mode
    #+end_src
 
-4. Additional setup:
+*** Additional setup:
 
    #+begin_src emacs-lisp 
      ;; If you want to load the mode automatically with some file extensions
@@ -55,6 +57,8 @@ through the issue tracker.
              auto-mode-alist))
           
    #+end_src
+   
+If you want to use auto-completion against magma keywords, please see the next section. 
 
 ** Completion
 *** Introduction
@@ -109,15 +113,15 @@ through the issue tracker.
     #+end_src
     
     then follow the above instructions to build the completion table,
-    but use =~/tmpmagma/= as the path to the magma installation.
+    but use =~/.tmpmagma/= as the path to the magma installation.
     
     Afterwards, you can remove the directory =.tmpmagma= and the file =magmadoc.htm=.
 
 *** Invoking the completion
 
     In =magma-mode= and =magma-comint-interactive-mode=, the
-    dictionary supplies =completion-at-point= with completion
-    candidates. In =magma-comint-interactive-mode=,
+    dictionary provides completion candidates for =completion-at-point=. 
+    In =magma-comint-interactive-mode=,
     =completion-at-point= is bound to =TAB=, and in =magma-mode= it
     is not bound to any key by default. 
 
@@ -129,13 +133,9 @@ through the issue tracker.
     Context-dependent completion is not supported at the moment.
 
     The dictionary is only updated with function, procedure and
-    intrinsics definitions. The reason is that I deem unlikely that a
-    user will want completion for variables and inline-defined
-    functions without any decent scoping. 
-
-    However, it is not a frozen feature, so if you have usecases for
-    extensions to the completion engine, and/or suggestions to
-    overcome some of its current issues, please file an issue.
+    intrinsics definitions. If there are requests to be able to 
+    complete variable names, it may be implemented in the future.
+    However, without proper scoping, it would probably not be very useful.
 
 ** Keymap and functions
 *** Managing magma processes
@@ -181,10 +181,10 @@ Additionally, all these functions take optional prefix arguments:
 
 *** Comint vs term
 
-=Term-mode= will basically render the magma experience you would have in
-a regular terminal emulator, regardless of emacs. Only the prompt can be
-written, =C-p= and =C-n= browse the history instead of scrolling the
-window, /et caetera/.
+=Term-mode= will basically render the magma experience you would have
+in a regular terminal emulator, regardless of emacs. The buffer is
+read-only except for the prompt, =C-p= and =C-n= browse the history
+instead of scrolling the window, /et caetera/.
 
 Another specificity of term-mode is that it intercepts some prefix
 keys, most notably =C-c= and =C-x=. For most purposes, =C-x= needs to
@@ -213,7 +213,7 @@ not depend on anything apart from emacs and =magma=.
 
 As of today, =term-mode= is disabled by default and no longer
 maintained (it still works, but it won't recieve new features). It may
-be removed in the future, so please let me know if your workflow
+be removed in the future, so please create an issue if your workflow
 absolutely requires that you use =term-mode= instead of =comint=.
 
 
@@ -238,13 +238,17 @@ sent to magma makes sense.
 
 Additionally, the variable =magma-interactive-wait-between-inputs=
 controls whether we want to wait for magma to output before sending
-the next line of input. The default is =nil=, because this can cause
-a noticeable slowdown for large buffers, especially when the
-computations would otherwise be very fast.
+the next line of input. With the latest version, the default is =t=. 
+If you experience a noticeable slowdown for large buffers, you can 
+try setting it to =nil=.
 
-However, if using =comint= and due to the way magma processes its
+Note that, if using =comint= and due to the way magma processes its
 input, if this option is set to =nil=, in the magma buffer, the
 results will no longer be correlated to their input.
+
+The function =magma-eval-buffer= obeys to one more variable 
+=magma-interactive-use-load=: if set to =t=, =magma-eval-buffer= will 
+try to evaluate the buffer by sending =load <filename>;=.
 
 ** Extras
 
@@ -258,7 +262,7 @@ The file =magma-extra.el= provides support for various minor modes:
    not syntactically correct (unclosed blocks);
  - =imenu= : implemented the backend functions, so that code
    navigation and =which-function= should work fine. At the moment,
-   the defun syntax =foo := function (bar)=... =end function;= is not
+   the defun syntax =foo :== =function (bar)=... =end function;= is not
    supported;
  - =smart-parens= : partial support only, it is mainly a function
    trying to ensure that the second =>= in =hom<A -> B >= is matched
@@ -269,15 +273,14 @@ To use these features, simply turn the corresponding modes on.
 *** Yasnippet snippets
 
 =magma-mode= comes with a small collection of snippets. At the moment, we
-contains snippets for =case=, =for=, =if=, =try=, =while=, =function=,
-=procedure=, and =load=.
+provide snippets for =case=, =for=, =if=, =try=, =while=, =function=,
+=procedure=, and =load= (with filename completion).
 
 To use this, add the following to your init file:
 
 #+begin_src emacs-lisp
     (require 'magma-snippets)
 #+end_src
-
 
 *** Extra "electric" editting features
 
@@ -303,7 +306,7 @@ the following keys are also bound:
    This shouldn't change the way your code is evaluated.
 
  - =C-RET= or =C-c C-j= (=magma-special-newline-and-indent=): inserts
-   an "evaluated" newline in the buffer. It is a regular
+   an "stronger" newline in the buffer. It is a regular
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
 
@@ -327,6 +330,8 @@ the following keys are also bound:
       cat "and even a few more words";"
    #+end_example
 
+
+
 *** Initial file contents and file headers
 
 We offer support for initial file contents and automatically updated
@@ -344,3 +349,21 @@ The header inserted by the default functions looks like this:
   // load "filename.m";
 #+end_src
 
+*** Changelog
+
+**** 2014-11-19
+
+ - *Change* =comint-mode= is made the default mode
+ - *Change* Step-by-step evaluation mechanism changed, no more hardcoded waiting time between instructions
+ - *Bugfix* Incorrect indentation in some situations
+ - *Bugfix* Performance improvement when scanning the buffer for new completion candidates (noticeable in the interactive buffer)
+ - *Bugfix* The smie parser was unable to get out of strings
+ - *Bugfix* =build-completion-table.sh= was ignoring some functions
+  
+**** 2014-10-02  
+  
+ - Package added on melpa
+ 
+**** 2014-01-07 
+
+ - Initial release
