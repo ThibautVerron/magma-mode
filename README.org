@@ -349,7 +349,25 @@ The header inserted by the default functions looks like this:
   // load "filename.m";
 #+end_src
 
-*** Changelog
+** Changelog
+
+**** Next
+
+ - *New feature* Mode-line indicator for interactive buffer now shows
+   whether the buffer is ready or running some computation. If
+   running, also show the time since last input was sent.
+ - *New feature* Errors in the interactive buffer are highlighted and
+   link back to the source.
+ - *Change* In some situations, the magma interactive buffer failed to
+   acknowledge that it is ready for more input. It should happen more
+   rarely now. If it still happens, as a workaround, =C-c C-i=
+   (=magma-int=) will now force the input queue to be emptied.
+ - *Change* Indentation in parenthesed structures is more consistent.
+ - *Bugfix* Indentation after, and inside =<...>=
+ - *Bugfix* Changing the working buffer locally was impossible
+ - *Bugfix* =magma-eval-until= would evaluate up to the next
+   expression if point was at the end of an expression
+   
 
 **** 2014-11-19
 
