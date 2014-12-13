@@ -458,7 +458,7 @@ Feature: Interaction with a magma process
 
   Scenario: Errors in magma evaluation
     Given I am in buffer "*magma*"
-    When I insert "error;"
+    When I insert "error-absolute;"
     And I wait for an instant
     And I press "RET"
     And I wait for an instant
@@ -474,6 +474,24 @@ Feature: Interaction with a magma process
     Then I should be in buffer "error.m"
     And the cursor should be after "abc"
     And the cursor should be before "def"
+    When I switch to buffer "*magma*"
+    And I go to end of buffer
+    And I insert "error-relative;"
+    And I wait for an instant
+    And I press "RET"
+    And I wait for an instant
+    Then I should see pattern:
+    """
+    In file ".+/error\.m", line [0-9]+, column [0-9]+:
+    Error
+    """
+    And I place the cursor before "error.m"
+    And I wait for an instant
+    Then current point should have the compilation-error face
+    When I press "C-x `"
+    Then I should be in buffer "error.m"
+    And the cursor should be after "123"
+    And the cursor should be before "456"
     
     
     
