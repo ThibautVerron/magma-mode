@@ -245,33 +245,54 @@ the buffer number."
   (or (get-buffer (magma-make-buffer-name i))
       (error "No evaluation buffer found.")))
   
+(defcustom magma-interactive-prompt t
+  "If non nil, prompt for the path to the magma program and its arguments")
+
+(defun magma--interactive-read-spec (prog args)
+  (if magma-interactive-prompt
+      (let* ((default (concat prog (or args "")))
+             (prompt "Program to run: ")
+             (readval (read-string prompt default nil default)))
+        (split-string readval))
+        ;; (if (string-match
+        ;;        "^\\([[:alnum:]/\\-_~]+\\)[[:blank:]]?\\(.*\\)$"
+        ;;        readval)
+        ;;     (cons (match-string 1 readval) (match-string 2 readval))
+        ;;  (error "Failed to read program name")))
+    (cons prog args)))
 
 ;; Comint definitions
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  (let* (;(default-directory magma-default-directory)
-         (new-interactive-buffer
-          (progn
-            (make-comint-in-buffer (magma-get-buffer-name i)
-                                   (magma-make-buffer-name i)
-                                   magma-interactive-program
-                                   magma-interactive-arguments))))
-    (if (not (memq (or i 0) magma-active-buffers-list))
-        ; Steps to take if the buffer is new
-        (progn
-          (push (or i 0) magma-active-buffers-list)
-          (set-buffer new-interactive-buffer)
-          (cd magma-default-directory)
-          (setq magma-pending-input (magma-q-create))
-          (setq magma-ready t)
-          (magma-interactive-mode)))))
+  (let ((bufname (magma-make-buffer-name i)))
+    (unless (get-buffer-process bufname)
+      ; The buffer is new
+      (let* ((progargs (magma--interactive-read-spec
+                        magma-interactive-program
+                        magma-interactive-arguments))
+             (program (car progargs))
+             (args (cdr progargs))
+             (new-interactive-buffer
+              (apply #'make-comint-in-buffer
+                     (magma-get-buffer-name i)
+                     (magma-make-buffer-name i)
+                     program
+                     nil
+                     args)))
+        (push (or i 0) magma-active-buffers-list)
+        (set-buffer new-interactive-buffer)
+        (cd magma-default-directory)
+        (setq magma-pending-input (magma-q-create))
+        (setq magma-ready t)
+        (magma-interactive-mode)))))
 
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
   ;;(interactive "P")
   (with-current-buffer (magma-get-buffer i)
+    (remove (or i 0) magma-active-buffers-list)
     (or (not (comint-check-proc (current-buffer)))
         (interrupt-process nil comint-ptyp))
     (setq magma-ready t)
@@ -280,6 +301,7 @@ the buffer number."
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
+  (remove (or i 0) magma-active-buffers-list)
   (with-current-buffer (magma-get-buffer i)
     ;;(comint-kill-subjob)
     (or (not (comint-check-proc (current-buffer)))
@@ -379,6 +401,7 @@ magma evaluation buffer."
 (defun magma-term-int (&optional i)
   "Interrupt the magma process in buffer i"
   ;;(interactive "P")
+  (remove (or i 0) magma-active-buffers-list)
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-send-string (magma-get-buffer i) "\C-c"))))
@@ -386,6 +409,7 @@ magma evaluation buffer."
 (defun magma-term-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
+  (remove (or i 0) magma-active-buffers-list)
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-kill-subjob))))

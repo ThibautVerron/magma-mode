@@ -367,6 +367,7 @@ The header inserted by the default functions looks like this:
  - *Bugfix* Changing the working buffer locally was impossible
  - *Bugfix* =magma-eval-until= would evaluate up to the next
    expression if point was at the end of an expression
+   
 
 **** 2014-11-19
 
