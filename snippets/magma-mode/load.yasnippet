@@ -3,4 +3,4 @@
 # key: load
 # condition: (looking-at "$")
 # --
-load "${1:$$(unless yas/modified-p (file-relative-name (read-file-name "File to load " magma-working-directory nil 'confirm "" #'magma-filename-p)))}";
+load "${1:$$(unless yas/modified-p (file-relative-name (read-file-name "File to load " nil nil 'confirm "" #'magma-filename-p)))}";
