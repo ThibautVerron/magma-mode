@@ -71,10 +71,8 @@
   (use-local-map magma-mode-map)
   (set-syntax-table magma-mode-syntax-table)
   (setq-local syntax-propertize-function magma-syntax-propertize-function)
-  (make-local-variable 'comment-start)
-  (setq comment-start "/* ")
-  (make-local-variable 'comment-end)
-  (setq comment-end " */")
+  (set (make-local-variable 'comment-start) "/* ")
+  (set (make-local-variable 'comment-end) " */")
   (setq imenu-generic-expression magma-imenu-generic-expression)
   (smie-setup
    magma-smie-grammar
@@ -82,8 +80,8 @@
    :forward-token #'magma-smie-forward-token
    :backward-token #'magma-smie-backward-token)
   
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-font-lock-keywords nil nil ((?_ . "w"))))
+  (set (make-local-variable 'font-lock-defaults)
+       '(magma-font-lock-keywords nil nil ((?_ . "w"))))
 
   (set (make-local-variable 'indent-line-function)
        'smie-indent-line)
