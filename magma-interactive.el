@@ -754,25 +754,25 @@ The behavior of this function is controlled by
   (comint-send-input))
 
 (defconst magma-interactive-modeline-ready-face
-  'compilation-mode-line-exit)
+  "success")
 (defconst magma-interactive-modeline-run-face
-  'compilation-warning-face)
+  "warning")
 (defconst magma-interactive-modeline-stop-face
-  'compilation-error-face)
+  "error")
 
 (defun magma-interactive-make-mode-line-process ()
   (format
    ":%s"
    (if (comint-check-proc (current-buffer))
        (if magma-ready
-           (propertize "ready" 'face 'magma-interactive-modeline-ready-face)
+           (propertize "ready" 'face magma-interactive-modeline-ready-face)
          (concat
-          (propertize "run" 'face 'magma-interactive-modeline-ready-face)
+          (propertize "run" 'face magma-interactive-modeline-ready-face)
           ":["
           (format-seconds
           "%d:%h:%m:%z%02s]"
           (float-time (time-subtract (current-time) magma-timer)))))
-     (propertize "stop" 'face 'magma-interactive-modeline-ready-face))))
+     (propertize "stop" 'face magma-interactive-modeline-stop-face))))
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
