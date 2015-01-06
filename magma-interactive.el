@@ -753,17 +753,26 @@ The behavior of this function is controlled by
   (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
   (comint-send-input))
 
+(defconst magma-interactive-modeline-ready-face
+  'compilation-mode-line-exit)
+(defconst magma-interactive-modeline-run-face
+  'compilation-warning-face)
+(defconst magma-interactive-modeline-stop-face
+  'compilation-error-face)
+
 (defun magma-interactive-make-mode-line-process ()
   (format
    ":%s"
    (if (comint-check-proc (current-buffer))
-       (if magma-ready "ready"
+       (if magma-ready
+           (propertize "ready" 'face 'magma-interactive-modeline-ready-face)
          (concat
-          "run:["
+          (propertize "run" 'face 'magma-interactive-modeline-ready-face)
+          ":["
           (format-seconds
           "%d:%h:%m:%z%02s]"
           (float-time (time-subtract (current-time) magma-timer)))))
-     "stop")))
+     (propertize "stop" 'face 'magma-interactive-modeline-ready-face))))
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
@@ -772,13 +781,11 @@ The behavior of this function is controlled by
    'compilation-error-regexp-alist
    '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
      1 2 3 2 1))
-  (set (make-local-variable 'compilation-mode-font-lock-keywords)
-        nil)
+  (setq-local compilation-mode-font-lock-keywords nil)
   (compilation-shell-minor-mode 1)
   ;; Mode line name
   (setq mode-name "Magma-eval")
-  (setq mode-line-process '(:eval (magma-interactive-make-mode-line-process)))
-  )
+  (setq mode-line-process '(:eval (magma-interactive-make-mode-line-process))))
 
 (define-derived-mode magma-comint-interactive-mode
   comint-mode
@@ -800,8 +807,7 @@ The behavior of this function is controlled by
   "Magma interactive mode (using term)
 \\<magma-term-interactive-mode-map>"
   (setq term-scroll-to-bottom-on-output t)
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
+  (setq-local font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
 
 
