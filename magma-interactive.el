@@ -767,7 +767,7 @@ The behavior of this function is controlled by
        (if magma-ready
            (propertize "ready" 'face magma-interactive-modeline-ready-face)
          (concat
-          (propertize "run" 'face magma-interactive-modeline-ready-face)
+          (propertize "run" 'face magma-interactive-modeline-run-face)
           ":["
           (format-seconds
           "%d:%h:%m:%z%02s]"
