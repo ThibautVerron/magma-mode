@@ -47,7 +47,10 @@
       (id)
 
       ;; Assignment
-      (assign (id ":=" expr))
+      (assign (idlist ":=" expr))
+
+      (idlist (id)
+              (idlist "," idlist))
       
       ;; Instruction
       (inst (assign)
