@@ -44,7 +44,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 (push '(magma-mode "\\(function\\|procedure\\|for\\|while\\|try\\|if\\|case\\)"
-                   "end \\(function\\|procedure\\|for\\|while\\|try\\|if\\|case\\);" "/[/*]" nil nil)
+                   "end \\(function\\|procedure\\|for\\|while\\|try\\|if\\|case\\);"
+                   "/[/*]" nil nil)
       hs-special-modes-alist)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -156,17 +157,11 @@
 ;; Smartparens
 ;;;;;;;;;;;;;;
 
-(defun magma-smartparens-gt-in-an-arrow (id beg end)
-  "Test ensuring that \"->\" does not mark the end of the
-  surrounding \"<...>\" pair."
-  (save-excursion
-    (goto-char (- end 1))
-    (looking-back "-")))
-
 (eval-after-load "smartparens.el"
-  '(sp-with-modes '(magma-mode magma-comint-interactive-mode magma-term-interactive-mode)
-     (sp-local-pair "<" ">" :skip-match 'magma-smartparens-gt-in-an-arrow :actions '(insert wrap navigate))
-     (sp-local-pair "`" nil :actions nil)))
+  '(sp-with-modes '(magma-mode
+                   magma-comint-interactive-mode
+                   magma-term-interactive-mode)
+    (sp-local-pair "`" nil :actions nil)))
 
 
 ;; File header
@@ -206,7 +201,8 @@
              (save-excursion
                (forward-line 2)
                (point))))
-        (insert (format "// Hash: %s\n" (secure-hash 'md5 (current-buffer) start (point-max))))))))
+        (insert (format "// Hash: %s\n"
+                        (secure-hash 'md5 (current-buffer) start (point-max))))))))
 
 (defun magma-update-header ()
   (when magma-file-header
@@ -216,9 +212,8 @@
 
 (add-hook
  'magma-mode-hook
- (lambda ()
-   (add-hook 'write-contents-functions
-             'magma-update-header)))
+ (lambda () (add-hook 'write-contents-functions
+                      'magma-update-header nil t)))
 
 (defcustom magma-initial-file nil
   "Contents to insert in a new magma file. This can be either
