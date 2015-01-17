@@ -791,4 +791,22 @@ Feature: Magma code indentation
     end function;
     """
     
- 
+  Scenario: Indentation in multi-assignments
+    When I insert:
+    """
+    for x in L do
+    longvar1,
+    longvar2 := variable1
+    + variable2;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        longvar1,
+            longvar2 := variable1
+                        + variable2;
+    end for;
+    """
+
