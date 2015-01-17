@@ -36,7 +36,7 @@
 ;; a magma buffer, the lexer will not pick them as tokens: by default,
 ;; the lexer picks "\w+" matches as token, and '' is not a word
 ;; consistuant. (Proof : place the point at "token" above, then press
-;; `C-s' and enter "\w". Check that the '' is not highlighted amongst
+;; `C-M-s' and enter "\w". Check that the '' is not highlighted amongst
 ;; the matches)
 ;;;;;
 
@@ -502,8 +502,9 @@ robust in any way."
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
     (`(:after . ",")
-     (when (smie-rule-parent-p "(" "{" "[" "<")
-       0))
+     (if (smie-rule-parent-p "(" "{" "[" "<")
+         0
+       4))
 
     (`(:after . ";") 0)
     
