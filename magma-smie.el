@@ -607,7 +607,8 @@ robust in any way."
 (defun magma-beginning-of-defun (&optional silent)
   "Go to the beginning of the function, procedure or intrinsics
   definition at point"
-  (interactive) (condition-case nil
+  (interactive)
+  (condition-case nil
       (search-backward-regexp magma-defun-regexp)
     (error (or silent
                (message "Not in a function, procedure or intrinsics definition")))))
