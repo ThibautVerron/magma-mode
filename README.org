@@ -13,7 +13,6 @@ It is based on the [[magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
-
 ** Information
 
 Suggestions and bug reports are welcome, please use the github issue tracker. 
@@ -350,8 +349,7 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-
-**** Next
+*** Next
 
  - *New feature* Mode-line indicator for interactive buffer now shows
    whether the buffer is ready or running some computation. If
@@ -364,11 +362,12 @@ The header inserted by the default functions looks like this:
    (=magma-int=) will now force the input queue to be emptied.
  - *Change* Indentation in parenthesed structures is more consistent.
  - *Bugfix* Indentation after, and inside =<...>=
- - *Bugfix* Changing the working buffer locally was impossible
+ - *Bugfix* Changing the working buffer locally was impossible, now
+   there is a function =magma-set-working-buffer-locally=
  - *Bugfix* =magma-eval-until= would evaluate up to the next
    expression if point was at the end of an expression
 
-**** 2014-11-19
+*** 2014-11-19
 
  - *Change* =comint-mode= is made the default mode
  - *Change* Step-by-step evaluation mechanism changed, no more hardcoded waiting time between instructions
@@ -377,10 +376,10 @@ The header inserted by the default functions looks like this:
  - *Bugfix* The smie parser was unable to get out of strings
  - *Bugfix* =build-completion-table.sh= was ignoring some functions
   
-**** 2014-10-02  
+*** 2014-10-02  
   
  - Package added on melpa
  
-**** 2014-01-07 
+*** 2014-01-07 
 
  - Initial release
