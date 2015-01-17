@@ -44,6 +44,7 @@
 
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")
+(put 'magma-working-buffer-number 'safe-local-variable #'number-or-marker-p)
 
 (defvar magma-active-buffers-list '()
   "*List of active magma buffers.")
