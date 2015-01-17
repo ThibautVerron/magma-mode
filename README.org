@@ -366,6 +366,8 @@ The header inserted by the default functions looks like this:
    there is a function =magma-set-working-buffer-locally=
  - *Bugfix* =magma-eval-until= would evaluate up to the next
    expression if point was at the end of an expression
+ - *Bugfix* Evaluation functions no longer push the comments in the
+   evaluated region to the kill ring
 
 *** 2014-11-19
 

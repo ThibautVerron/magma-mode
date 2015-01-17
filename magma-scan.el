@@ -81,7 +81,8 @@
               (goto-char (point-min))
               
               ;; Get rid of the comments
-              (comment-kill (count-lines (point-min) (point-max)))
+              (let (kill-ring)
+                (comment-kill (count-lines (point-min) (point-max))))
               (goto-char (point-min))
               
               ;; And scan
