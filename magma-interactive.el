@@ -248,7 +248,8 @@ the buffer number."
               ;;(error "No evaluation buffer found.")))
   
 (defcustom magma-interactive-prompt t
-  "If non nil, prompt for the path to the magma program and its arguments")
+  "If non nil, prompt for the path to the magma program and its arguments"
+  :group 'magma)
 
 (defun magma--interactive-read-spec (prog args)
   (if magma-interactive-prompt
@@ -277,8 +278,9 @@ the buffer number."
                      program
                      nil
                      args)))
-        (or (memq (or i 0) magma-active-buffers-list)
-            (push (or i 0) magma-active-buffers-list))
+        ;(or (memq (or i 0) magma-active-buffers-list)
+        (push (or i 0) magma-active-buffers-list)
+        ;)
         (set-buffer new-interactive-buffer)
         (cd magma-default-directory)
         (setq magma-pending-input (magma-q-create))
@@ -288,38 +290,32 @@ the buffer number."
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
-  ;;(interactive "P")
-  ;;(message "Entering int...")
   (with-current-buffer (magma-get-buffer i)
-    (remove (or i 0) magma-active-buffers-list)
+    (setq magma-active-buffers-list
+          (remove (or i 0) magma-active-buffers-list))
     (or (not (comint-check-proc (current-buffer)))
         (comint-interrupt-subjob))
     (setq magma-ready t)
-    (setq magma-pending-input (magma-q-create)))
-  ;;(message "Exiting int")
-  )
+    (setq magma-pending-input (magma-q-create))))
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
-  ;;(message "Entering kill...")
-  (remove (or i 0) magma-active-buffers-list)
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
   (let ((buf (magma-get-buffer i)))
     (when buf
       (with-current-buffer buf
         (or (not (comint-check-proc (current-buffer)))
             (comint-kill-subjob))
         (setq magma-ready t)
-        (setq magma-pending-input (magma-q-create)))))
-  ;;(message "Exitting kill")
-  )
+        (setq magma-pending-input (magma-q-create))))))
 
 (defun magma-comint-send-string (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (concat expr "\n")))
     (run-hook-with-args 'comint-input-filter-functions expr)
-    (comint-send-string (magma-get-buffer i) command))
-    )
+    (comint-send-string (magma-get-buffer i) command)))
 
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation.
@@ -387,8 +383,9 @@ magma evaluation buffer."
          (new-interactive-buffer
           (make-term magma-buffer-name magma-interactive-program)))
     (save-excursion
-      (or (memq (or i 0) magma-active-buffers-list)
-          (push (or i 0) magma-active-buffers-list))
+      ;(or (memq (or i 0) magma-active-buffers-list)
+      (push (or i 0) magma-active-buffers-list)
+      ;)
       (set-buffer new-interactive-buffer)
       (unless reusing-buff
         (insert
@@ -403,16 +400,16 @@ magma evaluation buffer."
     
 (defun magma-term-int (&optional i)
   "Interrupt the magma process in buffer i"
-  ;;(interactive "P")
-  (remove (or i 0) magma-active-buffers-list)
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-send-string (magma-get-buffer i) "\C-c"))))
 
 (defun magma-term-kill (&optional i)
   "Kill the magma process in buffer i"
-  ;;(interactive "P")
-  (remove (or i 0) magma-active-buffers-list)
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-kill-subjob))))

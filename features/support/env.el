@@ -36,9 +36,6 @@
  (setq magma-default-directory magma-mode-root-path)
  ;; (message (format "%s" magma-default-directory))
  (require 'magma-mode)
- (defun magma--interactive-read-specs (prog args)
-   (message "magma--interactive-read-specs mockup")
-   (list magma-interactive-program))
  (setq magma-delay "0.5")
 )
 
