@@ -502,7 +502,8 @@ robust in any way."
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
     (`(:after . ",")
-     (if (smie-rule-parent-p "(" "{" "[" "<")
+     (if (or (smie-rule-parent-p "(" "{" "[" "<" "fun(" "paren:")
+             (smie-rule-sibling-p))
          0
        4))
 
