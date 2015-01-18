@@ -30,12 +30,15 @@
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
        (let ((ext (if (eq system-type 'windows-nt) ".bat" ".sh")))
-       (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
+         (f-join magma-mode-root-path "bin" (s-concat "dummymagma" ext))))
  (setq magma-completion-table-file (f-join magma-mode-root-path
                                            "data/dummymagma_symbols.txt"))
  (setq magma-default-directory magma-mode-root-path)
  ;; (message (format "%s" magma-default-directory))
  (require 'magma-mode)
+ (defun magma--interactive-read-specs (prog args)
+   (message "magma--interactive-read-specs mockup")
+   (list magma-interactive-program))
  (setq magma-delay "0.5")
 )
 

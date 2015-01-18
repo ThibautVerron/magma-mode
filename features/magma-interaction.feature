@@ -422,7 +422,7 @@ Feature: Interaction with a magma process
     And I wait for an instant
     Then the buffer should have no process
     And I should see "Process magma interrupt"
-
+    
 
   Scenario: Kill multiple magma processes
     Given I am in buffer "*magma-test*"
