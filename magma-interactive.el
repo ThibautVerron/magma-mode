@@ -239,7 +239,6 @@ file)."
 
 If `app' is not nil, it is a string which will be added before
 the buffer number."
-  
   (concat "*" (magma-get-buffer-name i app) "*"))
 
 (defun magma-get-buffer (&optional i)
@@ -278,9 +277,7 @@ the buffer number."
                      program
                      nil
                      args)))
-        ;(or (memq (or i 0) magma-active-buffers-list)
         (push (or i 0) magma-active-buffers-list)
-        ;)
         (set-buffer new-interactive-buffer)
         (cd magma-default-directory)
         (setq magma-pending-input (magma-q-create))
@@ -383,9 +380,7 @@ magma evaluation buffer."
          (new-interactive-buffer
           (make-term magma-buffer-name magma-interactive-program)))
     (save-excursion
-      ;(or (memq (or i 0) magma-active-buffers-list)
       (push (or i 0) magma-active-buffers-list)
-      ;)
       (set-buffer new-interactive-buffer)
       (unless reusing-buff
         (insert
