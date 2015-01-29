@@ -355,7 +355,7 @@ magma evaluation buffer."
       (comint-send-input))))
   
 (defun magma-comint-help-word (topic)
-  "call-up the handbook in an interactive buffer for topic"
+  "Call-up the handbook in an interactive buffer for topic"
   (interactive "sMagma help topic: ")
   (make-comint-in-buffer (magma-get-buffer-name "help")
                          (magma-make-buffer-name "help")
@@ -368,6 +368,20 @@ magma evaluation buffer."
    (format "?%s\n" topic))
   (display-buffer (magma-get-buffer "help")))
 
+(defun magma-comint-send-now (expr &optional i)
+  "Prompt for an expression, then send it to the comint buffer without waiting for ready.
+
+The primary use-case is to be able to send a value to a `read' or
+`readi' prompt, without having to switch buffers.
+
+This can be used to force a new line feed when the magma prompt
+is hanging at the end of the line, preventing comint to
+acknowledge that the magma process is ready."
+  (interactive "sExpression: ")
+  (let ((buf (magma-get-buffer (magma-choose-buffer i))))
+    (with-current-buffer buf
+      (insert expr)
+      (comint-send-input))))
    
 
 ;; Term-mode definitions
@@ -452,23 +466,19 @@ magma evaluation buffer."
   (interactive "P")
   (magma-kill-or-broadcast i)
   (sleep-for 2)
-  (magma-run-or-broadcast i)
-  )
+  (magma-run-or-broadcast i))
 
 (defun magma-switch-to-interactive-buffer (&optional i)
   "Switch to the magma process in buffer i in another frame"
   (interactive "P")
   (magma-run i)
-  (switch-to-buffer-other-frame (magma-get-buffer i))
-  )
+  (switch-to-buffer-other-frame (magma-get-buffer i)))
 
 (defun magma-switch-to-interactive-buffer-same-frame (&optional i)
   "Switch to the magma process in buffer i, in another window on the same frame"
   (interactive "P")
   (magma-run i)
-  (pop-to-buffer (magma-get-buffer i))
-  )
-
+  (pop-to-buffer (magma-get-buffer i)))
 
 (defun magma--at-end (end)
   (or (looking-at "\\([[:blank:]]\\|\n\\)*\\'")
