@@ -164,6 +164,12 @@ Additionally, all these functions take optional prefix arguments:
  - =C-u C-l= : prompts for a magma process, and send the current line
    to this process
  - =C-u C-u C-l= : send the current line to all magma processes
+   
+ The function =magma-comint-send-now= (not bound by default) is a bit
+ special: it prompts for a value, then sends it to the magma
+ evaluation buffer /without/ waiting for the evaluation queue to be
+ empty. It allows to send values to interactive prompts (=read= or
+ =readi=) without switching buffers.
 
 ** Settings
 
@@ -356,6 +362,7 @@ The header inserted by the default functions looks like this:
    running, also show the time since last input was sent.
  - *New feature* Errors in the interactive buffer are highlighted and
    link back to the source.
+ - *New feature* Added the function =magma-comint-send-now= 
  - *Change* In some situations, the magma interactive buffer failed to
    acknowledge that it is ready for more input. It should happen more
    rarely now. If it still happens, as a workaround, =C-c C-i=
