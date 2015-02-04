@@ -165,11 +165,11 @@ Additionally, all these functions take optional prefix arguments:
    to this process
  - =C-u C-u C-l= : send the current line to all magma processes
    
- The function =magma-comint-send-now= (not bound by default) is a bit
- special: it prompts for a value, then sends it to the magma
- evaluation buffer /without/ waiting for the evaluation queue to be
- empty. It allows to send values to interactive prompts (=read= or
- =readi=) without switching buffers.
+The function =magma-comint-send-now= (not bound by default) is a bit
+special: it prompts for a value, then sends it to the magma
+evaluation buffer /without/ waiting for the evaluation queue to be
+empty. It allows to send values to interactive prompts (=read= or
+=readi=) without switching buffers.
 
 ** Settings
 
