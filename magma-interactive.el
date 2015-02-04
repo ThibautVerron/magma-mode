@@ -44,7 +44,15 @@
 
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")
-(put 'magma-working-buffer-number 'safe-local-variable #'number-or-marker-p)
+
+(defun magma--valid-working-buffer-number (num)
+  "If this predicate is satisfied, the value is safe as file-local."
+  (or (integerp num)
+      (char-or-string-p num)))
+
+(put 'magma-working-buffer-number
+     'safe-local-variable
+     #'magma--valid-working-buffer-number)
 
 (defvar magma-active-buffers-list '()
   "*List of active magma buffers.")

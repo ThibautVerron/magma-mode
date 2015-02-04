@@ -361,6 +361,10 @@ The header inserted by the default functions looks like this:
    rarely now. If it still happens, as a workaround, =C-c C-i=
    (=magma-int=) will now force the input queue to be emptied.
  - *Change* Indentation in parenthesed structures is more consistent.
+ - *Change* =magma-working-buffer-number= can be set as a file local
+   variable, and its value is assumed to be safe if it is a number, a
+   char or a string. If it is a symbol, the user is prompted to
+   confirm that it is a safe value, and the symbol is evaluated.
  - *Bugfix* Indentation after, and inside =<...>=
  - *Bugfix* Changing the working buffer locally was impossible, now
    there is a function =magma-set-working-buffer-locally=
