@@ -4,6 +4,8 @@
 #+LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
 
 * Magma-mode
+[[http://melpa.org/#/magma-mode][file:http://melpa.org/packages/magma-mode-badge.svg]]
+
 ** Basics
 
 This is a mode for editting input files for the computer algebra
@@ -13,10 +15,8 @@ It is based on the [[magma-mode]] written by Luk Bettale.  The font-lock
 (syntax highlight) specifications were taken from this mode, as well
 as the interaction with a magma process through term-mode.
 
-
-** Information
-
 Suggestions and bug reports are welcome, please use the github issue tracker. 
+Contributions are more than welcome, feel free to clone the =dev= branch and start hacking!
 
 ** Installation instructions
 
