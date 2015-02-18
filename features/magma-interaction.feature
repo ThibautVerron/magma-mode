@@ -205,7 +205,6 @@ Feature: Interaction with a magma process
     And I wait for an instant
     Then I should see message "Not in a function, procedure or intrinsics definition"
 
-  @fixedbug
   Scenario: Evaluate an expression with no output
     Given I am in buffer "*magma-test*"
     And I insert:
@@ -297,8 +296,116 @@ Feature: Interaction with a magma process
     When I switch to buffer "*magma-2*"
     And I wait for an instant
     Then I should see "Input: 6;"
-  
+    
 
+
+  Scenario: Output filter: debugger prompt
+    Given I am in buffer "*magma*"
+    And I press "RET"
+    And I wait for an instant
+    And I insert "debug;"
+    And I press "RET"
+    And I wait for an instant
+    And I wait for an instant T
+    Then I should see "debug> "
+    And I should not see:
+    """
+    > debug;
+    > debug;
+    """
+    Then I insert "quit;"
+    And I press "RET"
+
+    
+  Scenario: Evaluation of a region as a whole
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to whole
+    And I set magma-interactive-wait-between-inputs to t
+    # And I show the result of "magma-interactive-method"
+    # And I show the result of "magma-interactive-wait-between-inputs"
+    # And I show the result of "magma-working-buffer-number"
+    # And I show the result of "(magma-make-buffer-name)"
+    # And I show the result of "magma-interactive-use-load"
+    And I insert:
+    """
+    whole_test: 1+1;
+    whole_test: 2+2;
+    
+    """
+    Then I should see:
+    """
+    whole_test: 1+1;
+    whole_test: 2+2;
+    
+    """
+    When I press "C-c C-b"
+    # And I wait for an instant
+    And I switch to buffer "*magma*"
+    # And I press "RET"
+    And I wait for an instant
+    Then I should see:
+    """
+    > whole_test: 1+1;
+    whole_test: 2+2;
+    """
+    And I should see:
+    """
+    Input: whole_test: 1+1;
+    Input: whole_test: 2+2;
+    """
+    
+  Scenario: Evaluation of a region line by line
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to line
+    And I set magma-interactive-wait-between-inputs to t
+    And I insert:
+    """
+    line_test: 1+1;
+    line_test: 2+2;
+    """
+    And I press "C-c C-b"
+    # And I wait for an instant
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see:
+    """
+    > line_test: 1+1;
+    Input: line_test: 1+1;
+    > line_test: 2+2;
+    Input: line_test: 2+2;
+    """
+    
+  Scenario: Evaluation of a region expression by expression
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to expr
+    And I set magma-interactive-wait-between-inputs to t
+    And I insert:
+    """
+    for expr_test in foo do
+        bar;
+    end for;
+    expr_test: 2+2;
+    """
+    And I press "C-c C-b"
+    # And I wait for an instant
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see:
+    """
+    > for expr_test in foo do
+        bar;
+    end for;
+    Input: for expr_test in foo do
+    Input:     bar;
+    Input: end for;
+    > expr_test: 2+2;
+    Input: expr_test: 2+2;
+    """
+
+    
   Scenario: Kill a magma process
     Given I am in buffer "*magma-test*"
     And I press "C-c C-k"
@@ -315,7 +422,7 @@ Feature: Interaction with a magma process
     And I wait for an instant
     Then the buffer should have no process
     And I should see "Process magma interrupt"
-
+    
 
   Scenario: Kill multiple magma processes
     Given I am in buffer "*magma-test*"
@@ -349,99 +456,42 @@ Feature: Interaction with a magma process
     Then the buffer should have no process
     And I should see "Process magma-2 interrupt"
 
-
-  Scenario: Output filter: debugger prompt
+  Scenario: Errors in magma evaluation
     Given I am in buffer "*magma*"
+    When I insert "error-absolute;"
+    And I wait for an instant
     And I press "RET"
     And I wait for an instant
-    And I insert "debug;"
+    Then I should see pattern:
+    """
+    In file ".+/error\.m", line [0-9]+, column [0-9]+:
+    Error
+    """
+    And I place the cursor before "error.m"
+    And I wait for an instant
+    Then current point should have the compilation-error face
+    When I press "C-x `"
+    Then I should be in buffer "error.m"
+    And the cursor should be after "abc"
+    And the cursor should be before "def"
+    When I switch to buffer "*magma*"
+    And I go to end of buffer
+    And I insert "error-relative;"
+    And I wait for an instant
     And I press "RET"
     And I wait for an instant
-    Then I should see "debug> "
-    And I should not see:
+    Then I should see pattern:
     """
-    > debug;
-    > debug;
+    In file ".+/error\.m", line [0-9]+, column [0-9]+:
+    Error
     """
-    Then I insert "quit;"
-    And I press "RET"
-
+    And I place the cursor before "error.m"
+    And I wait for an instant
+    Then current point should have the compilation-error face
+    When I press "C-x `"
+    Then I should be in buffer "error.m"
+    And the cursor should be after "123"
+    And the cursor should be before "456"
     
-  @wait-between-inputs
-  Scenario: Evaluation of a region as a whole
-    Given I am in buffer "*magma-test*"
-    And the buffer is empty
-    And I set magma-interactive-method to 'whole
-    And I set magma-interactive-wait-between-inputs to t
-    And I insert:
-    """
-    whole_test: 1+1;
-    whole_test: 2+2;
     
-    """
-    And I press "C-c C-b"
-    And I wait for an instant
-    And I switch to buffer "*magma*"
-    And I press "RET"
-    And I wait for an instant
-    Then I should see:
-    """
-    > whole_test: 1+1;
-    whole_test: 2+2;
-    Input: whole_test: 1+1;
-    whole_test: 2+2;
-    """
-    
-  @wait-between-inputs
-  Scenario: Evaluation of a region line by line
-    Given I am in buffer "*magma-test*"
-    And the buffer is empty
-    And I set magma-interactive-method to 'line
-    And I set magma-interactive-wait-between-inputs to t
-    And I insert:
-    """
-    line_test: 1+1;
-    line_test: 2+2;
-    """
-    And I press "C-c C-b"
-    And I wait for an instant
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then I should see:
-    """
-    > line_test: 1+1;
-    Input: line_test: 1+1;
-    > line_test: 2+2;
-    Input: line_test: 2+2;
-    """
-    
-  @wait-between-inputs
-  Scenario: Evaluation of a region expression by expression
-    Given I am in buffer "*magma-test*"
-    And the buffer is empty
-    And I set magma-interactive-method to 'expr
-    And I set magma-interactive-wait-between-inputs to t
-    And I insert:
-    """
-    for expr_test in foo do
-        bar;
-    end for;
-    expr_test: 2+2;
-    """
-    And I press "C-c C-b"
-    And I wait for an instant
-    And I switch to buffer "*magma*"
-    And I wait for an instant
-    Then I should see:
-    """
-    > for expr_test in foo do
-        bar;
-    end for;
-    Input: for expr_test in foo do
-        bar;
-    end for;
-    > expr_test: 2+2;
-    Input: expr_test: 2+2;
-    """
-
     

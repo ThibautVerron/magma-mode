@@ -113,19 +113,6 @@ Feature: Magma code indentation
             tete]
     """
     
-  @wishlist
-  Scenario: Indentation of assignments
-    When I insert:
-    """
-    longvariablename := 2 + 2;
-    """
-    And I cut the line before "+"
-    Then I should see:
-    """
-    longvariablename := 2
-        + 2;
-    """
-    
   Scenario: Indentation of expressions without parens
     When I insert:
     """
@@ -581,13 +568,14 @@ Feature: Magma code indentation
   Scenario: Indentation of type definitions in records
     When I insert:
     """
-    x := recformat<toto : Type1, tata : Type2>
+    x := recformat<toto : Type1, tata : Type2>;
     """
     And I cut the line after "Type1,"
+    And I indent the buffer
     Then I should see:
     """
     x := recformat<toto : Type1,
-                   tata : Type2>
+                   tata : Type2>;
     """
 
   @fixedbug
@@ -597,6 +585,7 @@ Feature: Magma code indentation
     testhom := hom<P -> Q>;
     """
     And I cut the line after "Q"
+    And I indent the buffer
     Then I should see:
     """
     testhom := hom<P -> Q
@@ -740,4 +729,84 @@ Feature: Magma code indentation
                  cat "return 3;",
                  5);
     """
+   
+  @fixedbug
+  Scenario: Indentation in a set with multiple iterations + restriction
+    When I insert:
+    """
+    x := {<a,b> : a in A, b in B 
+    | test(a,b)}; 
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    x := {<a,b> : a in A, b in B 
+          | test(a,b)}; 
+    """
+
+  Scenario: Indentation of hanging assignments
+    When I insert:
+    """
+    longvariablename := 
+    2 + 2;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    longvariablename := 
+        2 + 2;
+    """
+
+  @wishlist
+  Scenario: Indentation of hanging parenthesed expressions
+    When I insert:
+    """
+    x := [
+    <a,b>  
+    : a in A, b in B 
+    | test 
+    ];
+    x := function (
+    a,
+    b 
+    : c := 3
+    ) 
+    return a; 
+    end function;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    x := [
+        <a,b>  
+        : a in A, b in B 
+        | test 
+    ];
+    x := function (
+            a,
+            b 
+            : c := 3
+        ) 
+        return a; 
+    end function;
+    """
     
+  Scenario: Indentation in multi-assignments
+    When I insert:
+    """
+    for x in L do
+    longvar1,
+    longvar2 := variable1
+    + variable2;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        longvar1,
+            longvar2 := variable1
+                        + variable2;
+    end for;
+    """
+

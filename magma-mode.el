@@ -43,7 +43,7 @@
 ;; If you are using `yasnippet', you can enable some snippets for
 ;; `magma-mode' by adding the following to your init file.
 ;;
-;;     (require 'magma-snippet)
+;;     (require 'magma-snippets)
 ;;
 ;; At the moment, these snippets include basic syntactic constructs
 ;; (if, while, for, etc.) and load (with file name completion). More
@@ -70,10 +70,9 @@
   "Magma mode"
   (use-local-map magma-mode-map)
   (set-syntax-table magma-mode-syntax-table)
-  (make-local-variable 'comment-start)
-  (setq comment-start "/* ")
-  (make-local-variable 'comment-end)
-  (setq comment-end " */")
+  (setq-local syntax-propertize-function magma-syntax-propertize-function)
+  (setq-local comment-start "/* ")
+  (setq-local comment-end " */")
   (setq imenu-generic-expression magma-imenu-generic-expression)
   (smie-setup
    magma-smie-grammar
@@ -81,11 +80,10 @@
    :forward-token #'magma-smie-forward-token
    :backward-token #'magma-smie-backward-token)
   
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-font-lock-keywords nil nil ((?_ . "w"))))
+  (setq-local font-lock-defaults
+              '(magma-font-lock-keywords nil nil ((?_ . "w"))))
 
-  (set (make-local-variable 'indent-line-function)
-       'smie-indent-line)
+  (setq-local indent-line-function 'smie-indent-line)
 
   (magma--apply-electric-newline-setting)
   

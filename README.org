@@ -165,6 +165,12 @@ Additionally, all these functions take optional prefix arguments:
  - =C-u C-l= : prompts for a magma process, and send the current line
    to this process
  - =C-u C-u C-l= : send the current line to all magma processes
+   
+The function =magma-comint-send-now= (not bound by default) is a bit
+special: it prompts for a value, then sends it to the magma
+evaluation buffer /without/ waiting for the evaluation queue to be
+empty. It allows to send values to interactive prompts (=read= or
+=readi=) without switching buffers.
 
 ** Settings
 
@@ -349,9 +355,35 @@ The header inserted by the default functions looks like this:
   // load "filename.m";
 #+end_src
 
-*** Changelog
+** Changelog
+*** 2015-02-18
 
-**** 2014-11-19
+ - *New feature* Mode-line indicator for interactive buffer now shows
+   whether the buffer is ready or running some computation. If
+   running, also show the time since last input was sent.
+ - *New feature* Errors in the interactive buffer are highlighted and
+   link back to the source. (Note: this feature is still experimental,
+   in particular source file name detection still does not work in all
+   cases)
+ - *New feature* Added the function =magma-comint-send-now= 
+ - *Change* In some situations, the magma interactive buffer failed to
+   acknowledge that it is ready for more input. It should happen more
+   rarely now. If it still happens, as a workaround, =C-c C-i=
+   (=magma-int=) will now force the input queue to be emptied.
+ - *Change* Indentation in parenthesed structures is more consistent.
+ - *Change* =magma-working-buffer-number= can be set as a file local
+   variable, and its value is assumed to be safe if it is a number, a
+   char or a string. If it is a symbol, the user is prompted to
+   confirm that it is a safe value, and the symbol is evaluated.
+ - *Bugfix* Indentation after, and inside =<...>=
+ - *Bugfix* Changing the working buffer locally was not easy, now
+   there is a function =magma-set-working-buffer-locally=.
+ - *Bugfix* =magma-eval-until= would evaluate up to the next
+   expression if point was at the end of an expression. 
+ - *Bugfix* Evaluation functions no longer push the comments in the
+   evaluated region to the kill ring.
+
+*** 2014-11-19
 
  - *Change* =comint-mode= is made the default mode
  - *Change* Step-by-step evaluation mechanism changed, no more hardcoded waiting time between instructions
@@ -360,10 +392,10 @@ The header inserted by the default functions looks like this:
  - *Bugfix* The smie parser was unable to get out of strings
  - *Bugfix* =build-completion-table.sh= was ignoring some functions
   
-**** 2014-10-02  
+*** 2014-10-02  
   
  - Package added on melpa
  
-**** 2014-01-07 
+*** 2014-01-07 
 
  - Initial release

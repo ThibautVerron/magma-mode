@@ -56,8 +56,6 @@
     (hs-toggle-hiding)))
 
 
-
-
 ;; Redefinitions of some steps from espuds
 
 (Then "^I should see\\(?: \"\\(.+\\)\"\\|:\\)$"
@@ -82,8 +80,13 @@
   "Places the cursor at the end of buffer."
   '(lambda () (goto-char (point-max))))
 
+(When "^I show the value of variable \"\\(.+\\)\""
+  (lambda (var) (message (format "%s : %s" var (symbol-value (intern var))))))
 
+(When "^I show the result of \"\\(.+\\)\""
+  (lambda (expr) (message (format "%s : %s" expr (eval (read expr))))))
 
-
+(When "^I evaluate \"\\(.+\\)\""
+  (lambda (expr) (eval (read expr))))
 
 

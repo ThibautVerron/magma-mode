@@ -165,7 +165,9 @@
 
 (eval-after-load "smartparens.el"
   '(sp-with-modes '(magma-mode magma-comint-interactive-mode magma-term-interactive-mode)
-     (sp-local-pair "<" ">" :skip-match 'magma-smartparens-gt-in-an-arrow :actions '(insert wrap navigate))
+     (sp-local-pair "<" ">"
+                    :skip-match 'magma-smartparens-gt-in-an-arrow
+                    :actions '(insert wrap navigate))
      (sp-local-pair "`" nil :actions nil)))
 
 

@@ -45,6 +45,15 @@
 (defvar magma-working-buffer-number 0
   "Should this buffer send instructions to a different magma buffer")
 
+(defun magma--valid-working-buffer-number (num)
+  "If this predicate is satisfied, the value is safe as file-local."
+  (or (integerp num)
+      (char-or-string-p num)))
+
+(put 'magma-working-buffer-number
+     'safe-local-variable
+     #'magma--valid-working-buffer-number)
+
 (defvar magma-active-buffers-list '()
   "*List of active magma buffers.")
 
@@ -57,6 +66,13 @@ user-function sending input to a process.")
 
 (defvar-local magma-ready t
   "Whether there is still input or output pending in that buffer.")
+
+(defvar-local magma-timer (current-time))
+
+
+(put 'magma-ready 'permanent-local t)
+(put 'magma-pending-input 'permanent-local t)
+(put 'magma-timer 'permanent-local t)
 
 (defcustom magma-interactive-buffer-name "magma"
   "*Name of the buffer to be used for using magma
@@ -144,11 +160,19 @@ Setting this variable has no effect in term mode."
   :group 'magma
   :type 'boolean)
 
+;; (defvar magma--comint-interactive-escape-map
+;;   (if magma-interactive-comint-emulates-term
+;;       (let ((map (copy-keymap ctl-x-map)))
+;;         (define-key map (kbd "C-c C-c") 'comint-interrupt-subjob)
+;;         map)
+;;     nil))
+
 (defvar magma-comint-interactive-mode-map
-  (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
+  (let ((map (nconc (make-sparse-keymap) comint-mode-map )))
     (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "RET") 'comint-send-input)
     (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
+    ;(define-key map (kbd "C-c") magma--comint-interactive-escape-map)
     map)
   "Keymap for magma-interactive-mode")
 
@@ -171,11 +195,28 @@ Setting this variable has no effect in term mode."
 (defcustom magma-interactive-use-comint t
     "If non-nil, communication with the magma process is done using comint.
 
-Otherwise, it uses term-mode.  After changing this variable,
+Otherwise, it uses term-mode.  After setting this variable,
 restarting emacs is required (or reloading the magma-mode load
 file)."
     :group 'magma
     :type 'boolean)
+
+;; (defcustom magma-interactive-comint-emulates-term nil
+;;   "Should comint buffers try to emulate term buffers?
+
+;; If non-nil, interactive buffers using comint-mode try to emulate
+;; the behavior of term-mode buffers. At the moment, it only means
+;; that `C-c' can be used as a synonym for `C-x' (e.g. `C-c o' for
+;; other-buffer), with the exception of `C-c C-c' which remains
+;; bound to comint-interrupt-subjob.
+
+;; After setting this variable,
+;; restarting emacs is required (or reloading the magma-mode load
+;; file)."
+;;   :group 'magma
+;;   :type 'boolean)
+
+
 
 (defun magma-get-buffer-name (&optional i app)
   (let ((name
@@ -190,74 +231,96 @@ file)."
 (defun magma-set-working-buffer (i)
   "set the i-th buffer as the working buffer"
   (interactive "NBuffer number ?: ")
-  (magma-run i)
+  (save-window-excursion
+    (magma-run i))
   (setq magma-working-buffer-number i)
   (message (concat "Working buffer set to " (int-to-string i)))
   (magma-get-buffer i))
+
+(defun magma-set-working-buffer-locally ()
+  (interactive)
+  (make-local-variable 'magma-working-buffer-number)
+  (call-interactively #'magma-set-working-buffer))
 
 (defun magma-make-buffer-name (&optional i app)
   "Return the name of the i-th magma buffer.
 
 If `app' is not nil, it is a string which will be added before
 the buffer number."
-  
   (concat "*" (magma-get-buffer-name i app) "*"))
 
 (defun magma-get-buffer (&optional i)
   "return the i-th magma buffer"
-  (or (get-buffer (magma-make-buffer-name i))
-      (error "No evaluation buffer found.")))
+  (get-buffer (magma-make-buffer-name i)))
+              ;;(error "No evaluation buffer found.")))
   
+(defcustom magma-interactive-prompt t
+  "If non nil, prompt for the path to the magma program and its arguments"
+  :group 'magma)
+
+(defun magma--interactive-read-spec (prog args)
+  (if magma-interactive-prompt
+      (let* ((default (concat prog (or args "")))
+             (prompt "Program to run: ")
+             (readval (read-string prompt default nil default)))
+        (split-string readval))
+    (cons prog args)))
 
 ;; Comint definitions
 
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
-  (let* ((default-directory magma-default-directory)
-         (new-interactive-buffer
-          (progn
-            (make-comint-in-buffer (magma-get-buffer-name i)
-                                   (magma-make-buffer-name i)
-                                   magma-interactive-program
-                                   magma-interactive-arguments))))
-    (if (not (memq (or i 0) magma-active-buffers-list))
-        ; Steps to take if the buffer is new
-        (progn
-          (push (or i 0) magma-active-buffers-list)
-          (set-buffer new-interactive-buffer)
-          (setq magma-pending-input (magma-q-create))
-          (setq magma-ready t)
-          (magma-interactive-mode)))))
+  (let ((bufname (magma-make-buffer-name i)))
+    (unless (comint-check-proc bufname)
+                                        ; The buffer is new
+      (let* ((progargs (magma--interactive-read-spec
+                        magma-interactive-program
+                        magma-interactive-arguments))
+             (program (car progargs))
+             (args (cdr progargs))
+             (new-interactive-buffer
+              (apply #'make-comint-in-buffer
+                     (magma-get-buffer-name i)
+                     (magma-make-buffer-name i)
+                     program
+                     nil
+                     args)))
+        (push (or i 0) magma-active-buffers-list)
+        (set-buffer new-interactive-buffer)
+        (cd magma-default-directory)
+        (setq magma-pending-input (magma-q-create))
+        (setq magma-ready t)
+        (magma-interactive-mode)))))
 
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
-  ;;(interactive "P")
-  (set-buffer (magma-get-buffer i))
-  ;;(comint-interrupt-subjob)
-  (or (not (comint-check-proc (current-buffer)))
-      (interrupt-process nil comint-ptyp))
-  ;; ^ Same as comint-kill-subjob, without comint extras.
-  )
+  (with-current-buffer (magma-get-buffer i)
+    (setq magma-active-buffers-list
+          (remove (or i 0) magma-active-buffers-list))
+    (or (not (comint-check-proc (current-buffer)))
+        (comint-interrupt-subjob))
+    (setq magma-ready t)
+    (setq magma-pending-input (magma-q-create))))
 
 (defun magma-comint-kill (&optional i)
   "Kill the magma process in buffer i"
   ;;(interactive "P")
-  (with-current-buffer (magma-get-buffer i)
-    ;;(comint-kill-subjob)
-    (or (not (comint-check-proc (current-buffer)))
-        (kill-process nil comint-ptyp))
-    (setq magma-ready t)
-    (setq magma-pending-input (magma-q-create))
-    ;; ^ Same as comint-kill-subjob, without comint extras.
-    ))
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
+  (let ((buf (magma-get-buffer i)))
+    (when buf
+      (with-current-buffer buf
+        (or (not (comint-check-proc (current-buffer)))
+            (comint-kill-subjob))
+        (setq magma-ready t)
+        (setq magma-pending-input (magma-q-create))))))
 
 (defun magma-comint-send-string (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (concat expr "\n")))
     (run-hook-with-args 'comint-input-filter-functions expr)
-    (comint-send-string (magma-get-buffer i) command))
-    )
+    (comint-send-string (magma-get-buffer i) command)))
 
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation.
@@ -269,6 +332,7 @@ pushes `expr' onto the `magma-pending-input' queue."
       (if magma-ready
           (progn
             (setq magma-ready nil)
+            (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))))
   
@@ -299,7 +363,7 @@ magma evaluation buffer."
       (comint-send-input))))
   
 (defun magma-comint-help-word (topic)
-  "call-up the handbook in an interactive buffer for topic"
+  "Call-up the handbook in an interactive buffer for topic"
   (interactive "sMagma help topic: ")
   (make-comint-in-buffer (magma-get-buffer-name "help")
                          (magma-make-buffer-name "help")
@@ -312,6 +376,20 @@ magma evaluation buffer."
    (format "?%s\n" topic))
   (display-buffer (magma-get-buffer "help")))
 
+(defun magma-comint-send-now (expr &optional i)
+  "Prompt for an expression, then send it to the comint buffer without waiting for ready.
+
+The primary use-case is to be able to send a value to a `read' or
+`readi' prompt, without having to switch buffers.
+
+This can be used to force a new line feed when the magma prompt
+is hanging at the end of the line, preventing comint to
+acknowledge that the magma process is ready."
+  (interactive "sExpression: ")
+  (let ((buf (magma-get-buffer (magma-choose-buffer i))))
+    (with-current-buffer buf
+      (insert expr)
+      (comint-send-input))))
    
 
 ;; Term-mode definitions
@@ -324,8 +402,7 @@ magma evaluation buffer."
          (new-interactive-buffer
           (make-term magma-buffer-name magma-interactive-program)))
     (save-excursion
-      (if (not (memq (or i 0) magma-active-buffers-list))
-          (push (or i 0) magma-active-buffers-list))
+      (push (or i 0) magma-active-buffers-list)
       (set-buffer new-interactive-buffer)
       (unless reusing-buff
         (insert
@@ -340,14 +417,16 @@ magma evaluation buffer."
     
 (defun magma-term-int (&optional i)
   "Interrupt the magma process in buffer i"
-  ;;(interactive "P")
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-send-string (magma-get-buffer i) "\C-c"))))
 
 (defun magma-term-kill (&optional i)
   "Kill the magma process in buffer i"
-  ;;(interactive "P")
+  (setq magma-active-buffers-list
+        (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
       (with-current-buffer (magma-get-buffer i)
         (term-kill-subjob))))
@@ -395,23 +474,19 @@ magma evaluation buffer."
   (interactive "P")
   (magma-kill-or-broadcast i)
   (sleep-for 2)
-  (magma-run-or-broadcast i)
-  )
+  (magma-run-or-broadcast i))
 
 (defun magma-switch-to-interactive-buffer (&optional i)
   "Switch to the magma process in buffer i in another frame"
   (interactive "P")
   (magma-run i)
-  (switch-to-buffer-other-frame (magma-get-buffer i))
-  )
+  (switch-to-buffer-other-frame (magma-get-buffer i)))
 
 (defun magma-switch-to-interactive-buffer-same-frame (&optional i)
   "Switch to the magma process in buffer i, in another window on the same frame"
   (interactive "P")
   (magma-run i)
-  (pop-to-buffer (magma-get-buffer i))
-  )
-
+  (pop-to-buffer (magma-get-buffer i)))
 
 (defun magma--at-end (end)
   (or (looking-at "\\([[:blank:]]\\|\n\\)*\\'")
@@ -528,7 +603,6 @@ corresponding input."
 (defun magma-eval-until ( &optional i)
   "Evaluates all code from the beginning of the buffer to the point."
   (interactive "P")
-  (magma-end-of-expr)
   (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
@@ -692,17 +766,39 @@ The behavior of this function is controlled by
   (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
   (comint-send-input))
 
+(defconst magma-interactive-modeline-ready-face
+  "success")
+(defconst magma-interactive-modeline-run-face
+  "warning")
+(defconst magma-interactive-modeline-stop-face
+  "error")
+
+(defun magma-interactive-make-mode-line-process ()
+  (format
+   ":%s"
+   (if (comint-check-proc (current-buffer))
+       (if magma-ready
+           (propertize "ready" 'face magma-interactive-modeline-ready-face)
+         (concat
+          (propertize "run" 'face magma-interactive-modeline-run-face)
+          ":["
+          (format-seconds
+          "%d:%h:%m:%z%02s]"
+          (float-time (time-subtract (current-time) magma-timer)))))
+     (propertize "stop" 'face magma-interactive-modeline-stop-face))))
 
 (defun magma-interactive-common-settings ()
   "Settings common to comint and term modes"
-  (compilation-shell-minor-mode 1)
-  (set (make-local-variable 'compilation-mode-font-lock-keywords)
-        nil)
-  (set (make-local-variable 'font-lock-keywords) nil)
+  ;; Compilation shell mode
   (add-to-list
    'compilation-error-regexp-alist
    '("^In file \"\\(.*?\\)\", line \\([0-9]+\\), column \\([0-9]+\\):$"
-     1 2 3 2 1)))
+     1 2 3 2 1))
+  (setq-local compilation-mode-font-lock-keywords nil)
+  (compilation-shell-minor-mode 1)
+  ;; Mode line name
+  (setq mode-name "Magma-eval")
+  (setq mode-line-process '(:eval (magma-interactive-make-mode-line-process))))
 
 (define-derived-mode magma-comint-interactive-mode
   comint-mode
@@ -724,9 +820,9 @@ The behavior of this function is controlled by
   "Magma interactive mode (using term)
 \\<magma-term-interactive-mode-map>"
   (setq term-scroll-to-bottom-on-output t)
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
+  (setq-local font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
+
 
 (defun magma-interactive-init-with-comint ()
   (defalias 'magma-interactive-mode 'magma-comint-interactive-mode)
@@ -734,8 +830,7 @@ The behavior of this function is controlled by
   (defalias 'magma--int-cmd 'magma-comint-int)
   (defalias 'magma--kill-cmd 'magma-comint-kill)
   (defalias 'magma-send 'magma-comint-send)
-  (defalias 'magma-help-word-text 'magma-comint-help-word)
-  )
+  (defalias 'magma-help-word-text 'magma-comint-help-word))
 
 (defun magma-interactive-init-with-term ()
   (defalias 'magma-interactive-mode 'magma-term-interactive-mode)
@@ -751,7 +846,6 @@ The behavior of this function is controlled by
       (magma-interactive-init-with-comint)
     (magma-interactive-init-with-term)))
 
-;; (magma-interactive-init)
 
 (provide 'magma-interactive)
 
