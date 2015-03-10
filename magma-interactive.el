@@ -658,12 +658,16 @@ The behavior of this function is controlled by
         (magma-help-word-browser topic)
       (magma-help-word-text topic))))
 
-(defun magma-help-word-browser (topic)
+(defun magma-help-word-browser (&optional topic)
   "open the magma help page in a web browser for topic"
-  (interactive "sMagma help topic: ")
-  (let ((urlprefix "http://magma.maths.usyd.edu.au/magma/handbook/")
-        (urlsuffix "&chapters=1&examples=1&intrinsics=1"))
-    (browse-url (concat urlprefix "search?query=" topic urlsuffix))))
+  (interactive)
+  (let ((topic (or topic
+                   (read-string
+                    (format "Magma help topic (default %s): " (current-word))
+                    nil nil (current-word)))))
+    (let ((urlprefix "http://magma.maths.usyd.edu.au/magma/handbook/")
+          (urlsuffix "&chapters=1&examples=1&intrinsics=1"))
+      (browse-url (concat urlprefix "search?query=" topic urlsuffix)))))
 
 
 (defun magma-show-word (&optional i)
@@ -783,7 +787,7 @@ The behavior of this function is controlled by
           (propertize "run" 'face magma-interactive-modeline-run-face)
           ":["
           (format-seconds
-          "%d:%h:%m:%z%02s]"
+          "%d:%h:%02m:%z%02s]"
           (float-time (time-subtract (current-time) magma-timer)))))
      (propertize "stop" 'face magma-interactive-modeline-stop-face))))
 
@@ -805,10 +809,10 @@ The behavior of this function is controlled by
   "Magma-Interactive"
   "Magma interactive mode (using comint)
 \\<magma-comint-interactive-mode-map>"
-  (setq comint-use-prompt-regexp nil)
-  (setq comint-prompt-read-only magma-prompt-read-only)
-  (setq comint-prompt-regexp magma-prompt-regexp)
-  (setq comint-scroll-to-bottom-on-output t)
+  (setq-local comint-use-prompt-regexp nil)
+  (setq-local comint-prompt-read-only magma-prompt-read-only)
+  (setq-local comint-prompt-regexp magma-prompt-regexp)
+  (setq-local comint-scroll-to-bottom-on-output t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
   (magma-interactive-common-settings)
@@ -819,7 +823,7 @@ The behavior of this function is controlled by
   "Magma-Interactive"
   "Magma interactive mode (using term)
 \\<magma-term-interactive-mode-map>"
-  (setq term-scroll-to-bottom-on-output t)
+  (setq-local term-scroll-to-bottom-on-output t)
   (setq-local font-lock-defaults '(magma-interactive-font-lock-keywords nil nil))
   (magma-interactive-common-settings))
 
