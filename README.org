@@ -148,16 +148,17 @@ If you want to use auto-completion against magma keywords, please see the next s
 
 *** Evaluation of expressions
 
-| =C-c C-e= | =magma-eval=            | send the expression at point to the magma-process                                                  |
-| =C-c C-l= | =magma-eval-line=       | send the current line to the magma process                                                         |
-| =C-c C-r= | =magma-eval-region=     | send the current region to the magma process                                                       |
-| =C-c C-b= | =magma-eval-buffer=     | send the content of current buffer to the magma process                                            |
-| =C-c C-u= | =magma-eval-until=      | send the content of the current buffer, until the point, to the magma process                      |
-| =C-c C-f= | =magma-eval-defun=      | with point in a function definition, send it to the magma process                                  |
-| =C-c C-p= | =magma-eval-paragraph=  | send the current block to the magma process                                                        |
-| =C-c :=   | =magma-send-expression= | prompt for an expression, send it to the magma process                                             |
-| =C-c C-w= | =magma-show-word=       | evaluate the variable at point in the magma buffer                                                 |
-| =C-c h=   | =magma-show-help=       | prompt for a symbol, and display the available documentation about that symbol in the magma buffer |
+| =C-c C-e= | =magma-eval=              | send the expression at point to the magma-process                                                  |
+| =C-c C-l= | =magma-eval-line=         | send the current line to the magma process                                                         |
+| =C-c C-r= | =magma-eval-region=       | send the current region to the magma process                                                       |
+| =C-c C-b= | =magma-eval-buffer=       | send the content of current buffer to the magma process                                            |
+| =C-c C-u= | =magma-eval-until=        | send the content of the current buffer, until the point, to the magma process                      |
+| =C-c C-f= | =magma-eval-defun=        | with point in a function definition, send it to the magma process                                  |
+| =C-c C-p= | =magma-eval-paragraph=    | send the current block to the magma process                                                        |
+| =C-c :=   | =magma-send-expression=   | prompt for an expression, send it to the magma process                                             |
+| =C-c C-w= | =magma-show-word=         | evaluate the variable at point in the magma buffer                                                 |
+| =C-c h=   | =magma-help-word=         | prompt for a symbol, and display the available documentation about that symbol in the magma buffer |
+| =C-c C-h= | =magma-help-word-browser= | searches the online documentation                                                                  |
 
 Additionally, all these functions take optional prefix arguments:
 
@@ -356,6 +357,13 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2015-03-12
+
+ - *Bugfix* When =magma-interactive-method= is set to =line= and
+   several instructions are on the same line, =C-c C-e= will evaluate
+   them all.
+ - *Bugfix* Minor formatting tweaks for the timer on the modeline
+
 *** 2015-02-18
 
  - *New feature* Mode-line indicator for interactive buffer now shows
