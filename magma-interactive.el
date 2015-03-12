@@ -564,6 +564,17 @@ corresponding input."
     (magma-eval-region (point) end i)
     (goto-char end)))
 
+(defun magma-end-of-expr-or-line ()
+  "Go to the end of line or expression according to the evaluation method
+
+If `magma-interactive-method' is `line', go to the end of the
+line, otherwise the end of the expression. "
+  (interactive)
+  (if (eq magma-interactive-method 'line)
+      (progn (forward-line 1)
+             (forward-char -1))
+    (magma-end-of-expr)))
+
 (defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
   (interactive "P")
@@ -571,7 +582,7 @@ corresponding input."
                   (magma-beginning-of-expr)
                   (point)))
         (regend (progn
-                  (magma-end-of-expr)
+                  (magma-end-of-expr-or-line)
                   (point))))
     (magma-eval-region regbeg regend i)
     (goto-char regend)
@@ -586,7 +597,8 @@ corresponding input."
       (magma-eval-region (region-beginning) (region-end) i)
     (progn
       (magma-eval-next-statement i)
-      (when (looking-at "[[:space:]]*$") (forward-line 1)))))
+      ;(when (looking-at "[[:space:]]*$") (forward-line 1))
+      )))
 
 (defun magma-eval-defun (&optional i)
   "Evaluate the current defun"
