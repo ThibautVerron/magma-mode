@@ -570,10 +570,10 @@ corresponding input."
 If `magma-interactive-method' is `line', go to the end of the
 line, otherwise the end of the expression. "
   (interactive)
+  (magma-end-of-expr)
   (if (eq magma-interactive-method 'line)
       (progn (forward-line 1)
-             (forward-char -1))
-    (magma-end-of-expr)))
+             (forward-char -1))))
 
 (defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
