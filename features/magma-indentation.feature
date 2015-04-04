@@ -810,3 +810,63 @@ Feature: Magma code indentation
     end for;
     """
 
+  #Fixed in commit d7eef14a7cd64a1f67333dc4386f377a98d45574
+  @bugfix
+  Scenario
+    When I insert:
+    """
+    for x in L do
+    printf "x = %o, "
+    cat "y = %o\n",
+    x, y;
+    
+    printf 
+    "x = %o, "
+    cat "y = %o\n",
+    x, y;
+    
+    vprintf 
+    User1:
+    "x = %o,"
+    cat "y = %o\n",
+    x, y;
+
+    vprintf User1:
+    "x = %o,"
+    cat "y = %o\n",
+    x, y;
+    
+    vprintf User1: "x = %o,"
+    cat "y = %o\n",
+    x, y;
+    end for;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    for x in L do
+        printf "x = %o, "
+               cat "y = %o\n",
+               x, y;
+    
+        printf 
+            "x = %o, "
+            cat "y = %o\n",
+            x, y;
+    
+        vprintf 
+            User1:
+            "x = %o,"
+            cat "y = %o\n",
+            x, y;
+    
+        vprintf User1:
+            "x = %o,"
+            cat "y = %o\n",
+            x, y;
+    
+        vprintf User1: "x = %o,"
+                       cat "y = %o\n",
+                       x, y;
+    end for;
+    """
