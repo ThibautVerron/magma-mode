@@ -366,7 +366,7 @@ if in an intrinsic description or nil if somewhere else."
   "Returns t if we are currently looking at the closing paren of a
   block of function arguments."
   (let ((forward-sexp-function nil))
-    (and (looking-back ")")
+    (and (looking-back ")" (- (point) 1))
          (save-excursion
            (backward-sexp)
            (magma-looking-at-fun-openparen)))))
@@ -491,6 +491,7 @@ robust in any way."
     (`(:elem . 'arg)
      (if (smie-rule-parent-p "special1" "special2")
          (smie-rule-parent)
+       ;; This piece of code seems to never be evaluated
        magma-indent-basic))
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
@@ -502,10 +503,12 @@ robust in any way."
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
     (`(:after . ",")
-     (if (or (smie-rule-parent-p "(" "{" "[" "<" "fun(" "paren:")
+     (if (or (smie-rule-parent-p "(" "{" "[" "<"
+                                 "fun(" "paren:"
+                                 "special1" "special2" "special:")
              (smie-rule-sibling-p))
          0
-       4))
+       magma-indent-basic))
 
     (`(:after . ";") 0)
     
@@ -516,7 +519,7 @@ robust in any way."
 
     ;; (`(:close-all . ,(or `">" `")" `"fun)" `"]" `"]")) t)
     (`(:after . ,(or `"special1" `"special2")) 0)
-    (`(:after . "special:") 0)
+    (`(:after . "special:") magma-indent-basic)
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)
     (`(:before . "then")

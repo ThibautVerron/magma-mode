@@ -357,13 +357,19 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** Next
+
+ - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
+   (but still not working if there is a newline after the built-in)
+ - *Bugfix* Improved performance in some indentation/parsing helpers
+
 *** 2015-03-12
 
  - *Bugfix* When =magma-interactive-method= is set to =line= and
    several instructions are on the same line, =C-c C-e= will evaluate
    them all.
  - *Bugfix* Minor formatting tweaks for the timer on the modeline
-
+   
 *** 2015-02-18
 
  - *New feature* Mode-line indicator for interactive buffer now shows
