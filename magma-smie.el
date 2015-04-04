@@ -518,7 +518,7 @@ robust in any way."
     ;;    (smie-rule-parent (- magma-indent-basic))))
 
     ;; (`(:close-all . ,(or `">" `")" `"fun)" `"]" `"]")) t)
-    (`(:after . ,(or `"special1" `"special2")) 0)
+    (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
     (`(:after . "special:") magma-indent-basic)
     (`(:after . "when:") magma-indent-basic)
     (`(:before . "when") 0)

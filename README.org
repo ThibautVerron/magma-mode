@@ -360,7 +360,6 @@ The header inserted by the default functions looks like this:
 *** Next
 
  - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
-   (but still not working if there is a newline after the built-in)
  - *Bugfix* Improved performance in some indentation/parsing helpers
 
 *** 2015-03-12
