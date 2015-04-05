@@ -182,7 +182,7 @@ Setting this variable has no effect in term mode."
   "Keymap for magma-interactive-mode")
 
 
-(defvar magma-prompt-regexp "^[^ ]*> "
+(defconst magma-prompt-regexp "^[^ <\n]*>"
   "Regexp matching the magma prompt")
 
 (defvar magma-prompt-read-only t
@@ -259,6 +259,16 @@ the buffer number."
   :group 'magma)
 
 (defun magma--interactive-read-spec (prog args)
+  "Read the program to run and the arguments, if needed.
+
+If `magma-interactive-prompt' is set to `t', prompt the user for
+the command line, and split it in words. Otherwise, return the
+program and arguments given as input.
+
+The output is a list whose car is the program and cdr is the
+arguments.
+
+This function is for internal use."
   (if magma-interactive-prompt
       (let* ((default (concat prog (or args "")))
              (prompt "Program to run: ")
@@ -271,8 +281,7 @@ the buffer number."
 (defun magma-comint-run (&optional i)
   "Run an inferior instance of magma inside emacs, using comint."
   (let ((bufname (magma-make-buffer-name i)))
-    (unless (comint-check-proc bufname)
-                                        ; The buffer is new
+    (unless (comint-check-proc bufname) ; The buffer is new
       (let* ((progargs (magma--interactive-read-spec
                         magma-interactive-program
                         magma-interactive-arguments))
@@ -290,7 +299,8 @@ the buffer number."
         (cd magma-default-directory)
         (setq magma-pending-input (magma-q-create))
         (setq magma-ready t)
-        (magma-interactive-mode)))))
+        (magma-interactive-mode)))
+    (with-current-buffer bufname (current-buffer))))
 
 
 (defun magma-comint-int (&optional i)
