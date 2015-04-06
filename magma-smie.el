@@ -25,8 +25,8 @@
 
 (require 'magma-vars)
 
-(defvar magma-smie-verbose-p nil "Information about syntax state")
-;; Not used atm
+(defvar magma-smie-verbose nil "Information about syntax state")
+
 
 ;;;;;
 ;; Here we describe the smie grammar for the magma language. Some
@@ -46,12 +46,13 @@
     '(;; Identifier
       (id)
 
+      ;; Several identifiers, separated by commas
+      (idlist (id)
+              (idlist "," idlist))
+
       ;; Assignment
       (assign (idlist ":=" expr))
 
-      (idlist (id)
-              (idlist "," idlist))
-      
       ;; Instruction
       (inst (assign)
             (expr)
@@ -63,8 +64,7 @@
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
             ("special1" specialargs)
-            ("special2" specialargs "special:" specialargs)
-            )
+            ("special2" specialargs "special:" specialargs))
 
       ;; Several instructions
       (insts (insts ";" insts)
@@ -102,10 +102,7 @@
             (expr "in" expr)
             ("function" "fun(" funargs "fun)" insts "end function")
             ("procedure" "fun(" funargs "fun)" insts "end procedure")
-            (funcall)
-            ;; ("[" listargs "]")
-            ;; ("<" id "->" listargs ">")
-            )
+            (funcall))
 
       ;; What appears in a list or a similar construct (basic)
       (listargs (enum)
@@ -141,9 +138,7 @@
 
       ;; What appears in a "case" block
       (caseinsts (caseinsts "when" expr "when:" insts) 
-                 (caseinsts "else" insts)
-                 )
-      )
+                 (caseinsts "else" insts)))
     '((left "if")
       (nonassoc "end if")
       (assoc "then" "else"))
@@ -152,13 +147,7 @@
       (assoc "case:")
       (assoc "when")
       (assoc "when:"))
-      ;; (assoc "else")
-      ;;(left "ifthen")
-      ;;(left "elifthen" "when:")
     '((nonassoc "end function" "end procedure")
-      ;; (left "(") (right ")")
-      ;;(left ":")
-      ;; (left "<") (right ">")
       (assoc ",")
       (left "|") (left "paren:")
       (assoc ":="))
@@ -190,17 +179,13 @@
       (assoc "type:")
       (left "#")
       (left "&")
-      (left "~"))
-   ))
+      (left "~"))))
   "BNF grammar for the SMIEngine.")
 
 (defconst magma-smie-tokens-regexp
   (concat
    "\\("
-   (regexp-opt '("," "|" ";"
-                 ;;"(" ")" "[" "]"
-                 ;; "<" ">"
-                 ":="))
+   (regexp-opt '("," "|" ";" ":="))
    "\\|" 
    (regexp-opt '("for" "while" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
@@ -220,11 +205,9 @@
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
-                 "and" "or" "not"
-                 ) 'words)
+                 "and" "or" "not") 'words)
    "\\)")
   "Regexp matching magma operators.")
-
 
 (defconst magma-smie-special1-regexp
   (regexp-opt
@@ -239,7 +222,12 @@
   (regexp-opt '("vprint" "vprintf") 'words)
   "Regexp matching special functions requiring no parentheses but a colon")
 
-;; Functions lifting ambiguities
+;;;;;
+;; The grammar alone is not enough to properly read some magma code:
+;; some tokens have different roles in the grammar, but the same
+;; printed text. So we define here some functions to help the parser
+;; separate these tokens.
+;;;;;
 
 (defun magma-in-literal ()
   "Return the type of literal point is in, if any.
@@ -274,8 +262,10 @@ if in an intrinsic description or nil if somewhere else."
   (looking-at (concat endchar "[[:space:]]*$")))
 
 
-(defun magma-identify-colon ()
-  "If point is at a colon, returns the appropriate token for that
+(defun magma--smie-identify-colon ()
+  "Return the token type for a colon.
+
+If point is at a colon, returns the appropriate token for that
   colon. The returned value is :
 - \"case:\" if the colon is at the end of a case... : construct
 - \"when:\" if the colon is at the end of a when... : construct
@@ -283,7 +273,7 @@ if in an intrinsic description or nil if somewhere else."
   function calls
 - \"paren:\" if the colon is a separator in a pair of
   parens (parameter for a function, specification for a list...)
-- \":\" otherwise (this shouldn't appear)"
+- \":\" otherwise (this shouldn't appear in a syntactically correct buffer)"
   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
     (save-excursion
       (catch 'token
@@ -304,8 +294,10 @@ if in an intrinsic description or nil if somewhere else."
             (error (throw 'token "paren:"))))
         ))))
 
-(defun magma-identify-else()
-  "Assume the point is before \"else\". Returns:
+(defun magma--smie-identify-else()
+  "Return the token type for a else.
+
+Assume the point is before \"else\". Returns:
 - \"selectelse\" : if the \"else\" belongs to a select
 - \"else\" : otherwise, that is if the \"else\" belongs to an if
   or a case"
@@ -329,56 +321,56 @@ if in an intrinsic description or nil if somewhere else."
             (error (throw 'token "else"))))
         ))))
   
-(defun magma-looking-at-fun-openparen ()
+(defun magma--smie-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
   (condition-case nil
       (and (looking-at "(")
            (save-excursion
              (or
-              (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+              (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                             (- (point) 10))
               (progn
                 (backward-word)
-                (looking-back "\\(function\\|procedure\\)[[:space:]]*"
+                (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                               (- (point) 10))))))
     (error nil) ))
 
-(defun magma-looking-at-fun-closeparen ()
+(defun magma--smie-looking-at-fun-closeparen ()
   "Returns t if we are currently looking at the closing paren of a
   block of function arguments."
   (and
    (not (eobp))
    (save-excursion
      (forward-char)
-     (magma-looking-back-fun-closeparen))))
+     (magma--smie-looking-back-fun-closeparen))))
 
-(defun magma-looking-back-fun-openparen ()
+(defun magma--smie-looking-back-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
   (and
    (not (bobp))
    (save-excursion
     (forward-char -1)
-    (magma-looking-at-fun-openparen))))
+    (magma--smie-looking-at-fun-openparen))))
 
-(defun magma-looking-back-fun-closeparen ()
+(defun magma--smie-looking-back-fun-closeparen ()
   "Returns t if we are currently looking at the closing paren of a
   block of function arguments."
   (let ((forward-sexp-function nil))
     (and (looking-back ")" (- (point) 1))
          (save-excursion
            (backward-sexp)
-           (magma-looking-at-fun-openparen)))))
+           (magma--smie-looking-at-fun-openparen)))))
 
 (defun magma-smie-forward-token ()
   "Read the next token in the magma buffer"
   (forward-comment (point-max))
   (cond
-   ((magma-looking-at-fun-openparen)
+   ((magma--smie-looking-at-fun-openparen)
     (forward-char)
     "fun(")
-   ((magma-looking-at-fun-closeparen)
+   ((magma--smie-looking-at-fun-closeparen)
     (forward-char)
     "fun)")
    ((looking-at magma-smie-operators-regexp)
@@ -391,7 +383,7 @@ if in an intrinsic description or nil if somewhere else."
     (goto-char (match-end 0))
     "catche")
    ((looking-at "else")
-    (let ((elsetoken (save-match-data (magma-identify-else))))
+    (let ((elsetoken (save-match-data (magma--smie-identify-else))))
       (goto-char (match-end 0))
       elsetoken))
    ((looking-at magma-smie-tokens-regexp)
@@ -407,7 +399,7 @@ if in an intrinsic description or nil if somewhere else."
    ;;  (goto-char (match-end 0))
    ;;  (magma-identify-then))
    ((looking-at ":[^=]")
-    (let ((token (magma-identify-colon)))
+    (let ((token (magma--smie-identify-colon)))
       (forward-char 1)
       token))
    (t (buffer-substring-no-properties
@@ -424,10 +416,10 @@ if in an intrinsic description or nil if somewhere else."
            (move-beginning-of-line nil)
            (point))))
     (cond
-     ((magma-looking-back-fun-openparen)
+     ((magma--smie-looking-back-fun-openparen)
       (forward-char -1)
       "fun(")
-     ((magma-looking-back-fun-closeparen)
+     ((magma--smie-looking-back-fun-closeparen)
       (forward-char -1)
       "fun)")
      ((looking-back magma-smie-operators-regexp bolp)
@@ -441,7 +433,7 @@ if in an intrinsic description or nil if somewhere else."
       "catche")
      ((looking-back "else")
       (goto-char (match-beginning 0))
-      (magma-identify-else))
+      (magma--smie-identify-else))
      ((looking-back magma-smie-special1-regexp bolp)
       (goto-char (match-beginning 0))
       "special1")
@@ -454,7 +446,7 @@ if in an intrinsic description or nil if somewhere else."
       (match-string-no-properties 0))
      ((looking-back ":")
       (forward-char -1)
-      (magma-identify-colon))
+      (magma--smie-identify-colon))
      (t (buffer-substring-no-properties
          (point)
          (progn (skip-syntax-backward "w_")
@@ -483,9 +475,10 @@ robust in any way."
 
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
-  ;; (message (format "%s %s parent:%s"
-  ;;                  kind token
-  ;;                  (and (boundp 'smie--parent) smie--parent)))
+  (when magma-smie-verbose
+      (message (format "%s %s parent:%s"
+                       kind token
+                       (and (boundp 'smie--parent) smie--parent))))
   (pcase (cons kind token)
     (`(:elem . 'basic) magma-indent-basic)
     (`(:elem . 'arg)
@@ -511,13 +504,6 @@ robust in any way."
        magma-indent-basic))
 
     (`(:after . ";") 0)
-    
-    ;; (`(:after . ,(or `"{" `"(" `"[" `"<"))
-    ;;  (if (smie-rule-hanging-p)
-    ;;      (smie-rule-parent)
-    ;;    (smie-rule-parent (- magma-indent-basic))))
-
-    ;; (`(:close-all . ,(or `">" `")" `"fun)" `"]" `"]")) t)
     (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
     (`(:after . "special:") magma-indent-basic)
     (`(:after . "when:") magma-indent-basic)
@@ -528,7 +514,6 @@ robust in any way."
      (smie-rule-parent magma-indent-basic))
     (`(:after . "else")
      (smie-rule-parent magma-indent-basic))
-
     ;; The parent of an "else" in "if then else" is the corresponding
     ;; "then", not the "if"
     (`(:before . "elif") (smie-rule-parent))
@@ -558,14 +543,14 @@ robust in any way."
   (list ";" "then" "else" "do" "try" "catche" "when:" "case:" "fun)")
   "SMIE tokens marking the end of an expression.")
 
-(defun magma-looking-back-end-of-expr-p ()
+(defun magma--smie-looking-back-end-of-expr-p ()
   "Test whether we are at the beginning of an expression"
   (let ((prevtoken
          (save-excursion (magma-smie-backward-token))))
     (or (-contains? magma-end-of-expr-tokens prevtoken)
         (bobp))))
 
-(defun magma-looking-at-end-of-expr-p ()
+(defun magma--smie-looking-at-end-of-expr-p ()
   "Test whether we are before the end of an expression"
   (let ((nexttoken
          (save-excursion (magma-smie-forward-token))))
@@ -577,7 +562,7 @@ robust in any way."
   (let ((lit (magma-in-literal)))
     (when (eq (car lit) 'string)
       (goto-char (- (cdr lit) 1))))
-  (while (not (magma-looking-back-end-of-expr-p))
+  (while (not (magma--smie-looking-back-end-of-expr-p))
     (magma-smie-backward-token)))
 
 (defun magma-end-of-expr ()
