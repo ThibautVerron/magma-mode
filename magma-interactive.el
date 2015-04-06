@@ -268,7 +268,7 @@ program and arguments given as input.
 The output is a list whose car is the program and cdr is the
 arguments.
 
-This function is for internal use."
+This function is meant for internal use only."
   (if magma-interactive-prompt
       (let* ((default (concat prog (or args "")))
              (prompt "Program to run: ")
