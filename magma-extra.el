@@ -61,10 +61,8 @@
     (insert "cat \"")
     (forward-char -5)
     (magma-newline-and-indent)
-    (if (magma-looking-at-end-of-line)
-	(progn 
-          (insert "\"")
-          (backward-char 1)))))
+    (forward-char 5)
+      ))
 
 (defun magma-special-newline-when-in-string ()
   "Inserts a newline in a magma string, both on display and in the string"
@@ -165,10 +163,12 @@
 
 (eval-after-load "smartparens.el"
   '(sp-with-modes '(magma-mode magma-comint-interactive-mode magma-term-interactive-mode)
-     (sp-local-pair "<" ">"
-                    :skip-match 'magma-smartparens-gt-in-an-arrow
-                    :actions '(insert wrap navigate))
-     (sp-local-pair "`" nil :actions nil)))
+     (sp-local-pair "<" ">" 
+                    :actions '(insert wrap navigate)
+                    :skip-match 'magma-smartparens-gt-in-an-arrow)
+     (sp-local-pair "`" nil :actions '())
+     )
+  )
 
 
 ;; File header
