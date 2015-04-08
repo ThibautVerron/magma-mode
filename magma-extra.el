@@ -56,25 +56,20 @@
 
 (defun magma-newline-when-in-string ()
   "Inserts a newline in a magma string"
-  (progn
-    (insert "\"")
-    (insert "cat \"")
-    (forward-char -5)
-    (magma-newline-and-indent)
-    (forward-char 5)
-      ))
+  (insert "\"cat \"")
+  (forward-char -5)
+  (magma-newline-and-indent)
+  (forward-char 5))
 
 (defun magma-special-newline-when-in-string ()
   "Inserts a newline in a magma string, both on display and in the string"
-  (progn
-    (insert "\\n")
-    (magma-newline-when-in-string)))
+  (insert "\\n")
+  (magma-newline-when-in-string))
 
 (defun magma-special-newline-when-in-c-comment ()
   "Inserts a newline in a C++-like comment"
-  (progn
-    (magma-newline-and-indent)
-    (insert "// ")))
+  (magma-newline-and-indent)
+  (insert "// "))
 
 (defun magma-newline-when-in-c-comment ()
   "Insert a newline in a C-like comment, preserving the comment
@@ -166,9 +161,7 @@
      (sp-local-pair "<" ">" 
                     :actions '(insert wrap navigate)
                     :skip-match 'magma-smartparens-gt-in-an-arrow)
-     (sp-local-pair "`" nil :actions '())
-     )
-  )
+     (sp-local-pair "`" nil :actions '())))
 
 
 ;; File header
