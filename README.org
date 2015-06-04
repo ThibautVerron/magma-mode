@@ -367,6 +367,7 @@ The header inserted by the default functions looks like this:
  - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
  - *Bugfix* Improved performance in some indentation/parsing helpers
  - *Bugfix* Users were prompted for a void auto-insert
+ - *Bugfix* Keybindings not matching the documentation
 
 *** 2015-03-12
 
