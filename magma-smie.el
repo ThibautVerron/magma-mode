@@ -495,13 +495,19 @@ robust in any way."
      (when (magma-smie--parent-hanging-p)
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
-    (`(:after . ",")
-     (if (or (smie-rule-parent-p "(" "{" "[" "<"
-                                 "fun(" "paren:"
-                                 "special1" "special2" "special:")
-             (smie-rule-sibling-p))
-         0
-       magma-indent-basic))
+    (`(,_ . ",") (smie-rule-separator kind))
+    ;; (`(:after . ",")
+    ;;  (if (smie-rule-parent-p "(" "{" "[" "<"
+    ;;                          "fun(" "paren:"
+    ;;                          "special1" "special2" "special:")
+    ;;      0
+    ;;    (if (or (smie-rule-sibling-p)
+    ;;            (smie-rule-prev-p ",")
+    ;;            (smie-rule-next-p ",")
+    ;;            (smie-rule-bolp)
+    ;;            )
+    ;;        (smie-rule-parent magma-indent-basic)
+    ;;      magma-indent-basic)))
 
     (`(:after . ";") 0)
     (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
