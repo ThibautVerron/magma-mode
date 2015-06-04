@@ -361,9 +361,9 @@ magma evaluation buffer."
       (magma-comint-evaluate-here (magma-q-pop magma-pending-input)))))
          
 (defun magma-comint-evaluate-here (expr)
-  "Evaluate the expression expr in the current buffer.
+  "Evaluate the expression `expr' in the current buffer.
 
-This function should only be called when the current buffer is not a
+This function should only be called when the current buffer is a
 magma evaluation buffer."
   (let ((command (magma-preinput-filter expr)))
     (unless (s-equals? command "")
@@ -387,7 +387,7 @@ magma evaluation buffer."
   (display-buffer (magma-get-buffer "help")))
 
 (defun magma-comint-send-now (expr &optional i)
-  "Prompt for an expression, then send it to the comint buffer without waiting for ready.
+  "Prompt for an expression, then send it to the comint buffer without waiting until ready.
 
 The primary use-case is to be able to send a value to a `read' or
 `readi' prompt, without having to switch buffers.
