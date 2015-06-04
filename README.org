@@ -362,6 +362,10 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** Next
+
+ - *Bugfix* The SMIE parser was failing to jump over sexps
+
 *** 2015-06-04
 
  - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
