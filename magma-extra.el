@@ -156,19 +156,27 @@
     (goto-char (- end 1))
     (looking-back "-")))
 
-(eval-after-load "smartparens.el"
-  '(sp-with-modes '(magma-mode magma-comint-interactive-mode magma-term-interactive-mode)
+(declare-function sp-with-modes "ext:smartparens.el")
+(declare-function sp-local-pair "ext:smartparens.el")
+
+(eval-after-load 'smartparens
+  '(sp-with-modes '(magma-mode
+                    magma-comint-interactive-mode
+                    magma-term-interactive-mode)
      (sp-local-pair "<" ">" 
                     :actions '(insert wrap navigate)
                     :skip-match 'magma-smartparens-gt-in-an-arrow)
      (sp-local-pair "`" nil :actions '())))
 
 
+
 ;; File header
 ;;;;;;;;;;;;;;
 
 (defcustom magma-file-header nil
-  "If non-nil, magma will maintain a file header for the magma
+  "File header for magma source files
+
+If non-nil, magma will maintain a file header for the magma
   files. This variable should then be either `default', in which case
   we use the default header (see the documentation for
   `magma-update-header-default'), or the name of a function which
@@ -178,7 +186,9 @@
   :group 'magma)
 
 (defun magma-update-header-default ()
-  "Default header for magma files. The first line is the date of
+  "Update the default header for magma files.
+
+ The first line is the date of
   creation, the second the date of last modification, and the
   third a hash of the rest of the buffer. This function is
   intended to be user together with `yasnippet' and
@@ -201,9 +211,12 @@
              (save-excursion
                (forward-line 2)
                (point))))
-        (insert (format "// Hash: %s\n" (secure-hash 'md5 (current-buffer) start (point-max))))))))
+        (insert (format
+                 "// Hash: %s\n"
+                 (secure-hash 'md5 (current-buffer) start (point-max))))))))
 
 (defun magma-update-header ()
+  "Update the header for magma files"
   (when magma-file-header
     (if (eq magma-file-header 'default)
         (magma-update-header-default)
@@ -216,7 +229,9 @@
              'magma-update-header)))
 
 (defcustom magma-initial-file nil
-  "Contents to insert in a new magma file. This can be either
+  "Contents to insert in a new magma file.
+
+This can be either
   `default', in which case we insert a skeleton of the header
   described in `magma-update-header-default', or a function name which
   is then evaluated.
@@ -242,6 +257,7 @@ Based on `auto-insert'"
 
 
 (defun magma-initial-file-contents ()
+  "Insert the initial file contents if needed"
   (when (and magma-initial-file
              buffer-file-name
              ;; Make sure auto-insert has not been already called
@@ -250,11 +266,7 @@ Based on `auto-insert'"
         (magma-initial-file-contents-default)
       (funcall magma-initial-file))))
 
-(add-hook 'magma-mode-hook 'auto-insert)
-
 (define-auto-insert 'magma-mode 'magma-initial-file-contents)
-
-
 
 (provide 'magma-extra)
 
