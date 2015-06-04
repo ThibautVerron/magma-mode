@@ -338,7 +338,6 @@ the following keys are also bound:
    #+end_example
 
 
-
 *** Initial file contents and file headers
 
 We offer support for initial file contents and automatically updated
@@ -346,6 +345,12 @@ headers. To use them, set the variables =magma-initial-file= and
 =magma-file-header= to either =\'default= (remove the backslash) or a function name, which
 then replaces the default function for inserting the default content
 or updating it.
+
+Additionally, you should activate =auto-insert= for magma:
+
+#+begin_src emacs-lisp
+  (add-hook 'magma-mode-hook 'auto-insert)
+#+end_src
 
 The header inserted by the default functions looks like this:
 
