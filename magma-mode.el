@@ -5,6 +5,7 @@
 ;; Licensed under the GNU General Public License.
 
 ;; Package-requires: ((cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
+;; URL: https://github.com/ThibautVerron/magma-mode
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
