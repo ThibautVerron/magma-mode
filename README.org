@@ -362,7 +362,7 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** Next
+*** 2015-06-04
 
  - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
  - *Bugfix* Improved performance in some indentation/parsing helpers
