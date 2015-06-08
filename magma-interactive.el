@@ -523,13 +523,15 @@ before sending the next part. The result is that the buffer is
 more nicely structured, with each output located right after the
 corresponding input."
   (interactive "rP")
-  (cl-case magma-interactive-method
-    ('whole
-     (let ((str (buffer-substring-no-properties beg end)))
-       (magma-send-or-broadcast str i)))
-    ('expr
-     (save-excursion
-       (goto-char beg)
+  (save-restriction
+    (narrow-to-region beg end)
+    (cl-case magma-interactive-method
+      ('whole
+       (let ((str (buffer-substring-no-properties beg end)))
+         (magma-send-or-broadcast str i)))
+      ('expr
+       (save-excursion
+         (goto-char beg)
        (let ((magma-interactive-method 'whole))
          (while (not (magma--at-end end))
            (magma-eval-next-statement i)))))
@@ -547,7 +549,7 @@ corresponding input."
          (let ((magma-interactive-use-load t)
                (magma-interactive-auto-save 'always))
            (magma-eval-buffer i))
-         (kill-buffer))))))
+         (kill-buffer)))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line"
