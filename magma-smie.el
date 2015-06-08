@@ -566,8 +566,14 @@ robust in any way."
   (let ((lit (magma-in-literal)))
     (when (eq (car lit) 'string)
       (goto-char (- (cdr lit) 1))))
-  (while (not (magma--smie-looking-back-end-of-expr-p))
-    (magma-smie-backward-token)))
+  (let ((last-token "nonempty"))
+    (while (not (magma--smie-looking-back-end-of-expr-p))
+      (if (equal last-token "")
+          (progn
+            (backward-sexp)
+            (setq last-token "nonempty"))
+        (setq last-token (magma-smie-backward-token))))))
+    
 
 (defun magma-end-of-expr ()
   "Go to the end of the current expression."
