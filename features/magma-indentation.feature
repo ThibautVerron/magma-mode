@@ -810,9 +810,9 @@ Feature: Magma code indentation
     end for;
     """
 
-  #Fixed in commit d7eef14a7cd64a1f67333dc4386f377a98d45574
+  # Fixed in commit d7eef14a7cd64a1f67333dc4386f377a98d45574
   @bugfix
-  Scenario
+  Scenario: Indentation of complex expressio
     When I insert:
     """
     for x in L do
@@ -870,3 +870,16 @@ Feature: Magma code indentation
                        x, y;
     end for;
     """
+
+  #Fixed with commit 79cd53390807b567482e4d97d15fb5c178b7aa5c
+  @bugfix
+  Scenario: SMIE movement over sexps
+    When I insert:
+    """
+    2+2;R<x,y> := Polynomial_Ring(foo,bar); 3+3;
+    """
+    And I place the cursor before "olynomial"
+    When I press "M-a"
+    Then the cursor should be before "R<x"
+    When I press "M-e"
+    Then the cursor should be after "bar);"
