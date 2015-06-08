@@ -156,8 +156,11 @@
     (goto-char (- end 1))
     (looking-back "-")))
 
-(declare-function sp-with-modes "ext:smartparens.el")
-(declare-function sp-local-pair "ext:smartparens.el")
+;; ;; For some reason smartparens fails to start if magma-extra.el is
+;; ;; compiled with these lines
+
+;; (declare-function sp-with-modes "ext:smartparens.el")
+;; (declare-function sp-local-pair "ext:smartparens.el")
 
 (eval-after-load 'smartparens
   '(sp-with-modes '(magma-mode
