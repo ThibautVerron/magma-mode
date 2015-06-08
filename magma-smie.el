@@ -403,7 +403,7 @@ Assume the point is before \"else\". Returns:
       (forward-char 1)
       token))
    (t (let* ((here (point))
-             (there (scan-sexps here 1)))
+             (there  (or (scan-sexps here 1) here)))
         (goto-char there)
         (buffer-substring-no-properties here there)))))
 
@@ -447,7 +447,7 @@ Assume the point is before \"else\". Returns:
       (forward-char -1)
       (magma--smie-identify-colon))
      (t (let* ((here (point))
-               (there (scan-sexps here -1)))
+               (there (or (scan-sexps here -1) here)))
           (goto-char there)
           (buffer-substring-no-properties here there))))))
 
