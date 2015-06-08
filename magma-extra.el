@@ -159,15 +159,15 @@
 ;; ;; For some reason smartparens fails to start if magma-extra.el is
 ;; ;; compiled with these lines
 
-;; (declare-function sp-with-modes "ext:smartparens.el")
-;; (declare-function sp-local-pair "ext:smartparens.el")
+(declare-function sp-with-modes "ext:smartparens.el")
+(declare-function sp-local-pair "ext:smartparens.el")
 
 (eval-after-load 'smartparens
   '(sp-with-modes '(magma-mode
                     magma-comint-interactive-mode
                     magma-term-interactive-mode)
-     (sp-local-pair "<" ">" 
-                    :actions '(insert wrap navigate)
+     (sp-local-pair "<" ">"
+                    :actions '(insert wrap autoskip)
                     :skip-match 'magma-smartparens-gt-in-an-arrow)
      (sp-local-pair "`" nil :actions '())))
 
