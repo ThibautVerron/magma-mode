@@ -37,7 +37,7 @@
   (let* ((bounds (bounds-of-thing-at-point 'word))
          (start (car bounds))
          (end (cdr bounds)))
-    (list start end magma-completion-table :exclusive 'no)))
+    (and bounds (list start end magma-completion-table :exclusive 'no))))
 
 (defun magma-init-completion ()
   "Function run at mode initialisation, activating the completion and defining
