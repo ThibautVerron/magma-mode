@@ -402,10 +402,10 @@ Assume the point is before \"else\". Returns:
     (let ((token (magma--smie-identify-colon)))
       (forward-char 1)
       token))
-   (t (let* ((here (point))
-             (there  (or (scan-sexps here 1) here)))
-        (goto-char there)
-        (buffer-substring-no-properties here there)))))
+   (t (buffer-substring-no-properties
+       (point)
+       (progn (skip-syntax-forward "w_")
+              (point))))))
 
 (defun magma-smie-backward-token ()
   "Read the previous token in the magma buffer."
@@ -446,10 +446,11 @@ Assume the point is before \"else\". Returns:
      ((looking-back ":")
       (forward-char -1)
       (magma--smie-identify-colon))
-     (t (let* ((here (point))
-               (there (or (scan-sexps here -1) here)))
-          (goto-char there)
-          (buffer-substring-no-properties here there))))))
+     (t (buffer-substring-no-properties
+         (point)
+         (progn (skip-syntax-backward "w_")
+                (point)))))))
+
 
 (defcustom magma-indent-basic 4 "Indentation of blocks"
   :group 'magma
