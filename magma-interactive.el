@@ -779,7 +779,7 @@ The behavior of this function is controlled by
     (when magma-interactive-skip-comments
       (goto-char (point-min))
       (insert "\n")
-      (comment-kill (count-lines (point-min) (point-max))))
+      (magma--comment-kill-no-kill-ring (count-lines (point-min) (point-max))))
     (when magma-interactive-skip-empty-lines
       (flush-lines "^[[:blank:]]*$" (point-min) (point-max)))
     (buffer-substring-no-properties (point-min) (point-max))))

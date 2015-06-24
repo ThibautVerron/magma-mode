@@ -81,8 +81,7 @@
               (goto-char (point-min))
               
               ;; Get rid of the comments
-              (let (kill-ring)
-                (comment-kill (count-lines (point-min) (point-max))))
+              (magma--comment-kill-no-kill-ring (count-lines (point-min) (point-max)))
               (goto-char (point-min))
               
               ;; And scan
