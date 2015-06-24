@@ -99,5 +99,12 @@
 (defconst magma-syntax-propertize-function 
   (syntax-propertize-rules ("-\\(>\\)" (1 "."))))
 
+;; Helper functions, maybe we should put them in their own file in the future
+
+(defun magma--comment-kill-no-kill-ring (count)
+  "Same as comment-kill but without pushing the comments to the kill-ring"
+  (let (kill-ring)
+    (comment-kill count)))
+
 (provide 'magma-vars)
 ;;; magma-vars.el ends here

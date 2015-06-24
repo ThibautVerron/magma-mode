@@ -366,11 +366,12 @@ magma evaluation buffer."
 This function should only be called when the current buffer is a
 magma evaluation buffer."
   (let ((command (magma-preinput-filter expr)))
-    (unless (s-equals? command "")
+   ; (unless (s-equals? command "")
       (run-hook-with-args 'comint-input-filter-functions command)
       (goto-char (point-max))
       (insert command)
-      (comint-send-input))))
+      (comint-send-input)))
+  ;)
   
 (defun magma-comint-help-word (topic)
   "Call-up the handbook in an interactive buffer for topic"
@@ -446,11 +447,12 @@ acknowledge that the magma process is ready."
   "Send the expression expr to the magma buffer for evaluation."
   (save-window-excursion
     (let ((command (magma-preinput-filter expr)))
-      (unless (s-equals? command "")
+      ;(unless (s-equals? command "")
         (magma-switch-to-interactive-buffer)
         (goto-char (point-max))
         (insert command)
-        (term-send-input)))))
+        (term-send-input))))
+;)
 
 (defun magma-term-help-word (topic)
   "call-up the handbook in an interactive buffer for topic"
@@ -779,7 +781,7 @@ The behavior of this function is controlled by
     (when magma-interactive-skip-comments
       (goto-char (point-min))
       (insert "\n")
-      (comment-kill (count-lines (point-min) (point-max))))
+      (magma--comment-kill-no-kill-ring (count-lines (point-min) (point-max))))
     (when magma-interactive-skip-empty-lines
       (flush-lines "^[[:blank:]]*$" (point-min) (point-max)))
     (buffer-substring-no-properties (point-min) (point-max))))
