@@ -362,7 +362,7 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** Next
+*** 2015-07-06
 
  - *Bugfix* The SMIE parser was failing to jump over sexps
  - *Bugfix* During evaluation, stripped comments were added to the
