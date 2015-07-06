@@ -805,8 +805,8 @@ Feature: Magma code indentation
     """
     for x in L do
         longvar1,
-            longvar2 := variable1
-                        + variable2;
+        longvar2 := variable1
+                    + variable2;
     end for;
     """
 
@@ -884,7 +884,8 @@ Feature: Magma code indentation
     When I press "M-}"
     Then the cursor should be after "bar);"
 
-  @bug
+  #Fixed with commit 733446922740253da63191689db30d6409c87474
+  @bugfix
   Scenario: Indentation in repeat... until
     When I insert:
     """
