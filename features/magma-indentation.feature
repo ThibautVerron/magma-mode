@@ -812,7 +812,7 @@ Feature: Magma code indentation
 
   # Fixed in commit d7eef14a7cd64a1f67333dc4386f377a98d45574
   @bugfix
-  Scenario: Indentation of complex expressio
+  Scenario: Indentation of complex expressions
     When I insert:
     """
     for x in L do
