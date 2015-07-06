@@ -370,6 +370,9 @@ The header inserted by the default functions looks like this:
  - *Bugfix* Indent =repeat=...=until= statements
  - *Bugfix* On some occasions, empty lines would cause the evaluation
    to hang
+ - *Bugfix* Compilation errors. Support for smartparens is improved.
+ - *Bugfix* The parser would misbehave at the beginning of the buffer
+ - *Bugfix* Safer completion when point is inappropriate
 
 *** 2015-06-04
 
