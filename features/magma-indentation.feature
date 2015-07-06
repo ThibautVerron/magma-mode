@@ -883,3 +883,21 @@ Feature: Magma code indentation
     Then the cursor should be before "R<x"
     When I press "M-e"
     Then the cursor should be after "bar);"
+
+  @bug
+  Scenario: Indentation in repeat... until
+    When I insert:
+    """
+    repeat
+    x := x+1;
+    y := y+1;
+    until x eq 5;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    repeat
+        x := x+1;
+        y := y+1;
+    until x eq 5;
+    """
