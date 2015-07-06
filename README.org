@@ -365,6 +365,9 @@ The header inserted by the default functions looks like this:
 *** Next
 
  - *Bugfix* The SMIE parser was failing to jump over sexps
+ - *Bugfix* During evaluation, stripped comments were added to the
+   kill-ring
+ - *Bugfix* Indent =repeat=...=until= statements
 
 *** 2015-06-04
 
