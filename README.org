@@ -368,6 +368,8 @@ The header inserted by the default functions looks like this:
  - *Bugfix* During evaluation, stripped comments were added to the
    kill-ring
  - *Bugfix* Indent =repeat=...=until= statements
+ - *Bugfix* On some occasions, empty lines would cause the evaluation
+   to hang
 
 *** 2015-06-04
 
