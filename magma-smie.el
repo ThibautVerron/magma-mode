@@ -188,7 +188,7 @@
    "\\("
    (regexp-opt '("," "|" ";" ":="))
    "\\|" 
-   (regexp-opt '("for" "while" "do" "if" "else" "elif" 
+   (regexp-opt '("for" "while" "repeat" "until" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
                  "then" "where" "is" "select") 'words)
    "\\)")
