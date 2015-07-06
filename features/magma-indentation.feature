@@ -879,9 +879,9 @@ Feature: Magma code indentation
     2+2;R<x,y> := Polynomial_Ring(foo,bar); 3+3;
     """
     And I place the cursor before "olynomial"
-    When I press "M-a"
+    When I press "M-{"
     Then the cursor should be before "R<x"
-    When I press "M-e"
+    When I press "M-}"
     Then the cursor should be after "bar);"
 
   @bug
