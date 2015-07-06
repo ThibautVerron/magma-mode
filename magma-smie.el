@@ -58,6 +58,7 @@
             (expr)
             ("for" expr "do" insts "end for")
             ("while" expr "do" insts "end while")
+            ("repeat" insts "until" expr)
             ("if" ifbody "end if")
             ("case" expr "case:" caseinsts "end case")
             ("try" insts "catche" insts "end try")
