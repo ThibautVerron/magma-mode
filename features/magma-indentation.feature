@@ -911,8 +911,8 @@ Feature: Magma code indentation
     2+2;L := [x,y,z]; 3+3;
     """
     And I place the cursor before "y"
-    When I press "M-a"
+    When I press "M-{"
     Then the cursor should be before "L"
-    When I press "M-e"
-    Then the cursor should be after "z);"
+    When I press "M-}"
+    Then the cursor should be after "z];"
 
