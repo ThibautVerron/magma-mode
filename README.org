@@ -362,6 +362,10 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2015-07-08 (hotfix)
+ 
+ - *Bugfix* The SMIE parser was failing to jump from inside sexps.
+
 *** 2015-07-06
 
  - *Bugfix* The SMIE parser was failing to jump over sexps
@@ -373,7 +377,7 @@ The header inserted by the default functions looks like this:
  - *Bugfix* Compilation errors. Support for smartparens is improved.
  - *Bugfix* The parser would misbehave at the beginning of the buffer
  - *Bugfix* Safer completion when point is inappropriate
-
+   
 *** 2015-06-04
 
  - *Bugfix* Indentation for the arguments or =printf= and =vprintf=
