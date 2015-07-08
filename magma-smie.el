@@ -58,6 +58,7 @@
             (expr)
             ("for" expr "do" insts "end for")
             ("while" expr "do" insts "end while")
+            ("repeat" insts "until" expr)
             ("if" ifbody "end if")
             ("case" expr "case:" caseinsts "end case")
             ("try" insts "catche" insts "end try")
@@ -187,7 +188,7 @@
    "\\("
    (regexp-opt '("," "|" ";" ":="))
    "\\|" 
-   (regexp-opt '("for" "while" "do" "if" "else" "elif" 
+   (regexp-opt '("for" "while" "repeat" "until" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure"
                  "then" "where" "is" "select") 'words)
    "\\)")

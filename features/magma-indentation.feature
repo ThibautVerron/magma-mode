@@ -805,14 +805,14 @@ Feature: Magma code indentation
     """
     for x in L do
         longvar1,
-            longvar2 := variable1
-                        + variable2;
+        longvar2 := variable1
+                    + variable2;
     end for;
     """
 
   # Fixed in commit d7eef14a7cd64a1f67333dc4386f377a98d45574
   @bugfix
-  Scenario: Indentation of complex expressio
+  Scenario: Indentation of complex expressions
     When I insert:
     """
     for x in L do
@@ -879,7 +879,26 @@ Feature: Magma code indentation
     2+2;R<x,y> := Polynomial_Ring(foo,bar); 3+3;
     """
     And I place the cursor before "olynomial"
-    When I press "M-a"
+    When I press "M-{"
     Then the cursor should be before "R<x"
-    When I press "M-e"
+    When I press "M-}"
     Then the cursor should be after "bar);"
+
+  #Fixed with commit 733446922740253da63191689db30d6409c87474
+  @bugfix
+  Scenario: Indentation in repeat... until
+    When I insert:
+    """
+    repeat
+    x := x+1;
+    y := y+1;
+    until x eq 5;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    repeat
+        x := x+1;
+        y := y+1;
+    until x eq 5;
+    """
