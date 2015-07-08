@@ -902,3 +902,17 @@ Feature: Magma code indentation
         y := y+1;
     until x eq 5;
     """
+
+  #Tentative fix in commit ecc38038a86d04bf3d1bcf8aee3ab82f5168e535
+  @bugfix
+  Scenario: SMIE movement from inside sexps
+    When I insert:
+    """
+    2+2;L := [x,y,z]; 3+3;
+    """
+    And I place the cursor before "y"
+    When I press "M-a"
+    Then the cursor should be before "L"
+    When I press "M-e"
+    Then the cursor should be after "z);"
+
