@@ -571,8 +571,10 @@ robust in any way."
     (while (not (magma--smie-looking-back-end-of-expr-p))
       (if (equal last-token "")
           (progn
-            (backward-sexp)
-            (setq last-token "nonempty"))
+            (condition-case nil
+                (backward-sexp)
+              ('error (backward-up-list))
+            (setq last-token "nonempty")))
         (setq last-token (magma-smie-backward-token))))))
     
 
