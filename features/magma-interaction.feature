@@ -493,5 +493,18 @@ Feature: Interaction with a magma process
     And the cursor should be after "123"
     And the cursor should be before "456"
     
-    
-    
+  # Tentative fix in commit 91b1280cc8709a8b1e699ff8d7e3a0272b7198aa
+  @bugfix
+  Scenario: Behavior at end of buffer
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I set magma-interactive-method to line
+    And I insert "a:=2+2;" 
+    And I place the cursor before "a"
+    When I go to end of buffer
+    Then the cursor should be after ";"
+    When I place the cursor before "a"
+    And I press "C-c C-e"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see "Input: a:=2+2;"
