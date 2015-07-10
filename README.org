@@ -362,6 +362,11 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2015-07-10 (hotfix)
+
+ - *Bugfix* Evaluation would miss the semicolon for lines not ending
+   with a newline
+
 *** 2015-07-08 (hotfix)
  
  - *Bugfix* The SMIE parser was failing to jump from inside sexps.
