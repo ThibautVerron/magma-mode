@@ -587,7 +587,8 @@ line, otherwise the end of the expression. "
   (magma-end-of-expr)
   (if (eq magma-interactive-method 'line)
       (progn (forward-line 1)
-             (forward-char -1))))
+             (forward-char -1)
+             (or (looking-at "$") (forward-char 1)))))
 
 (defun magma-eval-next-statement ( &optional i)
   "Evaluate current or next statement"
