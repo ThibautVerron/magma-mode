@@ -32,6 +32,12 @@
 
 (declare-function magma-mode "magma-mode.el")
 
+(declare-function magma-run "magma-interactive.el" t t)
+(declare-function magma-interactive-mode "magma-interactive.el" t t)
+(declare-function magma-send "magma-interactive.el" t t)
+(declare-function magma-help-word-text "magma-interactive.el" t t)
+
+
 (defcustom magma-interactive-program "magma"
   "*Program to be launched to use magma (usually magma)"
   :group 'magma
