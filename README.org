@@ -362,10 +362,11 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** 2015-07-10 (hotfix)
+*** 2015-07-11 (hotfix)
 
  - *Bugfix* Evaluation would miss the semicolon for lines not ending
    with a newline
+ - *Bugfix* Compilation errors
 
 *** 2015-07-08 (hotfix)
  
