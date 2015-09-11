@@ -357,7 +357,7 @@ pushes `expr' onto the `magma-pending-input' queue."
 
 This function should only be called when the current buffer is a
 magma evaluation buffer."
-  (message (format "Recieved %s" string))
+  ;(message (format "Recieved %s" string))
   (when (or
          (not magma-interactive-wait-between-inputs)
          ;; (save-excursion
@@ -854,7 +854,7 @@ The behavior of this function is controlled by
   (setq-local comint-prompt-read-only magma-prompt-read-only)
   (setq-local comint-prompt-regexp magma-prompt-regexp)
   (setq-local comint-scroll-to-bottom-on-output t)
-  (add-hook 'comint-preoutput-filter-functions 'magma-message-raw-output nil t)
+  ;(add-hook 'comint-preoutput-filter-functions 'magma-message-raw-output nil t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
   (magma-interactive-common-settings)
