@@ -351,24 +351,22 @@ pushes `expr' onto the `magma-pending-input' queue."
             (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))))
-  
+
 (defun magma-comint-next-input (string)
   "Send next input if the buffer is ready for it.
 
 This function should only be called when the current buffer is a
 magma evaluation buffer."
-  ;(message (format "Recieved %s" string))
+  ;; (message (concat "-> " string " <-"))
+  ;; (setq magma-ready t)
   (when (or
          (not magma-interactive-wait-between-inputs)
-         ;; (save-excursion
-         ;;   (forward-line 0)
-         ;;   (looking-at "^[[:alnum:]|]*> ")))
-         ;;;;
-         ;;(string-match-p "\(.*\n\)\?[[:alnum:]|]*> $" string)
-         (string-equal string ""))
+         ;; (string-match-p "\(.*\n\)?[^ <\n]*> $" string)
+         (looking-back "> " (- (point) 2)))
     (if (magma-q-is-empty? magma-pending-input)
         (setq magma-ready t)
       (magma-comint-evaluate-here (magma-q-pop magma-pending-input)))))
+
          
 (defun magma-comint-evaluate-here (expr)
   "Evaluate the expression `expr' in the current buffer.
@@ -574,6 +572,7 @@ corresponding input."
          (end (save-excursion
                 (end-of-line)
                 (point))))
+    ;(message (format "eval-line: %s %s" beg end))
     (let ((magma-interactive-method 'whole))
       (magma-eval-region beg end i))
     (end-of-line)
