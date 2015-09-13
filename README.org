@@ -293,7 +293,7 @@ To use this, add the following to your init file:
 
 The following functions are available:
     
- - =magma-newline-and-indent=: inserts a visual
+ - =magma-insert-newline=: inserts a visual
    newline in the buffer. It is a regular =newline-and-indent= in most
    situations, but if the point is in the middle of the string, it
    cuts the string in half before inserting the newline.
@@ -311,7 +311,7 @@ The following functions are available:
     
    This shouldn't change the way your code is evaluated.
 
- - =magma-special-newline-and-indent=: inserts
+ - =magma-insert-special-newline==: inserts
    a "stronger" newline in the buffer. It is a regular
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
@@ -340,8 +340,8 @@ Simply bind them to keys of your choice if you wish to use them.
 For example:
 
 #+begin_src emacs-lisp
-(define-key magma-mode-map (kbd "RET") magma-newline-and-indent)
-(define-key magma-mode-map (kbd "C-RET") magma-special-newline-and-indent)
+(define-key magma-mode-map (kbd "RET") #'magma-insert-newline)
+(define-key magma-mode-map (kbd "C-RET") #'magma-insert-special-newline)
 #+end_src
 
 *** Initial file contents and file headers

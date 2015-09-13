@@ -26,7 +26,6 @@
  (setq magma-interactive-use-comint t)
  ;;(message "Test1")
  (setq magma-prompt-read-only nil)
- (setq magma-use-electric-newline t)
  (setq-default indent-tabs-mode nil)
  (setq magma-interactive-program
        (let ((ext (if (eq system-type 'windows-nt) ".bat" ".sh")))
@@ -36,6 +35,9 @@
  (setq magma-default-directory magma-mode-root-path)
  ;; (message (format "%s" magma-default-directory))
  (require 'magma-mode)
+ (define-key magma-mode-map (kbd "RET") #'magma-insert-newline)
+ (define-key magma-mode-map (kbd "C-c C-j") #'magma-insert-special-newline)
+ 
  (setq magma-delay "0.5")
 )
 
