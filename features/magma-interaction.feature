@@ -508,3 +508,24 @@ Feature: Interaction with a magma process
     And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see "Input: a:=2+2;"
+
+  @bugfix
+  Scenario: Printing a fake prompt
+    Given I am in buffer "*magma-test*"
+    And the buffer is empty
+    And I insert:
+    """
+    print "> ";
+    print 3;
+    """
+    And I press "C-c C-b"
+    And I switch to buffer "*magma*"
+    And I wait for an instant
+    Then I should see:
+    """
+    > print "> ";
+    > 
+    > print 3;
+    3
+    """
+    

@@ -769,23 +769,11 @@ The behavior of this function is controlled by
   output)
 
 (defun magma-comint-delete-reecho (output)
+  ;(message output)
   (with-temp-buffer
     (insert output)
-    (let ((maxp
-           (save-excursion
-             (goto-char (point-max))
-             (beginning-of-line)
-             (if (looking-at "^[[:alnum:]]*>")
-                 (progn
-                   (or (bobp) (forward-char -1))
-                   ;; (setq magma--output-finished t)
-                   (point))
-               (point-max)))))
-      (flush-lines (concat "\\(^[[:alnum:]]*>"
-                           ;"\\|^[[:blank:]]*$"
-                           "\\|\^H\\)")
-                   (point-min) maxp)
-      (buffer-substring-no-properties (point-min) (point-max)))))
+    (flush-lines "\" (point-min) (point-max))
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun magma-preinput-filter (input)
   (with-temp-buffer
