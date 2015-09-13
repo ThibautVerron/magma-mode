@@ -10,7 +10,9 @@ debuggerOn=0;
 
 while true; do
     IFS='' read -p "$prompt" line
-    echo "> $line" # This line should be deleted by comint
+    # python -c "print '> $line' + ''*(len('$line')+3)"
+    #echo "> $line" # This line should be deleted by comint
+    echo "$prompt $line"
     case "$line" in
         "help")
             echo "Commands:"
@@ -19,6 +21,7 @@ while true; do
             echo "- error-absolute;   : output an error with absolute path"
             echo "- hang;    : the process will hang until killed"
             echo "- help;    : display this"
+            echo "- print ...;" : print the argument
             echo "- quit;    : quit the debug mode, or dummy-magma if the debugger wasn't running"
             echo "- silence; : no output"
             echo "Anything else is just reechoed."
@@ -37,6 +40,9 @@ while true; do
             ;;
         "hang;")
             while true ; do :; done
+            ;;
+        "print"*";")
+            eval echo ${line:6:-1}
             ;;
         "quit;"|"exit;")
             if [ $debuggerOn -eq 1 ]; then

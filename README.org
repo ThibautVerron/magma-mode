@@ -291,10 +291,9 @@ To use this, add the following to your init file:
 
 *** Extra "electric" editting features
 
-If you have =magma-use-electric-newline= set to =t=,
-the following keys are also bound:
+The following functions are available:
     
- - =RET= or =C-j= (=magma-newline-and-indent=): inserts a visual
+ - =magma-insert-newline=: inserts a visual
    newline in the buffer. It is a regular =newline-and-indent= in most
    situations, but if the point is in the middle of the string, it
    cuts the string in half before inserting the newline.
@@ -312,8 +311,8 @@ the following keys are also bound:
     
    This shouldn't change the way your code is evaluated.
 
- - =C-RET= or =C-c C-j= (=magma-special-newline-and-indent=): inserts
-   an "stronger" newline in the buffer. It is a regular
+ - =magma-insert-special-newline==: inserts
+   a "stronger" newline in the buffer. It is a regular
    =newline-and-indent= in most situations, but in a comment, it will
    assume that you want to continue the comment in the next line:
 
@@ -337,6 +336,13 @@ the following keys are also bound:
       cat "and even a few more words";"
    #+end_example
 
+Simply bind them to keys of your choice if you wish to use them.
+For example:
+
+#+begin_src emacs-lisp
+(define-key magma-mode-map (kbd "RET") #'magma-insert-newline)
+(define-key magma-mode-map (kbd "C-RET") #'magma-insert-special-newline)
+#+end_src
 
 *** Initial file contents and file headers
 
@@ -362,7 +368,18 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** 2015-07-10 (hotfix)
+*** 2015-09-13
+
+ - *Bugfix* Sometimes some text would get stuck before the prompt, and
+   the magma buffer would hang
+ - *Bugfix* Cleaner detection of the deleted reecho (=print "> ";=
+   should work as expected now)
+ - *Change* Electric newline features are no longer controlled by a
+   variable, bind the keys manually if you wish to use them. (The
+   original behavior was making it too hard for a user to bind the
+   keys to some other function in the global keymap)
+
+*** 2015-07-11 (hotfix)
 
  - *Bugfix* Evaluation would miss the semicolon for lines not ending
    with a newline
