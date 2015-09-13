@@ -393,7 +393,7 @@ The header inserted by the default functions looks like this:
  - *Bugfix* The SMIE parser was failing to jump over sexps
  - *Bugfix* During evaluation, stripped comments were added to the
    kill-ring
- - *Bugfix* Indent =repeat=...=until= statements
+ - *Bugfix* Indent =repeat ... until= statements
  - *Bugfix* On some occasions, empty lines would cause the evaluation
    to hang
  - *Bugfix* Compilation errors. Support for smartparens is improved.
