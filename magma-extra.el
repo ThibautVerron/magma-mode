@@ -115,37 +115,6 @@
     (t (magma-newline-and-indent))))
 
 
-(defun magma-set-electric-newline (symbol value)
-  (set-default symbol value)
-  (magma--apply-electric-newline-setting))
-
-(defun magma--apply-electric-newline-setting ()
-  (if magma-use-electric-newline
-      (progn
-        (define-key magma-mode-map (kbd "RET") 'magma-insert-newline)
-        (define-key magma-mode-map (kbd "C-j") 'magma-insert-newline)
-        (define-key magma-mode-map (kbd "C-c C-j")
-          'magma-insert-special-newline)
-        (define-key magma-mode-map (kbd "C-<return>")
-          'magma-insert-special-newline))
-    (progn
-      (define-key magma-mode-map (kbd "RET") nil)
-      (define-key magma-mode-map (kbd "C-j") nil)
-      (define-key magma-mode-map (kbd "C-c C-j") nil)
-      (define-key magma-mode-map (kbd "C-RET") nil))))
-
-(defun magma-toggle-electric-newline ()
-  (interactive)
-  (setq magma-use-electric-newline (not magma-use-electric-newline))
-  (magma--apply-electric-newline-setting))
-
-(defcustom magma-use-electric-newline nil
-  "If non nil, C-j and C-c C-j have special behavior in strings and comments"
-  :group 'magma
-  :set 'magma-set-electric-newline
-  :type 'boolean)
-
-
 ;; Smartparens
 ;;;;;;;;;;;;;;
 

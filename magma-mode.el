@@ -86,7 +86,7 @@
 
   (setq-local indent-line-function 'smie-indent-line)
 
-  (magma--apply-electric-newline-setting)
+  ;(magma--apply-electric-newline-setting) 
   
   (magma-interactive-init))
   
