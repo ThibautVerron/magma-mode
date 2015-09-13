@@ -22,6 +22,7 @@
  (depends-on "magit")
  (depends-on "popwin")
  (depends-on "projectile")
+ (depends-on "smartparens") ;; Compilation
  (depends-on "wrap-region")
  )
 
