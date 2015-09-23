@@ -35,10 +35,10 @@
 (defconst magma-path (f-dirname (f-this-file)) "magma-mode install folder")
 ;;(add-to-list 'load-path magma-path)
 
-(defcustom magma-default-directory "~/"
+(defcustom magma-default-directory nil
   "Default work directory for magma"
   :group 'magma
-  :type 'string)
+  :type '(choice string (const nil)))
 
 (defvar magma--debug-level 0 "Echo basic debug information?")
 

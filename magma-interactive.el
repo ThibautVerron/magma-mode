@@ -288,7 +288,11 @@ This function is meant for internal use only."
   "Run an inferior instance of magma inside emacs, using comint."
   (let ((bufname (magma-make-buffer-name i)))
     (unless (comint-check-proc bufname) ; The buffer is new
-      (let* ((progargs (magma--interactive-read-spec
+      (let* ((file (buffer-file-name))
+             (directory (or magma-default-directory
+                            (and file (f-dirname file))
+                            "~/"))
+             (progargs (magma--interactive-read-spec
                         magma-interactive-program
                         magma-interactive-arguments))
              (program (car progargs))
@@ -302,10 +306,12 @@ This function is meant for internal use only."
                      args)))
         (push (or i 0) magma-active-buffers-list)
         (set-buffer new-interactive-buffer)
-        (cd magma-default-directory)
+        (cd directory)
         (setq magma-pending-input (magma-q-create))
         (setq magma-ready t)
-        (magma-interactive-mode)))
+        (magma-interactive-mode)
+        (magma-comint-send-string
+         (concat "ChangeDirectory(\"" directory "\");"))))
     (with-current-buffer bufname (current-buffer))))
 
 
@@ -362,7 +368,13 @@ magma evaluation buffer."
   (when (or
          (not magma-interactive-wait-between-inputs)
          ;; (string-match-p "\(.*\n\)?[^ <\n]*> $" string)
-         (looking-back "> " (- (point) 2)))
+         ;;(looking-back "> " (- (point) 2))
+         ;;(string-match-p ".*> $" string)
+         (save-excursion
+           (forward-char -2)
+           (looking-at "> ")
+         )
+         )
     (if (magma-q-is-empty? magma-pending-input)
         (setq magma-ready t)
       (magma-comint-evaluate-here (magma-q-pop magma-pending-input)))))
@@ -764,9 +776,9 @@ The behavior of this function is controlled by
 
 ;;(defvar magma--echo-complete nil)
 
-(defun magma-message-raw-output (output)
-  (message output)
-  output)
+;; (defun magma-message-raw-output (output)
+;;   (message output)
+;;   output)
 
 (defun magma-comint-delete-reecho (output)
   ;(message output)
