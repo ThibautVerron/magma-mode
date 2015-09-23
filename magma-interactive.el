@@ -370,6 +370,7 @@ magma evaluation buffer."
          ;; (string-match-p "\(.*\n\)?[^ <\n]*> $" string)
          ;;(looking-back "> " (- (point) 2))
          ;;(string-match-p ".*> $" string)
+         (<= (point) 2)
          (save-excursion
            (forward-char -2)
            (looking-at "> ")
