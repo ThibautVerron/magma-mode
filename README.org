@@ -32,7 +32,7 @@ magma-mode is on [[http://melpa.org/#/][melpa]], so you can install it with:
 
 1. Clone the repository in your favorite elisp folder
 
-   #+begin_src shell-script
+   #+begin_src sh
       cd $favoriteElispFolder
       git clone https://github.com/ThibautVerron/magma-mode.git
    #+end_src    
@@ -86,7 +86,7 @@ If you want to use auto-completion against magma keywords, please see the next s
     2. Place yourself in the =magma-mode= directory;
     3. Run the script:
 
-       #+begin_src shell-script
+       #+begin_src sh
          .../magma-mode$ bin/build_completion_table.sh $pathtomagma
        #+end_src
 
@@ -96,19 +96,16 @@ If you want to use auto-completion against magma keywords, please see the next s
     running magma, the easiest way is to first create a fake
     documentation. Run the following on the magma machine:
 
-    #+begin_src shell-script
+    #+begin_src sh
       cd $pathtomagma/doc/html
-      
       cat *.htm > ~/.magmadoc.htm
     #+end_src
 
     Then on the emacs machine:
 
-    #+begin_src shell-script
+    #+begin_src sh
        mkdir -p .tmpmagma/doc/html
-     
        scp $magmamachine:.magmadoc.htm .tmpmagma/doc/html/
-      
        cd .tmpmagma
     #+end_src
     
