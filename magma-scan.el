@@ -76,7 +76,7 @@
                 (magma-mode))
               (insert "\n")
               (if file
-                  (insert-file-contents-literally file)
+                  (insert-file-contents file)
                 (insert-buffer-substring-no-properties buf))
               (goto-char (point-min))
               
