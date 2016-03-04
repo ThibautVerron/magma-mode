@@ -365,6 +365,11 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2016-03-03 (hotfix)
+
+ - *Bugfix* Error in magma-scan if the buffer is encoded with dos end
+   of lines
+
 *** 2015-09-23
 
  - *Bugfix* Error in process filter if the buffer is too short
