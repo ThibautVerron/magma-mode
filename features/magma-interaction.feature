@@ -242,9 +242,11 @@ Feature: Interaction with a magma process
     And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see "Input: 2+2;"
+    And I should not see "Input: 3+3;"
     When I switch to buffer "*magma-2*"
     And I wait for an instant
     Then I should see "Input: 3+3;"
+    And I should not see "Input: 2+2;"
     
 
   Scenario: Send a line to multiple processes, broadcast
