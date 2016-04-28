@@ -178,6 +178,7 @@ Setting this variable has no effect in term mode."
     (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "RET") 'comint-send-input)
     (define-key map (kbd "C-a") 'comint-bol-or-process-mark)
+    (define-key map (kbd "C-c p") 'magma-comint-toggle-pause-output)
     ;(define-key map (kbd "C-c") magma--comint-interactive-escape-map)
     map)
   "Keymap for magma-interactive-mode")
@@ -255,11 +256,16 @@ If `app' is not nil, it is a string which will be added before
 the buffer number."
   (concat "*" (magma-get-buffer-name i app) "*"))
 
-(defun magma-get-buffer (&optional i)
-  "return the i-th magma buffer"
-  (get-buffer (magma-make-buffer-name i)))
-              ;;(error "No evaluation buffer found.")))
-  
+(defun magma-get-buffer (&optional i norun)
+  "Return the i-th magma buffer
+
+If optional arg `norun' is `nil' (the default) and the buffer doesn't exist or doesn't have a running process, start a magma process.
+If `norun' is `t', in that case, return `nil'."
+  (if norun
+      (get-buffer (magma-make-buffer-name i))
+    (magma-run i)))
+;; magma-run only returns the buffer if it exists and has a process, and runs a process 
+                
 (defcustom magma-interactive-prompt t
   "If non nil, prompt for the path to the magma program and its arguments"
   :group 'magma)
@@ -314,7 +320,6 @@ This function is meant for internal use only."
          (concat "ChangeDirectory(\"" directory "\");"))))
     (with-current-buffer bufname (current-buffer))))
 
-
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
   (with-current-buffer (magma-get-buffer i)
@@ -338,6 +343,12 @@ This function is meant for internal use only."
         (setq magma-ready t)
         (setq magma-pending-input (magma-q-create))))))
 
+(defun magma-comint-toggle-pause-output ()
+  "Pause the autoscroll in the comint buffer"
+  (interactive)
+  (setq comint-scroll-to-bottom-on-output
+        (not comint-scroll-to-bottom-on-output)))
+
 (defun magma-comint-send-string (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation."
   (let ((command (concat expr "\n")))
@@ -350,6 +361,7 @@ This function is meant for internal use only."
 If the magma process is currently processing some previous input,
 pushes `expr' onto the `magma-pending-input' queue."
   (let ((buffer (magma-get-buffer i)))
+    (display-buffer buffer)
     (with-current-buffer buffer
       (if magma-ready
           (progn
