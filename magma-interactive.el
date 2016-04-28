@@ -360,15 +360,17 @@ This function is meant for internal use only."
 
 If the magma process is currently processing some previous input,
 pushes `expr' onto the `magma-pending-input' queue."
-  (let ((buffer (magma-get-buffer i)))
-    (display-buffer buffer)
+  (let ((buffer (magma-get-buffer i))
+        (oldbuf (current-buffer)))
     (with-current-buffer buffer
       (if magma-ready
           (progn
             (setq magma-ready nil)
             (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
-        (magma-q-push magma-pending-input expr)))))
+        (magma-q-push magma-pending-input expr)))
+    (pop-to-buffer buffer)
+    (select-window (get-buffer-window oldbuf))))
 
 (defun magma-comint-next-input (string)
   "Send next input if the buffer is ready for it.
