@@ -916,3 +916,21 @@ Feature: Magma code indentation
     When I press "M-}"
     Then the cursor should be after "z];"
 
+  @bugfix
+  Scenario: indentation of function body with subword-mode
+    When I insert:
+    """
+    function Test_TestTest (a,b,c)
+    return 2;
+    end function;
+    """
+    And I turn on subword-mode
+    And I place the cursor before "return"
+    And I press "C-i"
+    Then I should see:
+    """
+    function Test_TestTest (a,b,c)
+        return 2;
+    end function;
+    """
+

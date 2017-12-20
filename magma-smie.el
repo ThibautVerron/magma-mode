@@ -56,12 +56,12 @@
       ;; Instruction
       (inst (assign)
             (expr)
-            ("for" expr "do" insts "end for")
-            ("while" expr "do" insts "end while")
+            ("for" dobody "end for")
+            ("while" dobody "end while")
             ("repeat" insts "until" expr)
             ("if" ifbody "end if")
-            ("case" expr "case:" caseinsts "end case")
-            ("try" insts "catche" insts "end try")
+            ("case" casebody "end case")
+            ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
             ("special1" specialargs)
@@ -132,12 +132,19 @@
       (specialargs (expr)
                    (specialargs "," specialargs))
 
+      ;; What appears in a "for" of a "while" block
+      (dobody (expr "do" insts))
+
+      ;; What appears in a "try" block
+      (trybody (insts "catche" insts))
+      
       ;; What appears in a "if" block
       (ifbody (ifelsebody) (ifthenbody "elif" ifbody))
       (ifelsebody (ifthenbody) (ifthenbody "else" insts))
       (ifthenbody (expr "then" insts))
 
       ;; What appears in a "case" block
+      (casebody (expr "case:" caseinsts))
       (caseinsts (caseinsts "when" expr "when:" insts) 
                  (caseinsts "else" insts)))
     '((left "if")
@@ -332,7 +339,7 @@ Assume the point is before \"else\". Returns:
               (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                             (- (point) 10))
               (progn
-                (backward-word)
+                (backward-word-strictly)
                 (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                               (- (point) 10))))))
     (error nil) ))
@@ -630,9 +637,9 @@ robust in any way."
 
 
 (defun magma-close-block ()
-  "Close the innermost open block at point
+  "Close the innermost open block at point.
 
-This function is experimental and cannot reliably be used."
+Note: does not work for function and procedure blocks"
   (interactive)
   (smie-close-block)
   (insert ";"))
