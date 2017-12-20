@@ -934,3 +934,33 @@ Feature: Magma code indentation
     end function;
     """
 
+  @bugfix
+  Scenario: indentation after while
+    When I insert:
+    """
+    while x eq 1 do
+    toto;
+    end while;
+    """
+    And I place the cursor before "toto"
+    And I press "C(si)"
+    Then I should see:
+    """
+    while x eq 1 do
+        toto;
+    end while;
+    """
+
+  @bugfix
+  Scenario: indentation in record fields after ':'
+    When I insert:
+    """
+    XX := <recfield : x : type1,
+    y : type2 >
+    """
+    And I place the cursor before "y"
+    Then I should see:
+    """
+    XX := <recfield : x : type1,
+        y : type2 >
+    """
