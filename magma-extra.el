@@ -123,7 +123,7 @@
   surrounding \"<...>\" pair."
   (save-excursion
     (goto-char (- end 1))
-    (looking-back "-")))
+    (looking-back "-" nil)))
 
 (declare-function sp-with-modes "ext:smartparens.el" t t)
 (declare-function sp-local-pair "ext:smartparens.el" t t)

@@ -840,6 +840,7 @@ Feature: Magma code indentation
     cat "y = %o\n",
     x, y;
     end for;
+    
     """
     And I indent the buffer
     Then I should see:
@@ -943,7 +944,7 @@ Feature: Magma code indentation
     end while;
     """
     And I place the cursor before "toto"
-    And I press "C(si)"
+    And I indent the buffer
     Then I should see:
     """
     while x eq 1 do
@@ -955,12 +956,13 @@ Feature: Magma code indentation
   Scenario: indentation in record fields after ':'
     When I insert:
     """
-    XX := <recfield : x : type1,
-    y : type2 >
+    XX := recformat<x : type1,
+    y : type2>;
     """
     And I place the cursor before "y"
+    And I indent the buffer
     Then I should see:
     """
-    XX := <recfield : x : type1,
-        y : type2 >
+    XX := recformat<x : type1,
+                    y : type2>;
     """

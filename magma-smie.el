@@ -81,7 +81,7 @@
             ("#" expr)
             (expr "+" expr)
             ;; (expr "::" expr) ;; For intrinsics only
-            (id "type:" id) ;; In recformat only
+            ("recformat<" recspec ">")
             (expr "-" expr)
             (expr "*" expr)
             (expr "/" expr)
@@ -112,12 +112,22 @@
       (listargspipe (enum)
                     (enum "|" enum))
 
+      (recspec (id)
+               (id "type:" id) ;; In recformat only
+               (recspec "," recspec))
+      
       (enum (expr)
             (enum "," enum))
 
       ;; (angleargs (listargs)
       ;;            (id "->" listargspipe))
 
+      ;; (recspec (id)
+      ;;          (id ":" expr)
+      ;;          (recspec "," recspec)
+      ;;          )
+
+      
       ;; What appears in a function or procedure arguments
       ;;(funbody (id "fun(" funargs "fun)" insts))
       (funcall (id "(" funargs ")"))
@@ -253,7 +263,7 @@ if in an intrinsic description or nil if somewhere else."
            "\\<intrinsic\\>[^;]*"
            (regexp-quote
             (buffer-substring-no-properties
-             (elt state 1) (point)))))))
+             (elt state 1) (point)))) nil )))
       'intrinsic)
      ((elt state 3) (cons 'string (elt state 8)))
      ((elt state 4) (cons (if (elt state 7) 'c++ 'c) (elt state 8)))
@@ -273,7 +283,7 @@ if in an intrinsic description or nil if somewhere else."
 (defun magma--smie-identify-colon ()
   "Return the token type for a colon.
 
-If point is at a colon, returns the appropriate token for that
+If point is at a colon, returns the a xppropriate token for that
   colon. The returned value is :
 - \"case:\" if the colon is at the end of a case... : construct
 - \"when:\" if the colon is at the end of a when... : construct
@@ -289,18 +299,21 @@ If point is at a colon, returns the appropriate token for that
           (condition-case nil 
               (progn
                 (forward-comment (- (point)))
+                 ;(up-list)
                 (backward-sexp)
                 (cond
                  ((looking-at "case") (throw 'token "case:"))
                  ((looking-at "when") (throw 'token "when:"))
                  ((looking-at magma-smie-special2-regexp)
                   (throw 'token "special:"))
-                 ((looking-back "recformat<[[:space:]]*")
+                 ;; ((up-list)
+                 ;;  (backward-sexp)
+                 ;;  (cond
+                 ((looking-back "recformat<[[:space:]]*" nil)
                   (throw 'token "type:"))
-                 ((bobp) (throw 'token ":"))
-                 ))
-            (error (throw 'token "paren:"))))
-        ))))
+                 ((bobp) (throw 'token ":"))))
+            (error (throw 'token "paren:")))
+        )))));; ))
 
 (defun magma--smie-identify-else()
   "Return the token type for a else.
@@ -328,7 +341,21 @@ Assume the point is before \"else\". Returns:
                  ))
             (error (throw 'token "else"))))
         ))))
-  
+
+(defun magma--backward-word-strictly ()
+  "Backward-word ignoring e.g. subword-backward
+
+Poorman's implementation of the backward-word-strictly function
+added in Emacs 25.1. It is only used to move over function
+identifiers, so it does not need to take into account all
+possible word separators, only white space."
+
+  (if (version< emacs-version "25.1")
+      (search-backward-regexp "[[:space:]]")
+    (backward-word-strictly)
+      )
+  )
+
 (defun magma--smie-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
@@ -339,7 +366,7 @@ Assume the point is before \"else\". Returns:
               (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                             (- (point) 10))
               (progn
-                (backward-word-strictly)
+                (magma--backward-word-strictly)
                 (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
                               (- (point) 10))))))
     (error nil) ))
@@ -435,10 +462,10 @@ Assume the point is before \"else\". Returns:
      ((looking-back magma-smie-end-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
-     ((looking-back "\\<catch [[:alnum:]]+")
+     ((looking-back "\\<catch [[:alnum:]]+" nil)
       (goto-char (match-beginning 0))
       "catche")
-     ((looking-back "else")
+     ((looking-back "else" nil)
       (goto-char (match-beginning 0))
       (magma--smie-identify-else))
      ((looking-back magma-smie-special1-regexp bolp)
@@ -451,7 +478,7 @@ Assume the point is before \"else\". Returns:
      ((looking-back magma-smie-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
-     ((looking-back ":")
+     ((looking-back ":" nil)
       (forward-char -1)
       (magma--smie-identify-colon))
      (t (buffer-substring-no-properties
@@ -483,7 +510,7 @@ robust in any way."
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
   (when magma-smie-verbose
-      (message (format "%s %s parent:%s"
+    (message (format "%s %s parent:%s"
                        kind token
                        (and (boundp 'smie--parent) smie--parent))))
   (pcase (cons kind token)
@@ -520,19 +547,29 @@ robust in any way."
     (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
     (`(:after . "special:") magma-indent-basic)
     (`(:after . "when:") magma-indent-basic)
-    (`(:before . "when") 0)
+    (`(:before . "when") (smie-rule-parent (- -1 magma-indent-basic)))
+    (`(:after . "do")
+     (smie-rule-parent magma-indent-basic))
     (`(:before . "then")
      (smie-rule-parent magma-indent-basic))
     (`(:after . "then")
      (smie-rule-parent magma-indent-basic))
     (`(:after . "else")
-     (smie-rule-parent magma-indent-basic))
+     (if (smie-rule-parent-p "if" "elif")
+         (smie-rule-parent magma-indent-basic)
+       (smie-rule-parent -1)))
     ;; The parent of an "else" in "if then else" is the corresponding
     ;; "then", not the "if"
+    (`(:before . "catche") (smie-rule-parent))
+    (`(:after . "catche") magma-indent-basic)
     (`(:before . "elif") (smie-rule-parent))
     (`(:before . "else")
-     (when (smie-rule-parent-p "if" "elif" "case") (smie-rule-parent)))
+     (if (smie-rule-parent-p "if" "elif" "case")
+         (smie-rule-parent)))
 
+    ;; (`(:before . "when")
+    ;;  (smie-rule-parent 7))
+    
     ;; Indentation for the functions, with one syntax or the other
     (`(:after . "fun)")
      magma-indent-basic)

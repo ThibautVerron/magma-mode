@@ -31,7 +31,7 @@ Feature: Interaction with a magma process
     Then I should be in buffer "*magma-2*"
     When I press "RET"
     And I wait for an instant
-    And I should see "Welcome to dummymagma v1.0!"
+    Then I should see "Welcome to dummymagma v1.0!"
     And I should see "> "
     And the buffer should have a process
     

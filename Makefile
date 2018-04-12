@@ -38,7 +38,8 @@ test: unit ecukes
 unit: $(ELCFILES)
 	${CASK} exec ert-runner
 
-.ecukes-failing-scenarios: ecukes-all
+.ecukes-failing-scenarios: $(ECUKESFILES)
+	${CASK} exec ecukes $(ECUKESFLAGS)
 
 ecukes-debug: .ecukes-failing-scenarios
 	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing --debug

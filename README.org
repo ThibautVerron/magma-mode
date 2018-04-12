@@ -264,10 +264,9 @@ The file =magma-extra.el= provides support for various minor modes:
  - =hs-minor-mode= : folding of =keyword=... =end keyword;=
    blocks. It probably will not work correctly in case the code is
    not syntactically correct (unclosed blocks);
- - =imenu= : implemented the backend functions, so that code
-   navigation and =which-function= should work fine. At the moment,
-   the defun syntax =foo :== =function (bar)=... =end function;= is not
-   supported;
+ - =imenu= : implements the backend functions, so code navigation and
+   =which-function= should work fine. At the moment, the defun syntax
+   =foo :== =function (bar)=... =end function;= is not supported;
  - =smart-parens= : partial support only, it is mainly a function
    trying to ensure that the second =>= in =hom<A -> B >= is matched
    to the opening =<=. 
@@ -365,6 +364,10 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2016-11-13
+
+ - *Bugfix* =magma-close-block= works more reliably now
+
 *** 2016-03-03 (hotfix)
 
  - *Bugfix* Error in magma-scan if the buffer is encoded with dos end
