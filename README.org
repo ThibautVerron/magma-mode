@@ -1,6 +1,6 @@
 # -*- eval: (auto-fill-mode 1); eval: (toggle-truncate-lines 0) -*-
 #+LINK: magma      http://magma.maths.usyd.edu.au/magma/
-#+LINK: magma-mode http://www-polsys.lip6.fr/~bettale/magma-mode/
+#+LINK: magma-mode https://www.lukbettale.ze.cx/magma-mode/
 #+LINK: emacs-lisp http://www.gnu.org/software/emacs/manual/html_node/elisp/
 
 * Magma-mode
@@ -364,6 +364,13 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2018-04-13
+
+ - *Bugfix* Indentation after =while= and =for= now respects
+   =magma-indent-basic=
+ - *Bugfix* Indentation errors with =subword-mode= on
+ - *Bugfix* Wrong indentation for parameters with a type specification
+
 *** 2016-11-13
 
  - *Bugfix* =magma-close-block= works more reliably now
