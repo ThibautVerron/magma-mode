@@ -599,7 +599,7 @@ corresponding input."
          (end (save-excursion
                 (end-of-line)
                 (point))))
-    ;(message (format "eval-line: %s %s" beg end))
+    ;; (message (format "eval-line: %s %s" beg end))
     (let ((magma-interactive-method 'whole))
       (magma-eval-region beg end i))
     (end-of-line)

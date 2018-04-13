@@ -445,8 +445,10 @@ Feature: Interaction with a magma process
     Given I am in buffer "*magma-test*"
     And I press "C-c C-a"
     And I press "C-u 2 C-c C-a"
-    # And I switch to buffer "magma-2"
-    # Then the buffer should have a process
+    And I switch to buffer "*magma-2*"
+    Then the buffer should have a process
+    When I switch to buffer "*magma-test*"
+    And I wait for an instant
     And I press "C-u C-u C-c C-i"
     And I wait for an instant
     And I switch to buffer "*magma*"
@@ -497,6 +499,7 @@ Feature: Interaction with a magma process
     
   # Tentative fix in commit 91b1280cc8709a8b1e699ff8d7e3a0272b7198aa
   @bugfix
+  @unreproducible
   Scenario: Behavior at end of buffer
     Given I am in buffer "*magma-test*"
     And the buffer is empty
@@ -505,8 +508,10 @@ Feature: Interaction with a magma process
     And I place the cursor before "a"
     When I go to end of buffer
     Then the cursor should be after ";"
+    ### Heisenbug here...
     When I place the cursor before "a"
     And I press "C-c C-e"
+    And I wait for an instant
     And I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see "Input: a:=2+2;"
