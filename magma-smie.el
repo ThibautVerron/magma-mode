@@ -351,7 +351,9 @@ identifiers, so it does not need to take into account all
 possible word separators, only white space."
 
   (if (version< emacs-version "25.1")
-      (search-backward-regexp "[[:space:]]")
+      (progn
+        (search-backward-regexp "[[:alnum:]]")
+        (search-backward-regexp "[[:space:]]"))
     (backward-word-strictly)
       )
   )
