@@ -316,6 +316,8 @@ This function is meant for internal use only."
         (setq magma-pending-input (magma-q-create))
         (setq magma-ready t)
         (magma-interactive-mode)
+        (when (not (comint-check-proc bufname))
+          (error (format "Failed to start process '%s'" program)))
         (magma-comint-send-string
          (concat "ChangeDirectory(\"" directory "\");"))))
     (with-current-buffer bufname (current-buffer))))
