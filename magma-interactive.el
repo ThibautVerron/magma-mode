@@ -372,20 +372,20 @@ pushes `expr' onto the `magma-pending-input' queue."
     (pop-to-buffer buffer)
     (select-window (get-buffer-window oldbuf))))
 
-(defun magma--comint-get-old-input-before-send ()
-  "Function for the variable 'comint-get-old-input
+;; (defun magma--comint-get-old-input-before-send ()
+;;   "Function for the variable 'comint-get-old-input
 
-This function is supposed to be the content of the variable
-'comint-get-old-input when evaluating content in the regular
-way. In that case, if the point is not at the current input line,
-we *don't* want input to take into account the current of the
-magma buffer around the point.
-"
-  (save-excursion
-    (comint-goto-process-mark)
-    (comint-get-old-input-default)
-    )
-  )
+;; This function is supposed to be the content of the variable
+;; 'comint-get-old-input when evaluating content in the regular
+;; way. In that case, if the point is not at the current input line,
+;; we *don't* want input to take into account the current of the
+;; magma buffer around the point.
+;; "
+;;   (save-excursion
+;;     (comint-goto-process-mark)
+;;     (comint-get-old-input-default)
+;;     )
+;;   )
 
 (defun magma-comint-next-input (string)
   "Send next input if the buffer is ready for it.
@@ -425,9 +425,7 @@ magma evaluation buffer."
                                         ;(goto-char (point-max))
       (comint-goto-process-mark)
       (insert command)
-      ;(goto-char (point-max))
       (comint-send-input))))
-                                        ;)
   
 (defun magma-comint-help-word (topic)
   "Call-up the handbook in an interactive buffer for topic"
