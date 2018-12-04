@@ -372,6 +372,21 @@ pushes `expr' onto the `magma-pending-input' queue."
     (pop-to-buffer buffer)
     (select-window (get-buffer-window oldbuf))))
 
+(defun magma--comint-get-old-input-before-send ()
+  "Function for the variable 'comint-get-old-input
+
+This function is supposed to be the content of the variable
+'comint-get-old-input when evaluating content in the regular
+way. In that case, if the point is not at the current input line,
+we *don't* want input to take into account the current of the
+magma buffer around the point.
+"
+  (save-excursion
+    (comint-goto-process-mark)
+    (comint-get-old-input-default)
+    )
+  )
+
 (defun magma-comint-next-input (string)
   "Send next input if the buffer is ready for it.
 
@@ -379,7 +394,9 @@ This function should only be called when the current buffer is a
 magma evaluation buffer."
   ;; (message (concat "-> " string " <-"))
   ;; (setq magma-ready t)
-  (when (or
+  (save-excursion
+    (goto-char (point-max))
+    (when (or
          (not magma-interactive-wait-between-inputs)
          ;; (string-match-p "\(.*\n\)?[^ <\n]*> $" string)
          ;;(looking-back "> " (- (point) 2))
@@ -392,7 +409,8 @@ magma evaluation buffer."
          )
     (if (magma-q-is-empty? magma-pending-input)
         (setq magma-ready t)
-      (magma-comint-evaluate-here (magma-q-pop magma-pending-input)))))
+      ;(let ((comint-get-old-input 'magma--comint-get-old-input-before-send)) 
+        (magma-comint-evaluate-here (magma-q-pop magma-pending-input))))))
 
          
 (defun magma-comint-evaluate-here (expr)
@@ -400,13 +418,16 @@ magma evaluation buffer."
 
 This function should only be called when the current buffer is a
 magma evaluation buffer."
-  (let ((command (magma-preinput-filter expr)))
-   ; (unless (s-equals? command "")
+  (save-excursion
+    (let ((command (magma-preinput-filter expr)))
+                                        ; (unless (s-equals? command "")
       (run-hook-with-args 'comint-input-filter-functions command)
-      (goto-char (point-max))
+                                        ;(goto-char (point-max))
+      (comint-goto-process-mark)
       (insert command)
-      (comint-send-input)))
-  ;)
+      ;(goto-char (point-max))
+      (comint-send-input))))
+                                        ;)
   
 (defun magma-comint-help-word (topic)
   "Call-up the handbook in an interactive buffer for topic"
@@ -434,8 +455,10 @@ acknowledge that the magma process is ready."
   (interactive "sExpression: ")
   (let ((buf (magma-get-buffer (magma-choose-buffer i))))
     (with-current-buffer buf
-      (insert expr)
-      (comint-send-input))))
+      (save-excursion
+        (goto-char (point-max))
+        (insert expr)
+        (comint-send-input)))))
    
 
 ;; Term-mode definitions
