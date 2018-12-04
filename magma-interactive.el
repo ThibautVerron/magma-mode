@@ -319,12 +319,12 @@ This function is meant for internal use only."
         (when (not (comint-check-proc bufname))
           (error (format "Failed to start process '%s'" program)))
         (magma-comint-send-string
-         (concat "ChangeDirectory(\"" directory "\");"))))
+         (concat "ChangeDirectory(\"" directory "\");") i t)))
     (with-current-buffer bufname (current-buffer))))
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer i"
-  (with-current-buffer (magma-get-buffer i)
+  (with-current-buffer (magma-get-buffer i t)
     (setq magma-active-buffers-list
           (remove (or i 0) magma-active-buffers-list))
     (or (not (comint-check-proc (current-buffer)))
@@ -337,7 +337,7 @@ This function is meant for internal use only."
   ;;(interactive "P")
   (setq magma-active-buffers-list
         (remove (or i 0) magma-active-buffers-list))
-  (let ((buf (magma-get-buffer i)))
+  (let ((buf (magma-get-buffer i t)))
     (when buf
       (with-current-buffer buf
         (or (not (comint-check-proc (current-buffer)))
@@ -351,11 +351,13 @@ This function is meant for internal use only."
   (setq comint-scroll-to-bottom-on-output
         (not comint-scroll-to-bottom-on-output)))
 
-(defun magma-comint-send-string (expr &optional i)
-  "Send the expression expr to the magma buffer for evaluation."
+(defun magma-comint-send-string (expr &optional i norun)
+  "Send the expression expr to the magma buffer for evaluation.
+
+If optional norun is t, do not attempt to start a process."
   (let ((command (concat expr "\n")))
     (run-hook-with-args 'comint-input-filter-functions expr)
-    (comint-send-string (magma-get-buffer i) command)))
+    (comint-send-string (magma-get-buffer i norun) command)))
 
 (defun magma-comint-send (expr &optional i)
   "Send the expression expr to the magma buffer for evaluation.
