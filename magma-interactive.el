@@ -373,7 +373,13 @@ pushes `expr' onto the `magma-pending-input' queue."
             (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))
-    (pop-to-buffer buffer)
+    (or
+     ; First try for a window in same frame
+     (display-buffer-reuse-window buffer nil)
+     ; Then a window in another frame
+     (display-buffer-reuse-window buffer '((reusable-frames .  t)))
+     ; Then pop the buffer in another window
+     (pop-to-buffer buffer))
     (select-window (get-buffer-window oldbuf))))
 
 ;; (defun magma--comint-get-old-input-before-send ()
