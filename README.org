@@ -216,7 +216,7 @@ hand, =comint= starts the magma process directly from emacs, and does
 not depend on anything apart from emacs and =magma=.
 
 As of today, =term-mode= is disabled by default and no longer
-maintained (it still works, but it won't recieve new features). It may
+maintained (it still works, but it won't receive new features). It may
 be removed in the future, so please create an issue if your workflow
 absolutely requires that you use =term-mode= instead of =comint=.
 
@@ -364,6 +364,17 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
+*** 2018-12-12
+
+ - *Bugfix* Indentation errors with =subword-mode= on on older
+   versions of emacs
+ - *Bugfix* When sending input in a magma buffer where point is not on
+   input line, output would become garbled
+ - *Bugfix* Calling up the magma buffer when it is in another frame
+   now moves point to that frame, instead of bringing the magma buffer
+   in one of the windows of the current frame
+ - *Bugfix* Emacs would hang (infinite loop) if magma fails to start
+
 *** 2018-04-13
 
  - *Bugfix* Indentation after =while= and =for= now respects
