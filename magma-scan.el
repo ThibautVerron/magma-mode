@@ -36,6 +36,8 @@
 
 (defconst magma-scan-defun-regexp "\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
 
+(defconst magma-scan--default-dirname ".magma-scan")
+
 (defun magma-scan-make-filename (file)
   "Make the name of the file holding the completion candidates
   for the file FILE. If FILE is nil, make a name based on the
@@ -44,13 +46,16 @@
       (let* ((fullfile (f-long file))
              (path (f-dirname fullfile))
              (base (f-filename fullfile)))
-        (f-join path (concat ".scan-" base ".el")))
+        (f-join path
+		magma-scan--default-dirname
+		(concat base ".el")))
     ;; If the buffer isn't associated to any file...
     (let ((buf (buffer-name)))
-      (f-join "/tmp"
-              (concat ".scan-"
-                      (substring-no-properties buf 1 -1) ;; Dirty...
-                      ".el")))))
+      (f-join temporary-file-directory
+              magma-scan--default-dirname
+              (concat
+	       (substring-no-properties buf 1 -1) ;; Dirty...
+               ".el")))))
 
 (defun magma-scan-changedirectory-el (dir)
   "Elisp code to insert to perform a cd to DIR from the current directory held in magma-working-directory"
