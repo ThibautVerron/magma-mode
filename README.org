@@ -73,7 +73,15 @@ If you want to use auto-completion against magma keywords, please see the next s
     buffer, and from externally loaded files (using the =load= magma
     primitive).
 
-*** Building the dictionary
+*** Building a completion dictionary
+
+    The package is distributed with a file containing the names of functions and
+    procedures built in =magma=.
+
+    If you should run into problems with this file (for example if you are running a
+    different version of magma than me and they decided to rename half the functions in
+    that update), you can follow the instructions below to rebuild the file.
+
     The =bin= folder contains a script named
     =build_completion_table.sh=. It is very basic, and the usage is
     quite constrained.
