@@ -39,20 +39,22 @@
 
 
 (defcustom magma-interactive-program "magma"
-  "*Program to be launched to use magma (usually magma)"
+  "Program to be launched to use magma (usually magma)."
   :group 'magma
   :type 'string)
 
 (defcustom magma-interactive-arguments '()
-  "Commandline arguments to pass to magma"
+  "Commandline arguments to pass to magma."
   :group 'magma
   :type 'sexp)
 
 (defvar magma-working-buffer-number 0
-  "Should this buffer send instructions to a different magma buffer")
+  "Should this buffer send instructions to a different magma buffer.")
 
 (defun magma--valid-working-buffer-number (num)
-  "If this predicate is satisfied, the value is safe as file-local."
+  "Is NUM a valid working buffer number?
+
+If this predicate is satisfied, the value  is safe as file-local."
   (or (integerp num)
       (char-or-string-p num)))
 
@@ -61,7 +63,7 @@
      #'magma--valid-working-buffer-number)
 
 (defvar magma-active-buffers-list '()
-  "*List of active magma buffers.")
+  "List of active magma buffers.")
 
 (defvar-local magma-pending-input (magma-q-create)
   "List of strings to be sent to the magma process.
@@ -81,8 +83,9 @@ user-function sending input to a process.")
 (put 'magma-timer 'permanent-local t)
 
 (defcustom magma-interactive-buffer-name "magma"
-  "*Name of the buffer to be used for using magma
-  interactively (will be surrounded by `*')"
+  "Name of the buffer to be used for using magma interactively.
+
+\(will be surrounded by `*')"
   :group 'magma
   :type 'string)
 
@@ -93,11 +96,10 @@ user-function sending input to a process.")
     (warn "magma-interactive-skip-empty-lines is nil, magma-interactive-skip-comments is t. Expect lots of empty lines replacing the comments.")))
 
 (defcustom magma-interactive-skip-empty-lines nil
-  "If non-nil, strip empty lines before sending input to the
-  magma process.
+  "If non-nil, strip empty lines before sending input to the magma process.
 
-  This variable can be set to `nil' even if
-  `magma-interactive-skip-comments' is set to `t'. However,
+  This variable can be set to nil even if
+  `magma-interactive-skip-comments' is set to t. However,
   this will probably lead to unwanted behavior, since the
   commented lines are replaced with blank lines."
   :group 'magma
@@ -105,14 +107,13 @@ user-function sending input to a process.")
   :type 'boolean)
 
 (defcustom magma-interactive-skip-comments nil
-  "If non-nil, strip comment lines before sending input to the
-  magma process"
+  "If non-nil, strip comment lines before sending input to the magma process."
   :group 'magma
   :set 'magma-set-skip
   :type 'boolean)
 
 (defcustom magma-interactive-method 'line
-  "How should we send instructions to the magma process
+  "How should we send instructions to the magma process?
 
 Can be one of the following symbols
    - 'whole : send all at once
@@ -121,12 +122,12 @@ Can be one of the following symbols
    - 'file : write the region to a temporary file, and use
      magma's load feature to evaluate it
 
-  If `magma-interactive-wait-between-inputs' is `nil', this
+  If `magma-interactive-wait-between-inputs' is nil, this
   setting does not change anything to the visible
-  result. However, it should prevent some edge cases, when the
-  input is too long to be sent to the magma process at once. In
+  result.  However, it should prevent some edge cases, when the
+  input is too long to be sent to the magma process at once.  In
   this case, `emacs' will cut the input in half at an arbitrary
-  location, effectively confusing `magma'. Sending line per line
+  location, effectively confusing `magma'.  Sending line per line
   or expression per expression reduces the risk of having too
   long input by forcing cuts at syntactically correct places."
 
@@ -137,14 +138,16 @@ Can be one of the following symbols
 (defvar magma-temp-file-name "/tmp/magma_temp.m")
 
 (defcustom magma-interactive-use-load nil
-  "See `magma-eval-buffer'"
+  "See `magma-eval-buffer'."
   :group 'magma
   :type 'boolean)
 
 (defcustom magma-interactive-auto-save 'confirm
-  "This variable controls what to do if
-  `magma-interactive-use-load' is non-nil, and if the current
-  buffer has been modified. It takes one of the following three values:
+  "Auto-save before sending-input?
+
+This variable controls what to do if
+`magma-interactive-use-load' is non-nil, and if the current
+buffer has been modified.  It takes one of the following three values:
 - `confirm' : ask for confirmation (default)
 - `always' : always save, no confirmation
 - `never' : never save, no confirmation"
@@ -153,13 +156,15 @@ Can be one of the following symbols
   :type 'symbol)
 
 (defcustom magma-interactive-wait-between-inputs t
-  "If non nil and `magma-interactive-method' is set to `expr' or
-  `line', wait for the magma process to output before sending the
-  next input.
+  "Wait for output before sending next input?
+
+If non nil and `magma-interactive-method' is set to `expr' or
+`line', wait for the magma process to output before sending the
+next input.
 
 With the current implementation, this should not induce any
-overhead, so this variable is set to `t' by default. If you need
-to set it to `nil', please file an issue explaining why, it is
+overhead, so this variable is set to t by default.  If you need
+to set it to nil, please file an issue explaining why, it is
 likely to be a bug or a design flaw.
 
 Setting this variable has no effect in term mode."
@@ -181,29 +186,30 @@ Setting this variable has no effect in term mode."
     (define-key map (kbd "C-c p") 'magma-comint-toggle-pause-output)
     ;(define-key map (kbd "C-c") magma--comint-interactive-escape-map)
     map)
-  "Keymap for magma-interactive-mode")
+  "Keymap for magma-interactive-mode.")
 
 (defvar magma-term-interactive-mode-map
   (let ((map (nconc (make-sparse-keymap) term-mode-map)))
     map)
-  "Keymap for magma-interactive-mode")
+  "Keymap for magma-interactive-mode.")
 
 
 (defconst magma-prompt-regexp "^[^ <\n]*>"
-  "Regexp matching the magma prompt")
+  "Regexp matching the magma prompt.")
 
 (defvar magma-prompt-read-only t
-  "Should the prompt in the magma buffer be read-only? Setting
-  this to `nil' can be confusing to users, but we expose this
-  setting for elisp calls.")
+  "Should the prompt in the magma buffer be read-only?
+
+Setting this to nil can be confusing to users, but we expose
+this setting for elisp calls.")
 
 ;; (defvar-local magma--output-finished t)
 
 (defcustom magma-interactive-use-comint t
     "If non-nil, communication with the magma process is done using comint.
 
-Otherwise, it uses term-mode.  After setting this variable,
-restarting emacs is required (or reloading the magma-mode load
+Otherwise, it uses ‘term-mode’.  After setting this variable,
+restarting Emacs is required (or reloading the magma-mode load
 file)."
     :group 'magma
     :type 'boolean)
@@ -236,7 +242,7 @@ file)."
         (concat name "-" i)))))
 
 (defun magma-set-working-buffer (i)
-  "set the i-th buffer as the working buffer"
+  "Set the I'th buffer as the working buffer."
   (interactive "NBuffer number ?: ")
   (save-window-excursion
     (magma-run i))
@@ -245,29 +251,31 @@ file)."
   (magma-get-buffer i))
 
 (defun magma-set-working-buffer-locally ()
+  "Change the working buffer number."
   (interactive)
   (make-local-variable 'magma-working-buffer-number)
   (call-interactively #'magma-set-working-buffer))
 
 (defun magma-make-buffer-name (&optional i app)
-  "Return the name of the i-th magma buffer.
+  "Return the name of the I'th magma buffer.
 
-If `app' is not nil, it is a string which will be added before
+If APP is not nil, it is a string which will be added before
 the buffer number."
   (concat "*" (magma-get-buffer-name i app) "*"))
 
 (defun magma-get-buffer (&optional i norun)
-  "Return the i-th magma buffer
+  "Return the I'th magma buffer.
 
-If optional arg `norun' is `nil' (the default) and the buffer doesn't exist or doesn't have a running process, start a magma process.
-If `norun' is `t', in that case, return `nil'."
+If optional arg NORUN is nil (the default) and the buffer
+doesn't exist or doesn't have a running process, start a magma
+process.  If NORUN is t, in that case, return nil."
   (if norun
       (get-buffer (magma-make-buffer-name i))
     (magma-run i)))
-;; magma-run only returns the buffer if it exists and has a process, and runs a process 
+;; magma-run only returns the buffer if it exists and has a process, and runs a process
                 
 (defcustom magma-interactive-prompt t
-  "If non nil, prompt for the path to the magma program and its arguments"
+  "If non nil, prompt for the path to the magma program and its arguments."
   :group 'magma)
 
 (defun magma--interactive-read-spec (prog args)
@@ -323,7 +331,7 @@ This function is meant for internal use only."
     (with-current-buffer bufname (current-buffer))))
 
 (defun magma-comint-int (&optional i)
-  "Interrupt the magma process in buffer i"
+  "Interrupt the magma process in buffer I."
   (with-current-buffer (magma-get-buffer i t)
     (setq magma-active-buffers-list
           (remove (or i 0) magma-active-buffers-list))
@@ -333,7 +341,7 @@ This function is meant for internal use only."
     (setq magma-pending-input (magma-q-create))))
 
 (defun magma-comint-kill (&optional i)
-  "Kill the magma process in buffer i"
+  "Kill the magma process in buffer I."
   ;;(interactive "P")
   (setq magma-active-buffers-list
         (remove (or i 0) magma-active-buffers-list))
@@ -346,21 +354,21 @@ This function is meant for internal use only."
         (setq magma-pending-input (magma-q-create))))))
 
 (defun magma-comint-toggle-pause-output ()
-  "Pause the autoscroll in the comint buffer"
+  "Pause the autoscroll in the comint buffer."
   (interactive)
   (setq comint-scroll-to-bottom-on-output
         (not comint-scroll-to-bottom-on-output)))
 
 (defun magma-comint-send-string (expr &optional i norun)
-  "Send the expression expr to the magma buffer for evaluation.
+  "Send the expression EXPR to the magma buffer for evaluation.
 
-If optional norun is t, do not attempt to start a process."
+If optional NORUN is t, do not attempt to start a process."
   (let ((command (concat expr "\n")))
     (run-hook-with-args 'comint-input-filter-functions expr)
     (comint-send-string (magma-get-buffer i norun) command)))
 
 (defun magma-comint-send (expr &optional i)
-  "Send the expression expr to the magma buffer for evaluation.
+  "Send the expression EXPR to the magma buffer for evaluation.
 
 If the magma process is currently processing some previous input,
 pushes `expr' onto the `magma-pending-input' queue."
@@ -419,12 +427,12 @@ magma evaluation buffer."
          )
     (if (magma-q-is-empty? magma-pending-input)
         (setq magma-ready t)
-      ;(let ((comint-get-old-input 'magma--comint-get-old-input-before-send)) 
+      ;(let ((comint-get-old-input 'magma--comint-get-old-input-before-send))
         (magma-comint-evaluate-here (magma-q-pop magma-pending-input))))))
 
          
 (defun magma-comint-evaluate-here (expr)
-  "Evaluate the expression `expr' in the current buffer.
+  "Evaluate the expression EXPR in the current buffer.
 
 This function should only be called when the current buffer is a
 magma evaluation buffer."
@@ -438,7 +446,7 @@ magma evaluation buffer."
       (comint-send-input))))
   
 (defun magma-comint-help-word (topic)
-  "Call-up the handbook in an interactive buffer for topic"
+  "Call-up the handbook in an interactive buffer for TOPIC."
   (interactive "sMagma help topic: ")
   (make-comint-in-buffer (magma-get-buffer-name "help")
                          (magma-make-buffer-name "help")
@@ -452,7 +460,10 @@ magma evaluation buffer."
   (display-buffer (magma-get-buffer "help")))
 
 (defun magma-comint-send-now (expr &optional i)
-  "Prompt for an expression, then send it to the comint buffer without waiting until ready.
+  "Prompt for an expression then send it immediately.
+
+The expression is sent to the comint buffer without waiting until
+ready.
 
 The primary use-case is to be able to send a value to a `read' or
 `readi' prompt, without having to switch buffers.
@@ -493,7 +504,7 @@ acknowledge that the magma process is ready."
       (term-char-mode))))
     
 (defun magma-term-int (&optional i)
-  "Interrupt the magma process in buffer i"
+  "Interrupt the magma process in buffer I."
   (setq magma-active-buffers-list
         (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
@@ -501,7 +512,7 @@ acknowledge that the magma process is ready."
         (term-send-string (magma-get-buffer i) "\C-c"))))
 
 (defun magma-term-kill (&optional i)
-  "Kill the magma process in buffer i"
+  "Kill the magma process in buffer I."
   (setq magma-active-buffers-list
         (remove (or i 0) magma-active-buffers-list))
   (if (term-check-proc (magma-get-buffer i))
@@ -510,7 +521,7 @@ acknowledge that the magma process is ready."
 
 
 (defun magma-term-send (expr &optional ins)
-  "Send the expression expr to the magma buffer for evaluation."
+  "Send the expression EXPR to the magma buffer for evaluation."
   (save-window-excursion
     (let ((command (magma-preinput-filter expr)))
       ;(unless (s-equals? command "")
@@ -521,7 +532,7 @@ acknowledge that the magma process is ready."
 ;)
 
 (defun magma-term-help-word (topic)
-  "call-up the handbook in an interactive buffer for topic"
+  "Call-up the handbook in an interactive buffer for TOPIC."
   (interactive "sMagma help topic: ")
   (make-term (magma-get-buffer-name "help")
              magma-interactive-program)
@@ -538,6 +549,7 @@ acknowledge that the magma process is ready."
 ;; Wrappers
 
 (defun magma-send-expression (expr &optional i)
+  "Send the expression."
   (interactive "iP")
   (let* ((initval (if (region-active-p)
                       (buffer-substring-no-properties (region-beginning)
@@ -548,20 +560,20 @@ acknowledge that the magma process is ready."
     (magma-send-or-broadcast expr i)))
 
 (defun magma-restart (&optional i)
-  "Restart the magma process in buffer i"
+  "Restart the magma process in buffer I."
   (interactive "P")
   (magma-kill-or-broadcast i)
   (sleep-for 2)
   (magma-run-or-broadcast i))
 
 (defun magma-switch-to-interactive-buffer (&optional i)
-  "Switch to the magma process in buffer i in another frame"
+  "Switch to the magma process in buffer I in another frame."
   (interactive "P")
   (magma-run i)
   (switch-to-buffer-other-frame (magma-get-buffer i)))
 
 (defun magma-switch-to-interactive-buffer-same-frame (&optional i)
-  "Switch to the magma process in buffer i, in another window on the same frame"
+  "Switch to the magma process in buffer I, in another window on the same frame."
   (interactive "P")
   (magma-run i)
   (pop-to-buffer (magma-get-buffer i)))
@@ -582,7 +594,8 @@ The behavior of this function depends on the value of
   the break is in the middle of an identifier for example;
 - if `line', send the region one line at a time;
 - if `expr', send the region one expr at a time;
-- if `file', copy the region to a temporary file and use \"load ...;\" to evaluate it in magma. 
+- if `file', copy the region to a temporary file and use \"load ...;\"
+  to evaluate it in magma.
 
 Additionally, if `magma-interactive-wait-between-inputs' is non
 nil, and if `magma-interactive-method' is either `line' or
@@ -620,7 +633,7 @@ corresponding input."
          (kill-buffer)))))))
 
 (defun magma-eval-line ( &optional i)
-  "Evaluate current line"
+  "Evaluate current line."
   (interactive "P")
   (while (looking-at "^$")
     (forward-line))
@@ -637,7 +650,7 @@ corresponding input."
     (or (eobp) (forward-line 1))))
 
 (defun magma-eval-paragraph ( &optional i)
-  "Evaluate current paragraph (space separated block)"
+  "Evaluate current paragraph (space separated block)."
   (interactive "P")
   (forward-paragraph)
   (let ((end (point)))
@@ -646,10 +659,10 @@ corresponding input."
     (goto-char end)))
 
 (defun magma-end-of-expr-or-line ()
-  "Go to the end of line or expression according to the evaluation method
+  "Go to the end of line or expression according to the evaluation method.
 
 If `magma-interactive-method' is `line', go to the end of the
-line, otherwise the end of the expression. "
+line, otherwise the end of the expression."
   (interactive)
   (magma-end-of-expr)
   (if (eq magma-interactive-method 'line)
@@ -658,7 +671,7 @@ line, otherwise the end of the expression. "
              (or (looking-at "$") (forward-char 1)))))
 
 (defun magma-eval-next-statement ( &optional i)
-  "Evaluate current or next statement"
+  "Evaluate current or next statement."
   (interactive "P")
   (let ((regbeg (progn
                   (magma-beginning-of-expr)
@@ -672,8 +685,10 @@ line, otherwise the end of the expression. "
   
 
 (defun magma-eval (&optional i)
-  "Evaluate the current region if set and the current statement
-  otherwise"
+  "Evaluate dwim.
+
+The function evaluates the current region if set and the current
+statement otherwise"
   (interactive "P")
   (if mark-active
       (magma-eval-region (region-beginning) (region-end) i)
@@ -683,7 +698,7 @@ line, otherwise the end of the expression. "
       )))
 
 (defun magma-eval-defun (&optional i)
-  "Evaluate the current defun"
+  "Evaluate the current defun."
   (interactive "P")
   (let ((regbeg (progn
                   (magma-beginning-of-defun)
@@ -700,7 +715,7 @@ line, otherwise the end of the expression. "
   (magma-eval-region (point-min) (point) i))
 
 (defun magma-eval-buffer ( &optional i)
-  "Evaluates all code in the buffer
+  "Evaluates all code in the buffer.
 
 If `magma-interactive-use-load' is non-nil and if the current
 buffer is associated to a file, use \"load ...;\" to evaluate the
@@ -710,8 +725,7 @@ the file to the remote host when needed.
 
 If needed, confirm saving through `magma-confirm-save-buffer'.
 
-Otherwise, send the whole buffer to `magma-eval-region'.
-"
+Otherwise, send the whole buffer to `magma-eval-region'."
   (interactive "P")
   (if (and (buffer-file-name) magma-interactive-use-load)
       (progn
@@ -743,7 +757,7 @@ The behavior of this function is controlled by
     (save-buffer))))
 
 (defun magma-help-word (&optional browser)
-  "call-up the handbook in the interactive buffer for the current word"
+  "Call-up the handbook in the interactive buffer for the current word."
   (interactive "P")
   (let ((topic (read-string
                 (format "Magma help topic (default %s): " (current-word))
@@ -753,7 +767,7 @@ The behavior of this function is controlled by
       (magma-help-word-text topic))))
 
 (defun magma-help-word-browser (&optional topic)
-  "open the magma help page in a web browser for topic"
+  "Open the magma help page in a web browser for TOPIC."
   (interactive)
   (let ((topic (or topic
                    (read-string
@@ -765,7 +779,7 @@ The behavior of this function is controlled by
 
 
 (defun magma-show-word (&optional i)
-  "show the current word in magma"
+  "Show the current word in magma."
   (interactive "P")
   (let ((word (current-word)))
     (magma-run-or-broadcast i)
@@ -778,12 +792,14 @@ The behavior of this function is controlled by
    magma-active-buffers-list))
 
 (defun magma-choose-buffer (i)
-  "Given an input i in raw prefix form, decides what buffers we
-  should be working on. The input can be an integer, in which
-  case it returns that integer; or it can be the list '(4), in
-  which case it prompts for an integer; or it can be the list
-  '(16), in which case it returns the symbol 'broadcast, meaning
-  we should work on all buffers"
+  "Choose what buffer to work on (internal).
+
+Given an input I in raw prefix form, decides what buffers we
+should be working on.  The input can be an integer, in which
+case it returns that integer; or it can be the list '(4), in
+which case it prompts for an integer; or it can be the list
+'(16), in which case it returns the symbol 'broadcast, meaning
+we should work on all buffers"
   (cond
    ((not i) magma-working-buffer-number)
    ((integerp i)
@@ -813,10 +829,12 @@ The behavior of this function is controlled by
   (magma-broadcast-if-needed 'magma-run i))
 
 (defun magma-kill (i)
+  "Kill the magma process."
   (interactive "P")
   (magma-kill-or-broadcast i))
 
 (defun magma-int (i)
+  "Interrupt the magma process."
   (interactive "P")
   (magma-int-or-broadcast i))
 
@@ -852,6 +870,7 @@ The behavior of this function is controlled by
 ;;   output)
 
 (defun magma-comint-send-input ()
+  "Obsolete."
   (interactive)
   (message "`magma-comint-send-input' is deprecated, use `comint-send-input' instead.")
   (comint-send-input))
@@ -878,7 +897,7 @@ The behavior of this function is controlled by
      (propertize "stop" 'face magma-interactive-modeline-stop-face))))
 
 (defun magma-interactive-common-settings ()
-  "Settings common to comint and term modes"
+  "Settings common to comint and term modes."
   ;; Compilation shell mode
   (add-to-list
    'compilation-error-regexp-alist
@@ -904,7 +923,7 @@ The behavior of this function is controlled by
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
   (magma-interactive-common-settings)
-  )  
+  )
 
 (define-derived-mode magma-term-interactive-mode
   term-mode

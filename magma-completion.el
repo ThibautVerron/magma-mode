@@ -1,4 +1,4 @@
-;;; magma-completion.el --- Code completion for magma. ;
+;;; magma-completion.el --- Code completion for magma. ; -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;;               2013-2014 Thibaut Verron
@@ -26,22 +26,30 @@
 
 (declare-function magma-mode "magma-mode.el")
 
-(defvar magma-completion-table-file (f-join magma-path "data/magma_symbols.txt"))
+(defvar magma-completion-table-file
+  "File containing the list of symbols"
+  (f-join magma-path "data/magma_symbols.txt"))
 
 (defvar magma-completion-table-base
+  "Completion table (internal)"
   (magma-scan-completion-file magma-completion-table-file))
 
-(defvar-local magma-completion-table nil)
+(defvar-local magma-completion-table
+  "Buffer local completion table (internal)"
+  nil)
   
 (defun magma-find-completions-at-point ()
+  "List possible completions at point."
   (let* ((bounds (bounds-of-thing-at-point 'word))
          (start (car bounds))
          (end (cdr bounds)))
     (and bounds (list start end magma-completion-table :exclusive 'no))))
 
 (defun magma-init-completion ()
-  "Function run at mode initialisation, activating the completion and defining
- its initial dictionary."
+  "Prepare the mode for completion.
+
+Function run at mode initialisation, activating the completion and defining
+its initial dictionary."
   (interactive)
   (setq magma-completion-table magma-completion-table-base)
   (make-local-variable 'completion-at-point-functions)
@@ -49,7 +57,7 @@
   )
 
 (defun magma-interactive-add-to-completion-table (str)
-  "Parse the string str, and extract new symbols to add to the completion table"
+  "Parse the string STR, and extract new symbols to add to the completion table."
   (magma--debug-message "Scanning input for completion candidates...")
   (magma--debug-message (format "Input : %s" str))
   (setq magma-completion-table
@@ -65,6 +73,7 @@
 
 
 (defun magma-interactive-init-completion ()
+  "Initialize completion in interactive buffers."
   (magma-init-completion)
   (magma-interactive-rebuild-completion-table)
   (add-hook 'comint-input-filter-functions
@@ -72,6 +81,7 @@
 
 
 (defun magma-editor-init-completion ()
+  "Initialize completion in edition buffers."
   (magma-init-completion)
   (magma-editor-rebuild-completion-table)
   )
@@ -82,16 +92,18 @@
 
 
 (defun magma-editor-rebuild-completion-table ()
+  "Rescan the current buffer."
   (interactive)
   (magma--debug-message "Rebuilding the completion table...")
   (ignore (magma-scan)))
 
 
-(defun magma-interactive-rebuild-completion-table ()
-  (interactive)
-  nil)
+;; (defun magma-interactive-rebuild-completion-table ()
+;;   (interactive)
+;;   nil)
 
 (defun magma-completion-at-point ()
+  "Completion at point function for magma buffers."
   (interactive)
   (magma-editor-rebuild-completion-table)
   ;; Fixme: maybe rebuild only if called twice, or something...
@@ -100,6 +112,7 @@
 ;; Extra functions for the snippets
 
 (defun magma-filename-p (str)
+  "Test whether STR is a magma file name."
   (string-match-p "\\.m$" str))
 
 (provide 'magma-completion)

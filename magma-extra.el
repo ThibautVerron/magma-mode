@@ -1,9 +1,10 @@
+;;; magma-extra.el --- Extra features for magma-mode
 ;;; magma-extra.el ---
 
 ;; Copyright (C) 2014  Thibaut VERRON
 
 ;; Author: Thibaut VERRON <verron@ilithye.calsci.lip6.fr>
-;; Keywords: 
+;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -55,31 +56,32 @@
 ;;;;;;;;;;;;
 
 (defun magma-newline-when-in-string ()
-  "Inserts a newline in a magma string"
+  "Insert a newline in a magma string."
   (insert "\"cat \"")
   (forward-char -5)
   (magma-newline-and-indent)
   (forward-char 5))
 
 (defun magma-special-newline-when-in-string ()
-  "Inserts a newline in a magma string, both on display and in the string"
+  "Insert a newline in a magma string, both on display and in the string."
   (insert "\\n")
   (magma-newline-when-in-string))
 
 (defun magma-special-newline-when-in-c-comment ()
-  "Inserts a newline in a C++-like comment"
+  "Insert a newline in a C++-like comment."
   (magma-newline-and-indent)
   (insert "// "))
 
 (defun magma-newline-when-in-c-comment ()
-  "Insert a newline in a C-like comment, preserving the comment
-  structure if we're not at the end of line"
+  "Insert a newline in a C-like comment.
+
+If we are not at the end of the line, preserve the comment structure."
   (if (looking-at "[[:space:]]*[^[:space:]\n].*$")
       (magma-special-newline-when-in-c-comment)
     (magma-newline-and-indent)))
 
 (defun magma-newline-when-in-cpp-comment ()
-  "Inserts a newline in a C++-like comment"
+  "Insert a newline in a C++-like comment."
   (let ((col
 	 (save-excursion
 	   (search-backward "/*")
@@ -91,13 +93,13 @@
     (indent-to-column col)))
 
 (defun magma-newline-and-indent ()
-  "Like newline-and-indent, but without deleting the trailing spaces"
+  "Like ‘newline-and-indent’, but without deleting the trailing spaces."
   (interactive)
   (newline)
   (magma-indent-line))
 
 (defun magma-insert-newline ()
-  "Inserts a newline depending on where the point is"
+  "Insert a newline depending on where the point is."
   (interactive)
   (cl-case (car (magma-in-literal))
     ('string (magma-newline-when-in-string))
@@ -106,7 +108,7 @@
     (t (magma-newline-and-indent))))
 
 (defun magma-insert-special-newline ()
-  "Inserts a special newline depending on where the point is"
+  "Insert a special newline depending on where the point is."
   (interactive)
   (cl-case (car (magma-in-literal))
     ('string (magma-special-newline-when-in-string))
@@ -119,8 +121,9 @@
 ;;;;;;;;;;;;;;
 
 (defun magma-smartparens-gt-in-an-arrow (id beg end)
-  "Test ensuring that \"->\" does not mark the end of the
-  surrounding \"<...>\" pair."
+  "Check whether > is part of an arrow.
+
+ID, BEG and END are arguments for the `smartparens' interface and are ignored."
   (save-excursion
     (goto-char (- end 1))
     (looking-back "-" nil)))
@@ -144,10 +147,10 @@
 ;;;;;;;;;;;;;;
 
 (defcustom magma-file-header nil
-  "File header for magma source files
+  "File header for magma source files.
 
 If non-nil, magma will maintain a file header for the magma
-  files. This variable should then be either `default', in which case
+  files.  This variable should then be either `default', in which case
   we use the default header (see the documentation for
   `magma-update-header-default'), or the name of a function which
   will create and update this header.
@@ -160,9 +163,9 @@ If non-nil, magma will maintain a file header for the magma
 
  The first line is the date of
   creation, the second the date of last modification, and the
-  third a hash of the rest of the buffer. This function is
+  third a hash of the rest of the buffer.  This function is
   intended to be user together with `yasnippet' and
-  `magma-initial-file' set to `t', in order to create the initial content.
+  `magma-initial-file' set to t, in order to create the initial content.
 
   `magma-update-header-default' will only operate if the file
   begins with \"// Created\", in order not to accidentally
@@ -186,7 +189,7 @@ If non-nil, magma will maintain a file header for the magma
                  (secure-hash 'md5 (current-buffer) start (point-max))))))))
 
 (defun magma-update-header ()
-  "Update the header for magma files"
+  "Update the header for magma files."
   (when magma-file-header
     (if (eq magma-file-header 'default)
         (magma-update-header-default)
@@ -206,11 +209,11 @@ This can be either
   described in `magma-update-header-default', or a function name which
   is then evaluated.
 
-Based on `auto-insert'"
+Based on function `auto-insert'"
   :group 'magma)
 
 (defun magma-initial-file-contents-default ()
-  "Insert a skeleton of the header described in `magma-update-header-default'"
+  "Insert a skeleton of the header described in `magma-update-header-default'."
   (insert (format "// Created: %s\n" (current-time-string)))
   (insert "// Last modified:\n")
   (insert "// Hash:\n")
@@ -227,7 +230,7 @@ Based on `auto-insert'"
 
 
 (defun magma-initial-file-contents ()
-  "Insert the initial file contents if needed"
+  "Insert the initial file contents if needed."
   (when (and magma-initial-file
              buffer-file-name
              ;; Make sure auto-insert has not been already called
