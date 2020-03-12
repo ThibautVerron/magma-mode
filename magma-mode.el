@@ -1,10 +1,11 @@
-;;; magma-mode.el --- Magma mode for Emacs
+;; -*- lexical-binding: t; -*-
+;;; magma-mode.el --- Mode for editing Magma source code
 
-;; Copyright (C) 2007-2014 Luk Bettale
-;;               2013-2014 Thibaut Verron
+;; Copyright (C) 2007-2020 Luk Bettale
+;;               2013-2020 Thibaut Verron
 ;; Licensed under the GNU General Public License.
 
-;; Package-requires: ((cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
+;; Package-requires: ((emacs "24.3") (cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
 ;; URL: https://github.com/ThibautVerron/magma-mode
 
 ;; This program is free software; you can redistribute it and/or
