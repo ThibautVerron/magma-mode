@@ -86,11 +86,12 @@
 
   (setq-local indent-line-function 'smie-indent-line)
 
-  (add-hook 'magma-mode-hook 'magma-editor-init-completion)
   ;(magma--apply-electric-newline-setting)
   
   (magma-interactive-init))
-  
+
+(add-hook 'magma-mode-hook 'magma-editor-init-completion)
+
 
 (provide 'magma-mode)
 

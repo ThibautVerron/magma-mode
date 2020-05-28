@@ -929,9 +929,10 @@ we should work on all buffers"
   ;(add-hook 'comint-preoutput-filter-functions 'magma-message-raw-output nil t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
-  (add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
   (magma-interactive-common-settings)
   )
+
+(add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
 
 (define-derived-mode magma-term-interactive-mode
   term-mode

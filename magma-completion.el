@@ -29,16 +29,15 @@
 (declare-function magma-mode "magma-mode.el")
 
 (defvar magma-completion-table-file
-  "File containing the list of symbols"
-  (f-join magma-path "data/magma_symbols.txt"))
+  (f-join magma-path "data/magma_symbols.txt")
+  "File containing the list of symbols")
 
 (defvar magma-completion-table-base
-  "Completion table (internal)"
-  (magma-scan-completion-file magma-completion-table-file))
+  (magma-scan-completion-file magma-completion-table-file)
+  "Completion table (internal)")
 
-(defvar-local magma-completion-table
-  "Buffer local completion table (internal)"
-  nil)
+(defvar-local magma-completion-table nil
+  "Buffer local completion table (internal)")
   
 (defun magma-find-completions-at-point ()
   "List possible completions at point."

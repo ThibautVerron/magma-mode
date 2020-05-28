@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (ert-deftest magma-build-completion-table ()
     (with-temp-buffer
       (insert-file-contents-literally (f-join magma-path "testfiles/defuns.m"))
