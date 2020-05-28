@@ -51,6 +51,9 @@
     '(;; Identifier
       (id)
 
+      ;; ;; Identifier with type
+      ;; (typedid (id "::" id))
+      
       ;; Any text
       (doc)
       
@@ -72,7 +75,8 @@
             ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
-	    ("intrinsic" id "fun(" funargs "fun)" intrinsicbody "end intrinsic")
+	    ("intrinsic" id "fun(" funargs "fun)"
+	     intrinsicbody "end intrinsic")
             ("special1" specialargs)
             ("special2" specialargs "special:" specialargs))
 
@@ -89,7 +93,7 @@
             ("~" expr)
             ("#" expr)
             (expr "+" expr)
-            ;; (expr "::" expr) ;; For intrinsic only
+            (expr "::" expr) ;; For intrinsic only
             ("recformat<" recspec ">")
             (expr "-" expr)
             (expr "*" expr)
@@ -147,6 +151,10 @@
       (funcall (id "(" funargs ")"))
       (funargs (lfunargs)
                (lfunargs "paren:" rfunargs))
+      ;; (intrinsicargs (lintrinsicargs)
+      ;; 		     (lintrinsicargs "paren:" rfunargs))
+      ;; (lintrinsicargs (typedid)
+      ;; 		      (lintrinsicargs "," lintrinsicargs))
       (lfunargs (expr)
                 (lfunargs "," lfunargs))
       (rfunargs (assign)
@@ -297,7 +305,7 @@ if in an intrinsic description or nil if somewhere else."
 (defun magma--smie-identify-colon ()
   "Return the token type for a colon.
 
-If point is at a colon, returns the a xppropriate token for that
+If point is at a colon, returns the appropriate token for that
   colon. The returned value is :
 - \"case:\" if the colon is at the end of a case... : construct
 - \"when:\" if the colon is at the end of a when... : construct
@@ -305,6 +313,8 @@ If point is at a colon, returns the a xppropriate token for that
   function calls
 - \"paren:\" if the colon is a separator in a pair of
   parens (parameter for a function, specification for a list...)
+- \"type:\" if the colon is part of a type specification in a record
+- \"::\" if the colon is part of a type specification for an intrinsic
 - \":\" otherwise (this shouldn't appear in a syntactically correct buffer)"
   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
     (save-excursion
@@ -312,6 +322,9 @@ If point is at a colon, returns the a xppropriate token for that
         (while t
           (condition-case nil 
               (progn
+		(when (or (looking-at "::")
+			  (looking-back ":" (- (point) 1)))
+		  (throw 'token "::"))
                 (forward-comment (- (point)))
                  ;(up-list)
                 (backward-sexp)

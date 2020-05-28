@@ -714,6 +714,200 @@ Feature: Magma code indentation
     end for;
     """
 
+  Scenario: Indentation of intrinsics, without return type
+    When I insert:
+    """
+    intrinsic f(a::BoolElt,
+    b::BoolElt)
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt)
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt,
+    b::BoolElt 
+    : c := true)
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt
+    : c := true)
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt,
+    b::BoolElt : c := true)
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt : c := true)
+    { Docstring }
+    return a;
+    end intrinsic;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    intrinsic f(a::BoolElt,
+                b::BoolElt)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    	        b::BoolElt 
+    	        : c := true)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt
+    	        : c := true)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    	        b::BoolElt : c := true)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt : c := true)
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+       	        b::BoolElt) 
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt) 
+        { Docstring }
+        return a;
+    end intrinsic;
+    """
+
+
+  Scenario: Indentation of intrinsics, with return type
+    When I insert:
+    """
+    intrinsic f(a::BoolElt,
+    b::BoolElt) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt,
+    b::BoolElt 
+    : c := true) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt
+    : c := true) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt,
+    b::BoolElt : c := true) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt : c := true) -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt,
+    b::BoolElt) 
+    -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+
+    intrinsic f(a::BoolElt, b::BoolElt) 
+    -> BoolElt
+    { Docstring }
+    return a;
+    end intrinsic;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    intrinsic f(a::BoolElt,
+                b::BoolElt) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    	    b::BoolElt 
+    	    : c := true) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt
+    	    : c := true) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    	    b::BoolElt : c := true) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt : c := true) -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    	    b::BoolElt) 
+              -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt, b::BoolElt) 
+              -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    """
+
+
+
   @fixedbug
   Scenario: Indentation in strings containing magma keywords
     When I insert:

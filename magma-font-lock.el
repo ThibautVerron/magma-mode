@@ -24,13 +24,15 @@
 (defconst magma-space-comments-regexp
   (concat
    "[[:space:]\n\r]*"
-   "\\(\\(/\\*[^*]*\\*\\([^/][^*]*\\*\\)*/\\|//[^\n]*\\)[[:space:]\n\r]*\\)*")
+   "\\(\\(/\\*[^*]*\\*\\([^/][^*]*\\*\\)*/\\|//[^\n]*\\)"
+   "[[:space:]\n\r]*\\)*")
   "Regular expression to find magma comments or space.")
 
 (defconst magma-blank-comments-regexp
   (concat
    "[[:blank:]]*"
-   "\\(\\(/\\*[^*\n]*\\*\\([^/][^*\n]*\\*\\)*/\\|//[^\n]*\\)[[:blank:]]*\\)*")
+   "\\(\\(/\\*[^*\n]*\\*\\([^/][^*\n]*\\*\\)*/\\|//[^\n]*\\)"
+   "[[:blank:]]*\\)*")
   "Regular expression to find magma comments or space")
 
 (defconst magma-ident-regexp
@@ -55,8 +57,6 @@
 
 (defconst magma-statement-end-regexp
   (concat
-   ;; "\\(;\\|:\\|}\\|" ;; Original
-   ;; Change 10.11.2013 T.Verron : two following lines
    "\\(;\\|}\\|"
    (regexp-opt '("case" "when") 'words) "[^:]*:\\|"
    (regexp-opt '("repeat" "do" "try" "then" "else") 'words) "\\|"
