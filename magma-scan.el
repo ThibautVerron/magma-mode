@@ -1,4 +1,4 @@
-;;; magma-scan.el --- Scan magma input for completion candidates. ;
+;;; magma-scan.el --- Scan magma input for completion candidates. ;  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;;               2013-2014 Thibaut Verron
@@ -24,6 +24,7 @@
 (require 'magma-vars)
 (declare-function magma-mode "magma-mode.el")
 
+(defvar magma-mode-hook)
 (defvar-local magma-working-directory magma-default-directory)
 
 (defun magma-scan-completion-file (file)

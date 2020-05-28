@@ -1,4 +1,4 @@
-;;; magma-snippets.el --- 
+;;; magma-snippets.el ---  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014  Thibaut VERRON
 

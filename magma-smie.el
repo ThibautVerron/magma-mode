@@ -1,4 +1,4 @@
-;;; magma-smie.el --- Indentation in the magma buffers. ;
+;;; magma-smie.el --- Indentation in the magma buffers. ;  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;;               2013-2014 Thibaut Verron

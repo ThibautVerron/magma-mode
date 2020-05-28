@@ -1,5 +1,4 @@
-;;; magma-extra.el --- Extra features for magma-mode
-;;; magma-extra.el ---
+;;; magma-extra.el --- Extra features for magma-mode.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014  Thibaut VERRON
 
@@ -120,10 +119,11 @@ If we are not at the end of the line, preserve the comment structure."
 ;; Smartparens
 ;;;;;;;;;;;;;;
 
-(defun magma-smartparens-gt-in-an-arrow (id beg end)
+(defun magma-smartparens-gt-in-an-arrow (_id _beg end)
   "Check whether > is part of an arrow.
 
-ID, BEG and END are arguments for the `smartparens' interface and are ignored."
+ID, BEG and END are arguments for the `smartparens' interface and
+the first two are ignored."
   (save-excursion
     (goto-char (- end 1))
     (looking-back "-" nil)))
@@ -156,7 +156,10 @@ If non-nil, magma will maintain a file header for the magma
   will create and update this header.
 
   This variable can always be overridden as a file-local variable."
-  :group 'magma)
+  :group 'magma
+  :type '(choice (const :tag "Off" nil)
+		 (const :tag "Default" 'default)
+		 (function :tag "Custom function")))
 
 (defun magma-update-header-default ()
   "Update the default header for magma files.
@@ -210,7 +213,9 @@ This can be either
   is then evaluated.
 
 Based on function `auto-insert'"
-  :group 'magma)
+  :group 'magma
+  :type '(choice (const :tag "None" nil)
+		 (file :tag "File" :must-match t)))
 
 (defun magma-initial-file-contents-default ()
   "Insert a skeleton of the header described in `magma-update-header-default'."

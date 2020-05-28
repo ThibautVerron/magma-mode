@@ -1,4 +1,4 @@
-;;; magma-q.el --- Simple queue structure
+;;; magma-q.el --- Simple queue structure.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014  Thibaut Verron
 

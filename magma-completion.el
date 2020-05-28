@@ -24,6 +24,8 @@
 (require 'magma-smie)
 (require 'magma-scan)
 
+(defvar magma-mode-hook)
+
 (declare-function magma-mode "magma-mode.el")
 
 (defvar magma-completion-table-file
@@ -75,7 +77,6 @@ its initial dictionary."
 (defun magma-interactive-init-completion ()
   "Initialize completion in interactive buffers."
   (magma-init-completion)
-  (magma-interactive-rebuild-completion-table)
   (add-hook 'comint-input-filter-functions
             'magma-interactive-add-to-completion-table nil t))
 
@@ -86,10 +87,6 @@ its initial dictionary."
   (magma-editor-rebuild-completion-table)
   )
 
-(add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
-
-(add-hook 'magma-mode-hook 'magma-editor-init-completion)
-
 
 (defun magma-editor-rebuild-completion-table ()
   "Rescan the current buffer."
@@ -97,10 +94,6 @@ its initial dictionary."
   (magma--debug-message "Rebuilding the completion table...")
   (ignore (magma-scan)))
 
-
-;; (defun magma-interactive-rebuild-completion-table ()
-;;   (interactive)
-;;   nil)
 
 (defun magma-completion-at-point ()
   "Completion at point function for magma buffers."

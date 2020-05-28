@@ -1,4 +1,4 @@
-;;; magma-font-lock.el --- Syntax highlight for magma code. ;
+;;; magma-font-lock.el --- Syntax highlight for magma code. ;  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;; Licensed under the GNU General Public License.

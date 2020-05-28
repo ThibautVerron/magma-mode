@@ -1,4 +1,4 @@
-;;; magma-interactive.el --- Interaction with an external magma process. ;
+;;; magma-interactive.el --- Interaction with an external magma process. ;  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2014 Luk Bettale
 ;;               2013-2014 Thibaut Verron
@@ -37,6 +37,7 @@
 (declare-function magma-send "magma-interactive.el" t t)
 (declare-function magma-help-word-text "magma-interactive.el" t t)
 
+(defvar magma-mode-hook)
 
 (defcustom magma-interactive-program "magma"
   "Program to be launched to use magma (usually magma)."
@@ -276,7 +277,8 @@ process.  If NORUN is t, in that case, return nil."
                 
 (defcustom magma-interactive-prompt t
   "If non nil, prompt for the path to the magma program and its arguments."
-  :group 'magma)
+  :group 'magma
+  :type 'boolean)
 
 (defun magma--interactive-read-spec (prog args)
   "Read the program to run and the arguments, if needed.
@@ -405,11 +407,14 @@ pushes `expr' onto the `magma-pending-input' queue."
 ;;     )
 ;;   )
 
-(defun magma-comint-next-input (string)
+(defun magma-comint-next-input (_string)
   "Send next input if the buffer is ready for it.
 
 This function should only be called when the current buffer is a
-magma evaluation buffer."
+magma evaluation buffer.
+
+This function is added to `comint-output-filter-functions' and
+takes an argument which is ignored."
   ;; (message (concat "-> " string " <-"))
   ;; (setq magma-ready t)
   (save-excursion
@@ -520,8 +525,10 @@ acknowledge that the magma process is ready."
         (term-kill-subjob))))
 
 
-(defun magma-term-send (expr &optional ins)
+(defun magma-term-send (expr &optional _i)
   "Send the expression EXPR to the magma buffer for evaluation."
+  ;; The variable `_i' is not used, this is probably a bug. But term-based
+  ;; interaction will go away at some point anyway
   (save-window-excursion
     (let ((command (magma-preinput-filter expr)))
       ;(unless (s-equals? command "")
@@ -922,6 +929,7 @@ we should work on all buffers"
   ;(add-hook 'comint-preoutput-filter-functions 'magma-message-raw-output nil t)
   (add-hook 'comint-preoutput-filter-functions 'magma-comint-delete-reecho nil t)
   (add-hook 'comint-output-filter-functions 'magma-comint-next-input nil t)
+  (add-hook 'magma-comint-interactive-mode-hook 'magma-interactive-init-completion)
   (magma-interactive-common-settings)
   )
 
