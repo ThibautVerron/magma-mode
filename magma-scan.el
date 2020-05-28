@@ -61,8 +61,8 @@ If the directory does not exist, it is created, unless NOCREATE is t."
      (concat
       (if file
 	  (f-filename file)
-	(buffer-name) ;; if the buffer isn't associated to a file we use its name
-	".el")))))
+	(buffer-name)) ;; if the buffer isn't associated to a file we use its name
+	".el"))))
 
 (defun magma-scan-changedirectory-el (dir)
   "Elisp code to insert to perform a cd to DIR from the current directory held in magma-working-directory"
@@ -141,7 +141,8 @@ If FILE is nil, always rebuild the table."
           (magma-scan-file file loadfile))
         (load loadfile nil t t))
     (magma--debug-message
-     (format "Skipping nonexistent file %s" file))))
+     (format "Skipping nonexistent file %s" file))
+    ))
 
 (defun magma-scan (&optional forcerescan)
   "Scan the current buffer for completions (unless it isn't needed)"
