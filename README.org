@@ -65,9 +65,9 @@ If you want to use auto-completion against magma keywords, please see the next s
     A basic completion engine is provided, to be used in the magma
     editting window, or in a magma interactive buffer using comint.
 
-    At the moment, it provides completion based on a dictionary. This
-    dictionary is not included at the moment, but if you need to build
-    it, we provide a script for doing so (linux only).
+    At the moment, it provides completion based on a dictionary. A version of this
+    dictionary is included, as well as a script to rebuild it if for some reason it does
+    not match the names defined by Magma on your system.
 
     This dictionary is updated with definitions from the current
     buffer, and from externally loaded files (using the =load= magma
@@ -374,6 +374,7 @@ The header inserted by the default functions looks like this:
 ** Changelog
 *** 2020-05-28
 
+ - *Bugfix* Completion not working due to misformed defvars
  - *Bugfix* Error when trying to write completion file in a non-existent directory
 
 *** 2020-03-05
