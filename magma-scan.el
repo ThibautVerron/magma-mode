@@ -27,7 +27,6 @@
 (defvar-local magma-working-directory magma-default-directory)
 
 (defun magma-scan-completion-file (file)
-  (interactive)
   (with-temp-buffer
     (condition-case nil
         (insert-file-contents file)
