@@ -40,12 +40,20 @@
 ;; the matches)
 ;;;;;
 
+(makunbound 'magma-smie-grammar)
+(makunbound 'magma-smie-tokens-regexp)
+(makunbound 'magma-smie-end-tokens-regexp)
+
+
 (defconst magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
     '(;; Identifier
       (id)
 
+      ;; Any text
+      (doc)
+      
       ;; Several identifiers, separated by commas
       (idlist (id)
               (idlist "," idlist))
@@ -64,6 +72,7 @@
             ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
+	    ("intrinsic" id "fun(" funargs "fun)" intrinsicbody "end intrinsic")
             ("special1" specialargs)
             ("special2" specialargs "special:" specialargs))
 
@@ -80,7 +89,7 @@
             ("~" expr)
             ("#" expr)
             (expr "+" expr)
-            ;; (expr "::" expr) ;; For intrinsics only
+            ;; (expr "::" expr) ;; For intrinsic only
             ("recformat<" recspec ">")
             (expr "-" expr)
             (expr "*" expr)
@@ -101,9 +110,12 @@
             (expr "gt" expr)
             (expr "ge" expr)
             (expr "in" expr)
-            ("function" "fun(" funargs "fun)" insts "end function")
-            ("procedure" "fun(" funargs "fun)" insts "end procedure")
-            (funcall))
+	    ;; Is duplication here necessary?
+            ;; ("function" "fun(" funargs "fun)" insts "end function")
+            ;; ("procedure" "fun(" funargs "fun)" insts "end procedure")
+	    ;; ("intrinsic" id "fun(" funargs "fun)" ;; "{" doc "}" insts
+	    ;;  "end intrinsic")
+	    (funcall))
 
       ;; What appears in a list or a similar construct (basic)
       (listargs (enum)
@@ -127,6 +139,8 @@
       ;;          (recspec "," recspec)
       ;;          )
 
+      (intrinsicbody ("->" id "{" doc "}" insts)
+		     (id "{" doc "}" insts))
       
       ;; What appears in a function or procedure arguments
       ;;(funbody (id "fun(" funargs "fun)" insts))
@@ -165,7 +179,7 @@
       (assoc "case:")
       (assoc "when")
       (assoc "when:"))
-    '((nonassoc "end function" "end procedure")
+    '((nonassoc "end function" "end procedure" "end intrinsic")
       (assoc ",")
       (left "|") (left "paren:")
       (assoc ":="))
@@ -206,14 +220,14 @@
    (regexp-opt '("," "|" ";" ":="))
    "\\|" 
    (regexp-opt '("for" "while" "repeat" "until" "do" "if" "else" "elif" 
-                 "case" "when" "try" "catch" "function" "procedure"
+                 "case" "when" "try" "catch" "function" "procedure" "intrinsic"
                  "then" "where" "is" "select") 'words)
    "\\)")
   "SMIE tokens for magma keywords, except for block ends.")
 
 (defconst magma-smie-end-tokens-regexp
   (regexp-opt '("end while" "end if" "end case" "end try" "end for"
-                "end function" "end procedure") 'words)
+                "end function" "end procedure" "end intrinsic") 'words)
   "SMIE tokens for block ends.")
 
 (defconst magma-smie-operators-regexp
@@ -365,13 +379,13 @@ possible word separators, only white space."
       (and (looking-at "(")
            (save-excursion
              (or
-              (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
-                            (- (point) 10))
+              (looking-back "\\<\\(function\\|procedure\\|intrinsic\\)[[:space:]]*"
+                            (- (point) 20))
               (progn
                 (magma--backward-word-strictly)
-                (looking-back "\\<\\(function\\|procedure\\)[[:space:]]*"
-                              (- (point) 10))))))
-    (error nil) ))
+                (looking-back "\\<\\(function\\|procedure\\|intrinsic\\)[[:space:]]*"
+                              (- (point) 20))))))
+    (error nil)))
 
 (defun magma--smie-looking-at-fun-closeparen ()
   "Returns t if we are currently looking at the closing paren of a
@@ -489,11 +503,12 @@ possible word separators, only white space."
                 (point)))))))
 
 
-(defcustom magma-indent-basic 4 "Indentation of blocks"
+(defcustom magma-indent-basic smie-indent-basic
+  "Indentation of blocks"
   :group 'magma
   :type 'integer)
 
-(defcustom magma-indent-args 4
+(defcustom magma-indent-args smie-indent-basic
   "Indentation inside expressions (currently mostly ignored)"
   :group 'magma
   :type 'integer)
@@ -575,12 +590,16 @@ robust in any way."
     ;; Indentation for the functions, with one syntax or the other
     (`(:after . "fun)")
      magma-indent-basic)
-    (`(:before . ,(or `"function" `"procedure"))
+    (`(:before . "{")
+     magma-indent-basic)
+    (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
      (if (smie-rule-prev-p ":=")
          (progn
            (back-to-indentation)
            (cons 'column (current-column)))))
-    (`(:before . ,(or `"end function" `"end procedure"))
+    (`(:before . ,(or `"end function"
+		      `"end procedure"
+		      `"end intrinsic"))
      (smie-rule-parent))))
 
 (defun magma-indent-line ()
@@ -654,20 +673,20 @@ robust in any way."
   (setq deactivate-mark nil))
 
 (defconst magma-defun-regexp
-  (regexp-opt '("function" "procedure" "intrinsics") 'words)
+  (regexp-opt '("function" "procedure" "intrinsic") 'words)
   "Regexp for words marking the beginning of a defun")
 
 (defun magma-beginning-of-defun (&optional silent)
-  "Go to the beginning of the function, procedure or intrinsics
+  "Go to the beginning of the function, procedure or intrinsic
   definition at point"
   (interactive)
   (condition-case nil
       (search-backward-regexp magma-defun-regexp)
     (error (or silent
-               (message "Not in a function, procedure or intrinsics definition")))))
+               (message "Not in a function, procedure or intrinsic definition")))))
 
 (defun magma-end-of-defun ()
-  "Go to the beginning of the function, procedure or intrinsics
+  "Go to the beginning of the function, procedure or intrinsic
   definition at point"
   (interactive)
   (or (looking-at magma-defun-regexp)
