@@ -1,10 +1,10 @@
-;;; magma-mode.el --- Magma mode for Emacs
+;;; magma-mode.el --- Mode for editing Magma source code  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2007-2014 Luk Bettale
-;;               2013-2014 Thibaut Verron
+;; Copyright (C) 2007-2020 Luk Bettale
+;;               2013-2020 Thibaut Verron
 ;; Licensed under the GNU General Public License.
 
-;; Package-requires: ((cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
+;; Package-requires: ((emacs "24.3") (cl-lib "0.3") (dash "2.6.0") (f "0.17.1"))
 ;; URL: https://github.com/ThibautVerron/magma-mode
 
 ;; This program is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@
 ;;
 ;; Ensure that the installation directory is in your `load-path' (it
 ;; is done for you if installing from melpa), and add the following
-;; line to your emacs init file:
+;; line to your Emacs init file:
 ;;
 ;;     (require 'magma-mode)
 ;;
@@ -34,8 +34,8 @@
 ;;     (append '(("\\.mgm$\\|\\.m$" . magma-mode))
 ;;             auto-mode-alist))
 ;;
-;; Some features are available in `magma-extra.el'. They are disabled
-;; because they are more intrusive than the others. Feel free to
+;; Some features are available in `magma-extra.el'.  They are disabled
+;; because they are more intrusive than the others.  Feel free to
 ;; browse the customize interface to enable some of them!
 ;;
 ;; Some support for `hs-minor-mode', `imenu' and `smart-parens' is
@@ -47,7 +47,7 @@
 ;;     (require 'magma-snippets)
 ;;
 ;; At the moment, these snippets include basic syntactic constructs
-;; (if, while, for, etc.) and load (with file name completion). More
+;; (if, while, for, etc.) and load (with file name completion).  More
 ;; will be added in the future.
 ;;
 ;; The complete documentation is available on
@@ -86,7 +86,7 @@
 
   (setq-local indent-line-function 'smie-indent-line)
 
-  ;(magma--apply-electric-newline-setting) 
+  ;(magma--apply-electric-newline-setting)
   
   (magma-interactive-init))
   

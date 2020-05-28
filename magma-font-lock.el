@@ -25,39 +25,39 @@
   (concat
    "[[:space:]\n\r]*"
    "\\(\\(/\\*[^*]*\\*\\([^/][^*]*\\*\\)*/\\|//[^\n]*\\)[[:space:]\n\r]*\\)*")
-  "*Regular expression to find magma comments or space")
+  "Regular expression to find magma comments or space.")
 
 (defconst magma-blank-comments-regexp
   (concat
    "[[:blank:]]*"
    "\\(\\(/\\*[^*\n]*\\*\\([^/][^*\n]*\\*\\)*/\\|//[^\n]*\\)[[:blank:]]*\\)*")
-  "*Regular expression to find magma comments or space")
+  "Regular expression to find magma comments or space")
 
 (defconst magma-ident-regexp
   "\\_<\\([[:alpha:]]\\|_[[:alnum:]_]\\)[[:alnum:]_]*\\_>"
-  "*Regular expression of an identifier")
+  "Regular expression of an identifier")
 
 (defconst magma-defun-regexp
-  (concat 
+  (concat
    (regexp-opt '("function" "procedure" "intrinsic") 'words)
-   "[[:space:]\n\r]*\\(" magma-ident-regexp 
+   "[[:space:]\n\r]*\\(" magma-ident-regexp
    "\\)?[[:space:]\n\r]*([^)]*)")
-  "*Regular expression of a defun")
+  "Regular expression of a defun")
 
 (defconst magma-intrinsic-regexp
   (concat
    "\\<intrinsic\\>"
-   "[[:space:]\n\r]+" magma-ident-regexp 
+   "[[:space:]\n\r]+" magma-ident-regexp
    "[[:space:]\n\r]*([^)]*)"
    "[[:space:]\n\r]*->[[:space:]\n\r]*[[:alnum:]]+"
    "[[:space:]\n\r]*{[^}]*}")
-  "*Regular expression of an intrinsic declaration");
+  "Regular expression of an intrinsic declaration");
 
 (defconst magma-statement-end-regexp
   (concat
    ;; "\\(;\\|:\\|}\\|" ;; Original
    ;; Change 10.11.2013 T.Verron : two following lines
-   "\\(;\\|}\\|" 
+   "\\(;\\|}\\|"
    (regexp-opt '("case" "when") 'words) "[^:]*:\\|"
    (regexp-opt '("repeat" "do" "try" "then" "else") 'words) "\\|"
    magma-intrinsic-regexp "\\|"
@@ -66,7 +66,7 @@
    "\\<catch\\>[[:blank:]]+" magma-ident-regexp "\\)"
    ;;"[[:space:]\n\r]*"
    )
-  "*Regular expression ending a statement")
+  "Regular expression ending a statement")
 
 
 ;; Keywords in magma
@@ -74,13 +74,13 @@
   '("_" "by" "default" "do" "is" "select" "then" "to" "where" "end" "until"
     "catch" "elif" "else" "when" "case" "for" "function" "if" "intrinsic"
     "procedure" "repeat" "try" "while")
-  "*Keywords used by magma")
+  "Keywords used by magma")
 
 (defconst magma-operators
   '("adj" "and" "cat" "cmpeq" "cmpne" "diff" "div" "eq" "ge" "gt" "in" "join"
     "le" "lt" "meet" "mod" "ne" "notadj" "notin" "notsubset" "or" "sdiff"
     "subset" "xor" "not")
-  "*Operators used by magma")
+  "Operators used by magma")
 
 (defconst magma-proc-keywords
   '("assert" "assert2" "assert3" "break" "clear" "continue" "declare" "delete"
@@ -88,35 +88,35 @@
     "forward" "fprintf" "freeze" "iload" "import" "load" "local" "print"
     "printf" "quit" "random" "read" "readi" "require" "requirege"
     "requirerange" "restore" "return" "save" "time" "vprint" "vprintf" "vtime")
-  "*Keywords representing a procedure")
+  "Keywords representing a procedure")
 
 (defconst magma-function-keywords
   '("assigned" "exists" "forall")
-  "*Keywords representing a function")
+  "Keywords representing a function")
 
 (defconst magma-constants
   '("true" "false")
-  "*Constants in magma")
+  "Constants in magma")
 
 (defconst magma-constructors
   '("car" "case" "cop" "elt" "ext" "func" "hom" "ideal" "lideal" "map"
     "ncl" "pmap" "proc" "quo" "rec" "recformat" "rideal" "sub")
-  "*Constructors used by magma")
+  "Constructors used by magma")
 
 (defconst magma-block-end
   '("try" "case" "function" "procedure" "intrinsic")
-  "*Keywords opening a block, closing with an end.")
+  "Keywords opening a block, closing with an end.")
 
 (defconst magma-block-open
   '("try" "catch" "case" "when" "then" "else" "do" "repeat"
     "function" "procedure" "intrinsic")
-  "*Keywords opening a block.")
+  "Keywords opening a block.")
 
 (defconst magma-block-close
   '("until"
     "end"
     "when" "elif" "else" "catch")
-  "*Keywords closing a block.")
+  "Keywords closing a block.")
 
 
 (defvar magma-font-lock-keywords
@@ -152,7 +152,7 @@
     (concat "\\(" magma-ident-regexp "\\|\\_<\\$\\$\\_>\\)[[:space:]\n\r]*(")
     1 'font-lock-function-name-face)
    )
-  "*Default expressions to highlight in Magma mode.")
+  "Default expressions to highlight in Magma mode.")
 
 (defvar magma-interactive-font-lock-keywords
   (list
@@ -183,7 +183,7 @@
     '(1 font-lock-type-face)
     '(2 font-lock-type-face))
    )
-  "*Default expressions to highlight in Magma Interactive mode.")
+  "Default expressions to highlight in Magma Interactive mode.")
 
 (provide 'magma-font-lock)
 
