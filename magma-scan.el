@@ -35,26 +35,34 @@
 
 (defconst magma-scan-defun-regexp "\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
 
-(defconst magma-scan--default-dirname ".magma-scan")
+(defconst magma-scan--default-dirname ".auto")
+
+(defun magma-scan-make-directory (file &optional nocreate)
+  "Return the name of the directory containing the completion
+  file for the file FILE.
+
+If the directory does not exist, it is created, unless NOCREATE is t."
+  (let* ((basedir
+	  (if file
+	      (f-dirname (f-long file))
+	    temporary-file-directory))
+	 (dirname (f-join basedir magma-scan--default-dirname)))
+    (unless (or nocreate (f-exists? dirname))
+      (make-directory dirname))
+    dirname))
 
 (defun magma-scan-make-filename (file)
   "Make the name of the file holding the completion candidates
   for the file FILE. If FILE is nil, make a name based on the
   current buffer's name."
-  (if file
-      (let* ((fullfile (f-long file))
-             (path (f-dirname fullfile))
-             (base (f-filename fullfile)))
-        (f-join path
-		magma-scan--default-dirname
-		(concat base ".el")))
-    ;; If the buffer isn't associated to any file...
-    (let ((buf (buffer-name)))
-      (f-join temporary-file-directory
-              magma-scan--default-dirname
-              (concat
-	       (substring-no-properties buf 1 -1) ;; Dirty...
-               ".el")))))
+  (let ((compdir (magma-scan-make-directory file)))
+    (f-join
+     compdir
+     (concat
+      (if file
+	  (f-filename file)
+	(buffer-name) ;; if the buffer isn't associated to a file we use its name
+	".el")))))
 
 (defun magma-scan-changedirectory-el (dir)
   "Elisp code to insert to perform a cd to DIR from the current directory held in magma-working-directory"
