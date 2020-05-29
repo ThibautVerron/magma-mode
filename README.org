@@ -372,7 +372,7 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** 2020-05-28
+*** 2020-05-28 (develop)
 
  - *Feature* Support for indentation of intrinsics
  - *Bugfix* Better detection of whether we are or not in a function
