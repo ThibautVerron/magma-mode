@@ -80,6 +80,11 @@
   "Places the cursor at the end of buffer."
   '(lambda () (goto-char (point-max))))
 
+(When "^I set the variable \"\\(.+\\)\" to \"\\(.+\\)\""
+  (lambda (var value)
+    (set (intern var) (eval (read value)))))
+
+
 (When "^I show the value of variable \"\\(.+\\)\""
   (lambda (var) (message (format "%s : %s" var (symbol-value (intern var))))))
 

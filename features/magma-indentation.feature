@@ -1,3 +1,5 @@
+# -*- indent-tabs-mode: nil; -*-
+
 Feature: Magma code indentation
   In order to edit magma code
   As a user
@@ -7,6 +9,7 @@ Feature: Magma code indentation
     Given I am in buffer "*magma-test*"
     And the buffer is empty
     And I turn on magma-mode
+    And I set the variable "indent-tabs-mode" to "nil"
     
   Scenario: Basic indentation
     When I insert:
@@ -718,7 +721,7 @@ Feature: Magma code indentation
     When I insert:
     """
     intrinsic f(a::BoolElt,
-    b::BoolElt 
+    b::BoolElt
     : c := true,
     d := true)
     -> BoolElt
@@ -727,7 +730,7 @@ Feature: Magma code indentation
     end intrinsic;
     
     intrinsic f(a::BoolElt,
-    b::BoolElt 
+    b::BoolElt
     : c := true,
     d := true)
     { Docstring }
@@ -738,16 +741,16 @@ Feature: Magma code indentation
     Then I should see:
     """
     intrinsic f(a::BoolElt,
-                b::BoolElt 
-    	        : c := true,
-    	          d := true) 
+                b::BoolElt
+                : c := true,
+                  d := true)
               -> BoolElt
         { Docstring }
         return a;
     end intrinsic;
     
     intrinsic f(a::BoolElt,
-                b::BoolElt 
+                b::BoolElt
                 : c := true,
                   d := true)
         { Docstring }
