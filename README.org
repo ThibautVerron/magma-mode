@@ -374,6 +374,8 @@ The header inserted by the default functions looks like this:
 ** Changelog
 *** 2020-05-28
 
+ - *Feature* Support for indentation of intrinsics
+ - *Bugfix* Better detection of whether we are or not in a function
  - *Bugfix* Completion not working due to misformed defvars
  - *Bugfix* Error when trying to write completion file in a non-existent directory
 
