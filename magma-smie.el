@@ -69,8 +69,12 @@
             ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
-	    ("intrinsic" id "fun(" funargs "fun)" 
-	     intrinsicbody "end intrinsic")
+	    ("intrinsic" id "fun(" funargs "fun)"
+	     intrinsicbody
+	     "end intrinsic")
+            ;; ("intrinsic" id "fun(" funargs "fun)"
+	    ;;  "{" id "}" insts
+	    ;;  "end intrinsic")
             ("special1" specialargs)
             ("special2" specialargs "special:" specialargs))
 
@@ -136,7 +140,7 @@
       ;;          )
 
       (intrinsicbody ("->" id "{" id "}" insts)
-		     (id "{" id "}" insts))
+      		     (id "{" id "}" insts))
       
       ;; What appears in a function or procedure arguments
       ;;(funbody (id "fun(" funargs "fun)" insts))
@@ -532,9 +536,10 @@ robust in any way."
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
   (when magma-smie-verbose
-    (message (format "kind=%s token=%s parent=%s"
+    (message (format "kind=%s token=%s parent=%s test=%s"
                        kind token
-                       (and (boundp 'smie--parent) smie--parent))))
+                       (and (boundp 'smie--parent) smie--parent)
+		       (smie-rule-bolp))))
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
     (`(:list-intro . ,_) nil)
@@ -558,6 +563,15 @@ robust in any way."
      (when (magma-smie--parent-hanging-p)
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
+    (`(:before . "->")
+     ;; For some reason the parent is not given by the grammar but backward-sexp
+     ;; works
+     (progn
+       ;; Get to the intrinsic kw
+       (backward-sexp)
+       ;; Get to the start of the intrinsics name
+       (forward-word 2) (backward-word)
+       `(column . ,(current-column))))
     (`(,_ . ",") (smie-rule-separator kind))
     ;; (`(:after . ",")
     ;;  (if (smie-rule-parent-p "(" "{" "[" "<"
