@@ -725,6 +725,14 @@ Feature: Magma code indentation
     { Docstring }
     return a;
     end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+    b::BoolElt 
+    : c := true,
+    d := true)
+    { Docstring }
+    return a;
+    end intrinsic;
     """
     And I indent the buffer
     Then I should see:
@@ -734,6 +742,14 @@ Feature: Magma code indentation
     	        : c := true,
     	          d := true) 
               -> BoolElt
+        { Docstring }
+        return a;
+    end intrinsic;
+    
+    intrinsic f(a::BoolElt,
+                b::BoolElt 
+                : c := true,
+                  d := true)
         { Docstring }
         return a;
     end intrinsic;

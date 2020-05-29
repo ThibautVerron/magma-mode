@@ -542,6 +542,8 @@ robust in any way."
 		       (smie-rule-bolp))))
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
+    (`(:list-intro . "}") t)
+    (`(:list-intro . "fun)") t)
     (`(:list-intro . ,_) nil)
 
     ;; Our grammar doesn't really define those, I guess
