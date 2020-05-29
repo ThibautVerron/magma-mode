@@ -529,24 +529,39 @@ possible word separators, only white space."
 Should only be used in `magma-smie-rules', and probably not
 robust in any way."
   (and
-   (boundp 'smie--parent)
+   (bound-and-true-p smie--parent)
    (save-excursion
      (goto-char (car (cdr smie--parent)))
      (smie-rule-hanging-p))))
 
+(defun magma-smie--parent-bolp ()
+  "Return t if parent of the current token is at the beginning of the line.
+
+Should only be used in `magma-smie-rules', and probably not
+robust in any way."
+  (and
+   (bound-and-true-p smie--parent)
+   (save-excursion
+     (goto-char (car (cdr smie--parent)))
+     (smie-rule-bolp))))
+
+
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
-  (when magma-smie-verbose
+  (when ;(and magma-smie-verbose (not edebug-mode))
+      magma-smie-verbose
     (message (format "kind=%s token=%s parent=%s test=%s"
                        kind token
                        (and (boundp 'smie--parent) smie--parent)
-		       (smie-rule-bolp))))
+		       (and (not (magma-smie--parent-bolp))
+			    (not (smie-rule-sibling-p))))))
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
-    (`(:list-intro . "}") t)
-    (`(:list-intro . "fun)") t)
+    ;; (`(:list-intro . "}") t)
+    ;; (`(:list-intro . "fun)") t)
     (`(:list-intro . ,_) nil)
-
+    
+    
     ;; Our grammar doesn't really define those, I guess
     (`(:elem . 'basic) magma-indent-basic)
     (`(:elem . 'arg)
@@ -566,9 +581,10 @@ robust in any way."
      (when (magma-smie--parent-hanging-p)
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
+    ;; (`(:after . "->") 0)
     (`(:before . "->")
-     ;; For some reason the parent is not given by the grammar but backward-sexp
-     ;; works
+     ;; For some reason the parent is not given by the grammar but
+     ;; backward-sexp works
      (progn
        ;; Get to the intrinsic kw
        (backward-sexp)
@@ -576,20 +592,14 @@ robust in any way."
        (forward-word 2) (backward-word)
        `(column . ,(current-column))))
     (`(,_ . ",") (smie-rule-separator kind))
-    ;; (`(:after . ",")
-    ;;  (if (smie-rule-parent-p "(" "{" "[" "<"
-    ;;                          "fun(" "paren:"
-    ;;                          "special1" "special2" "special:")
-    ;;      0
-    ;;    (if (or (smie-rule-sibling-p)
-    ;;            (smie-rule-prev-p ",")
-    ;;            (smie-rule-next-p ",")
-    ;;            (smie-rule-bolp)
-    ;;            )
-    ;;        (smie-rule-parent magma-indent-basic)
-    ;;      magma-indent-basic)))
 
+    (`(:before . ";")
+     (when (and (not (magma-smie--parent-bolp))
+		(not (smie-rule-sibling-p)))
+       (smie-rule-parent magma-indent-basic)))
     (`(:after . ";") 0)
+    ;; (`(,_ . ";") (smie-rule-separator kind))
+    
     (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
     (`(:after . "special:") magma-indent-basic)
     (`(:after . "when:") magma-indent-basic)
@@ -619,8 +629,12 @@ robust in any way."
     ;; Indentation for the functions, with one syntax or the other
     (`(:after . "fun)")
      magma-indent-basic)
+    (`(:before . "fun)")
+     (if (not (smie-rule-bolp))
+       (smie-rule-parent)))
     (`(:before . "{")
      magma-indent-basic)
+    (`(:after . "}") 0)
     (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
      (if (smie-rule-prev-p ":=")
          (progn

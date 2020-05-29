@@ -1,7 +1,7 @@
 CASK ?= cask
 EMACS ?= emacs
 
-ECUKESFLAGS = --no-win
+ECUKESFLAGS = --script
 
 ELFILES = magma-completion.el \
 	magma-font-lock.el \
@@ -41,10 +41,10 @@ unit: $(ELCFILES)
 .ecukes-failing-scenarios:
 	${CASK} exec ecukes $(ECUKESFLAGS)
 
-ecukes-debug: .ecukes-failing-scenarios
+ecukes-debug: $(ELCFILES) .ecukes-failing-scenarios
 	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing --debug
 
-ecukes-fail: .ecukes-failing-scenarios 
+ecukes-fail: $(ELCFILES) .ecukes-failing-scenarios 
 	${CASK} exec ecukes $(ECUKESFLAGS) --only-failing
 
 ecukes-all: $(ELCFILES) $(ECUKESFILES)

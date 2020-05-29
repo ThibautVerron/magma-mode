@@ -720,12 +720,20 @@ Feature: Magma code indentation
   Scenario: Indentation of intrinsics
     When I insert:
     """
+    intrinsic f(a::BoolElt, b::BoolElt
+    : c := true, d := true) -> BoolElt
+    { Docstring }
+    a := 3;
+    return a;
+    end intrinsic;
+    
     intrinsic f(a::BoolElt,
     b::BoolElt
     : c := true,
     d := true)
     -> BoolElt
     { Docstring }
+    a := 3;
     return a;
     end intrinsic;
     
@@ -734,18 +742,27 @@ Feature: Magma code indentation
     : c := true,
     d := true)
     { Docstring }
+    a := 3;
     return a;
     end intrinsic;
     """
     And I indent the buffer
     Then I should see:
     """
+    intrinsic f(a::BoolElt, b::BoolElt
+                : c := true, d := true) -> BoolElt
+        { Docstring }
+        a := 3;
+        return a;
+    end intrinsic;
+
     intrinsic f(a::BoolElt,
                 b::BoolElt
                 : c := true,
                   d := true)
               -> BoolElt
         { Docstring }
+        a := 3;
         return a;
     end intrinsic;
     
@@ -754,6 +771,7 @@ Feature: Magma code indentation
                 : c := true,
                   d := true)
         { Docstring }
+        a := 3;
         return a;
     end intrinsic;
     """
@@ -861,28 +879,28 @@ Feature: Magma code indentation
     When I insert:
     """
     for x in L do
-    printf "x = %o, "
-    cat "y = %o\n",
+    printf "x = %%%%o, "
+    cat "y = %%%%o\n",
     x, y;
     
     printf
-    "x = %o, "
-    cat "y = %o\n",
+    "x = %%%%o, "
+    cat "y = %%%%o\n",
     x, y;
     
     vprintf
     User1:
-    "x = %o,"
-    cat "y = %o\n",
+    "x = %%%%o,"
+    cat "y = %%%%o\n",
     x, y;
 
     vprintf User1:
-    "x = %o,"
-    cat "y = %o\n",
+    "x = %%%%o,"
+    cat "y = %%%%o\n",
     x, y;
     
-    vprintf User1: "x = %o,"
-    cat "y = %o\n",
+    vprintf User1: "x = %%%%o,"
+    cat "y = %%%%o\n",
     x, y;
     end for;
     
@@ -891,28 +909,28 @@ Feature: Magma code indentation
     Then I should see:
     """
     for x in L do
-        printf "x = %o, "
-               cat "y = %o\n",
+        printf "x = %%%%o, "
+               cat "y = %%%%o\n",
                x, y;
     
         printf
-            "x = %o, "
-            cat "y = %o\n",
+            "x = %%%%o, "
+            cat "y = %%%%o\n",
             x, y;
     
         vprintf
             User1:
-            "x = %o,"
-            cat "y = %o\n",
+            "x = %%%%o,"
+            cat "y = %%%%o\n",
             x, y;
     
         vprintf User1:
-            "x = %o,"
-            cat "y = %o\n",
+            "x = %%%%o,"
+            cat "y = %%%%o\n",
             x, y;
     
-        vprintf User1: "x = %o,"
-                       cat "y = %o\n",
+        vprintf User1: "x = %%%%o,"
+                       cat "y = %%%%o\n",
                        x, y;
     end for;
     """
