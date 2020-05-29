@@ -594,8 +594,7 @@ robust in any way."
     (`(,_ . ",") (smie-rule-separator kind))
 
     (`(:before . ";")
-     (when (and (not (magma-smie--parent-bolp))
-		(not (smie-rule-sibling-p)))
+     (when (smie-rule-parent-p "fun)")
        (smie-rule-parent magma-indent-basic)))
     (`(:after . ";") 0)
     ;; (`(,_ . ";") (smie-rule-separator kind))
