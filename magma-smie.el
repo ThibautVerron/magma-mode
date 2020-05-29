@@ -43,20 +43,14 @@
 (makunbound 'magma-smie-grammar)
 (makunbound 'magma-smie-tokens-regexp)
 (makunbound 'magma-smie-end-tokens-regexp)
-
+(makunbound 'magma-smie-operators-regexp)
 
 (defconst magma-smie-grammar
   (smie-prec2->grammar
    (smie-bnf->prec2
-    '(;; Identifier
+    '(;; Identifier (any text, really)
       (id)
 
-      ;; ;; Identifier with type
-      ;; (typedid (id "::" id))
-      
-      ;; Any text
-      (doc)
-      
       ;; Several identifiers, separated by commas
       (idlist (id)
               (idlist "," idlist))
@@ -75,7 +69,7 @@
             ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
-	    ("intrinsic" id "fun(" funargs "fun)"
+	    ("intrinsic" id "fun(" funargs "fun)" 
 	     intrinsicbody "end intrinsic")
             ("special1" specialargs)
             ("special2" specialargs "special:" specialargs))
@@ -114,11 +108,9 @@
             (expr "gt" expr)
             (expr "ge" expr)
             (expr "in" expr)
-	    ;; Is duplication here necessary?
-            ;; ("function" "fun(" funargs "fun)" insts "end function")
-            ;; ("procedure" "fun(" funargs "fun)" insts "end procedure")
-	    ;; ("intrinsic" id "fun(" funargs "fun)" ;; "{" doc "}" insts
-	    ;;  "end intrinsic")
+	    ;; For declaration ala f := function(...)
+            ("function" "fun(" funargs "fun)" insts "end function")
+            ("procedure" "fun(" funargs "fun)" insts "end procedure")
 	    (funcall))
 
       ;; What appears in a list or a similar construct (basic)
@@ -143,8 +135,8 @@
       ;;          (recspec "," recspec)
       ;;          )
 
-      (intrinsicbody ("->" id "{" doc "}" insts)
-		     (id "{" doc "}" insts))
+      (intrinsicbody ("->" id "{" id "}" insts)
+		     (id "{" id "}" insts))
       
       ;; What appears in a function or procedure arguments
       ;;(funbody (id "fun(" funargs "fun)" insts))
@@ -241,7 +233,7 @@
 (defconst magma-smie-operators-regexp
   (concat
    "\\("
-   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->" "&"))
+   (regexp-opt '("*" "+" "^" "-" "/" "~" "." "!" "#" "->" "&" "::"))
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
@@ -315,16 +307,16 @@ If point is at a colon, returns the appropriate token for that
   parens (parameter for a function, specification for a list...)
 - \"type:\" if the colon is part of a type specification in a record
 - \"::\" if the colon is part of a type specification for an intrinsic
-- \":\" otherwise (this shouldn't appear in a syntactically correct buffer)"
+- \"other:\" otherwise (this shouldn't appear in a syntactically correct buffer)"
   (let ((forward-sexp-function nil)) ;; Do not use the smie table if loaded!
     (save-excursion
       (catch 'token
+	;; Maybe not necessary
+	(when (looking-at "::")
+	  (throw 'token "::"))
         (while t
           (condition-case nil 
               (progn
-		(when (or (looking-at "::")
-			  (looking-back ":" (- (point) 1)))
-		  (throw 'token "::"))
                 (forward-comment (- (point)))
                  ;(up-list)
                 (backward-sexp)
@@ -338,7 +330,7 @@ If point is at a colon, returns the appropriate token for that
                  ;;  (cond
                  ((looking-back "recformat<[[:space:]]*" nil)
                   (throw 'token "type:"))
-                 ((bobp) (throw 'token ":"))))
+                 ((bobp) (throw 'token "other:"))))
             (error (throw 'token "paren:")))
         )))));; ))
 
@@ -462,7 +454,7 @@ possible word separators, only white space."
    ;; ((looking-at "then")
    ;;  (goto-char (match-end 0))
    ;;  (magma-identify-then))
-   ((looking-at ":[^=]")
+   ((looking-at ":[^:=]")
     (let ((token (magma--smie-identify-colon)))
       (forward-char 1)
       token))
@@ -507,7 +499,7 @@ possible word separators, only white space."
      ((looking-back magma-smie-tokens-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
-     ((looking-back ":" nil)
+     ((looking-back "[^:]:" nil)
       (forward-char -1)
       (magma--smie-identify-colon))
      (t (buffer-substring-no-properties
@@ -540,21 +532,28 @@ robust in any way."
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
   (when magma-smie-verbose
-    (message (format "%s %s parent:%s"
+    (message (format "kind=%s token=%s parent=%s"
                        kind token
                        (and (boundp 'smie--parent) smie--parent))))
   (pcase (cons kind token)
+    ;; Our grammar doesn't allow for unseparated lists of expressions
+    (`(:list-intro . ,_) nil)
+
+    ;; Our grammar doesn't really define those, I guess
     (`(:elem . 'basic) magma-indent-basic)
     (`(:elem . 'arg)
      (if (smie-rule-parent-p "special1" "special2")
          (smie-rule-parent)
        ;; This piece of code seems to never be evaluated
        magma-indent-basic))
+
+    ;; Now the real thing
     (`(:before . ":=") (smie-rule-parent))
     (`(:after . ":=")
      (if (smie-rule-hanging-p)
          magma-indent-basic
          (smie-rule-parent)))
+    (`(:before . "::") (smie-rule-parent))
     (`(:before . "paren:")
      (when (magma-smie--parent-hanging-p)
        magma-indent-basic))
