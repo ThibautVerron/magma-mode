@@ -169,7 +169,8 @@ Feature: Interaction with a magma process
     """
     And I place the cursor before "+2"
     And I press "C-c C-f"
-    And I switch to buffer "*magma*"
+    Then the cursor should be after "function;"
+    When I switch to buffer "*magma*"
     And I wait for an instant
     Then I should see:
     """
@@ -191,19 +192,23 @@ Feature: Interaction with a magma process
     """
     y := 4;
     """
-    ;; And I should not see message "Not in a function, procedure or intrinsics definition"
+    ;; And I should not see message "Not in a function, procedure or intrinsic definition"
 
   Scenario: Evaluate a defun, not in a defun
     Given I am in buffer "*magma-test*"
     And I insert:
     """
+    function toto (arg)
+    arg := arg +2;
+    return arg;
+    end function;
     x := 3;
     """
     And I place the cursor before "x"
     And I press "C-c C-f"
-    And I switch to buffer "*magma*"
     And I wait for an instant
-    Then I should see message "Not in a function, procedure or intrinsics definition"
+    Then I should see message "Not in a function, procedure or intrinsic definition"
+    And the cursor should be before "x"
 
   Scenario: Evaluate an expression with no output
     Given I am in buffer "*magma-test*"
@@ -498,6 +503,8 @@ Feature: Interaction with a magma process
     And the cursor should be before "456"
     
   # Tentative fix in commit 91b1280cc8709a8b1e699ff8d7e3a0272b7198aa
+  # Does not fail when run manually
+  # Does not fail with --only-failing
   @bugfix
   @unreproducible
   Scenario: Behavior at end of buffer

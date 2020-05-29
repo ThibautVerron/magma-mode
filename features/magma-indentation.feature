@@ -1,4 +1,4 @@
-# -*- indent-tabs-mode: nil; -*-
+# -*- indent-tabs-mode: nil; eval: (whitespace-mode 1) -*-
 
 Feature: Magma code indentation
   In order to edit magma code
@@ -865,12 +865,12 @@ Feature: Magma code indentation
     cat "y = %o\n",
     x, y;
     
-    printf 
+    printf
     "x = %o, "
     cat "y = %o\n",
     x, y;
     
-    vprintf 
+    vprintf
     User1:
     "x = %o,"
     cat "y = %o\n",
@@ -895,12 +895,12 @@ Feature: Magma code indentation
                cat "y = %o\n",
                x, y;
     
-        printf 
+        printf
             "x = %o, "
             cat "y = %o\n",
             x, y;
     
-        vprintf 
+        vprintf
             User1:
             "x = %o,"
             cat "y = %o\n",

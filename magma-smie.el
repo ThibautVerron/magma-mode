@@ -40,10 +40,11 @@
 ;; the matches)
 ;;;;;
 
-(makunbound 'magma-smie-grammar)
-(makunbound 'magma-smie-tokens-regexp)
-(makunbound 'magma-smie-end-tokens-regexp)
-(makunbound 'magma-smie-operators-regexp)
+;;;;; Uncomment when developing
+;; (makunbound 'magma-smie-grammar)
+;; (makunbound 'magma-smie-tokens-regexp)
+;; (makunbound 'magma-smie-end-tokens-regexp)
+;; (makunbound 'magma-smie-operators-regexp)
 
 (defconst magma-smie-grammar
   (smie-prec2->grammar

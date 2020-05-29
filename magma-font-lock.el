@@ -118,7 +118,9 @@
     "when" "elif" "else" "catch")
   "Keywords closing a block.")
 
-(makunbound 'magma-font-lock-keywords)
+;;;;; Uncomment when developing
+;;(makunbound 'magma-font-lock-keywords)
+
 (defvar magma-font-lock-keywords
   (list
    (list

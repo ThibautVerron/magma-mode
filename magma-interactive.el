@@ -707,13 +707,18 @@ statement otherwise"
 (defun magma-eval-defun (&optional i)
   "Evaluate the current defun."
   (interactive "P")
-  (let ((regbeg (progn
+  (let ((curpt (point))
+	(regbeg (save-excursion
                   (magma-beginning-of-defun)
                   (point)))
-        (regend (progn
+        (regend (save-excursion
                   (magma-end-of-defun)
                   (point))))
-    (magma-eval-region regbeg regend i)))
+    (if (or (> regbeg curpt) (< regend curpt))
+	(message "Not in a function, procedure or intrinsic definition")
+      (progn
+	(magma-eval-region regbeg regend i)
+	(goto-char regend)))))
   
 
 (defun magma-eval-until ( &optional i)
