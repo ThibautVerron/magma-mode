@@ -39,13 +39,15 @@
 
 (defvar magma-mode-hook)
 
+(defun magma-interactive-program-pred (val)
+  (memq val '("magma")))
+
 (defcustom magma-interactive-program "magma"
   "Program to be launched to use magma (usually magma)."
   :group 'magma
-  :type 'string)
-
-(defun magma-interactive-program-pred (val)
-  (memq val '("magma")))
+  :type 'string
+  :risky nil
+  :safe 'magma-interactive-program-pred)
 
 ;;;###autoload (put 'magma-interactive-program 'safe-local-variable 'magma-interactive-program-pred)
 
@@ -763,7 +765,9 @@ one as input, starting with the absolute filename of the working
 buffer.
 
 If one of the functions returns nil, the buffer is not sent using
-load or attach.")
+load or attach."
+  :group 'magma
+  :type '(list function))
 
 (defun magma-make-send-name (filename)
   (let ((funs magma-load-file-transformation-functions))
