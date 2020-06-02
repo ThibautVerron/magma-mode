@@ -136,13 +136,22 @@ Can be one of the following symbols
   :options '(whole expr line file)
   :type 'symbol)
 
-(defvar magma-temp-file-name "/tmp/magma_temp.m")
+(defun magma-temp-file ()
+  (make-temp-file "emacs-magma-"))
 
 (defcustom magma-interactive-use-load nil
   "See `magma-eval-buffer'."
   :group 'magma
-  :type 'boolean)
+  :type '(choice (const :tag "Never" nil)
+		 (const :tag "Always" t)
+		 (const :tag "Only local" 'local)))
 
+(defcustom magma-interactive-load-syntax 'load
+  "Syntax for loading magma files"
+  :group 'magma
+  :type '(choice (const :tag "load ...;" 'load)
+		 (const :tag "Attach(...);" 'attach)))
+  
 (defcustom magma-interactive-auto-save 'confirm
   "Auto-save before sending-input?
 
@@ -629,15 +638,17 @@ corresponding input."
        (while (not (magma--at-end end))
          (magma-eval-line i))))
     ('file
-     (let ((buf (current-buffer)))
+     (let ((buf (current-buffer))
+	   (tmp (magma-temp-file)))
        (with-temp-buffer
-         (find-file-literally magma-temp-file-name)
+         (find-file-literally tmp)
          (erase-buffer)
          (insert-buffer-substring-no-properties buf beg end)
          (let ((magma-interactive-use-load t)
                (magma-interactive-auto-save 'always))
            (magma-eval-buffer i))
-         (kill-buffer)))))))
+         (kill-buffer)
+	 (delete-file tmp)))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line."
@@ -726,6 +737,27 @@ statement otherwise"
   (interactive "P")
   (magma-eval-region (point-min) (point) i))
 
+(defun magma-load-file-strip-ssh-prefix (filename)
+  "Remove ssh prefix inserted by tramp.
+
+This function allows to edit and evaluate magma files over tramp."
+  (if (and (eq magma-interactive-use-load 'only-local)
+	   (file-remote-p filename))
+      nil
+    (file-local-name filename)))
+
+(defcustom magma-load-file-transformation-functions
+  '(magma-load-file-process-ssh)
+  "Functions to run to get the filepath to send using load or attach.
+
+The functions are run in order with the output of the previous
+one as input, starting with the absolute filename of the working
+buffer.
+
+If one of the functions returns nil, the buffer is not sent using
+load or attach.")
+
+
 (defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer.
 
@@ -739,17 +771,20 @@ If needed, confirm saving through `magma-confirm-save-buffer'.
 
 Otherwise, send the whole buffer to `magma-eval-region'."
   (interactive "P")
-  (if (and (buffer-file-name) magma-interactive-use-load)
-      (progn
-        (when (buffer-modified-p)
-          (magma-confirm-save-buffer))
-        (magma-send-or-broadcast
-         (format "load \"%s\";"
-                 ; (f-relative (buffer-file-name) magma-working-directory)
-                 ;; ^ This would work if magma-working-directory was
-                 ;;   correctly kept up to date. Instead, as a fallback, we use:
-                 (f-long (buffer-file-name))
-                 ) i))
+  (if (and (buffer-file-name)
+	   magma-interactive-use-load)
+      (let ((send-name (f-long (buffer-file-name)))
+	    (funs magma-load-file-transformation-functions))
+	(while (and send-name funs)
+	  (setq send-name (funcall (car funs) send-name))
+	  (setq funs (cdr funs)))
+	(when (buffer-modified-p)
+	  (magma-confirm-save-buffer))
+	(magma-send-or-broadcast
+         (format
+	  (if (eq magma-interactive-use-load 'load) "load \"%s\";"
+	    "Attach(\"%s\");")
+	  send-name) i))
   (magma-eval-region (point-min) (point-max) i)))
 
 (defun magma-confirm-save-buffer ()
