@@ -40,7 +40,7 @@
 (defvar magma-mode-hook)
 
 (defun magma-interactive-program-pred (val)
-  (memq val '("magma")))
+  (member val '("magma")))
 
 (defcustom magma-interactive-program "magma"
   "Program to be launched to use magma (usually magma)."
