@@ -44,6 +44,11 @@
   :group 'magma
   :type 'string)
 
+(defun magma-interactive-program-pred (val)
+  (memq val '("magma")))
+
+;;;###autoload (put 'magma-interactive-program 'safe-local-variable 'magma-interactive-program-pred)
+
 (defcustom magma-interactive-arguments '()
   "Commandline arguments to pass to magma."
   :group 'magma
@@ -764,7 +769,8 @@ load or attach.")
   (let ((funs magma-load-file-transformation-functions))
     (while (and filename funs)
       (setq filename (funcall (car funs) filename))
-      (setq funs (cdr funs)))))
+      (setq funs (cdr funs)))
+    filename))
 
 (defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer.
@@ -785,13 +791,14 @@ Otherwise, send the whole buffer to `magma-eval-region'."
 	      (magma-make-send-name
 	       (f-long (buffer-file-name))))))
     (if send-name
-	(when (buffer-modified-p)
-	  (magma-confirm-save-buffer))
-      (magma-send-or-broadcast
-       (format
-	(if (eq magma-interactive-use-load 'load) "load \"%s\";"
-	  "Attach(\"%s\");")
-	send-name) i)
+	(progn
+	  (when (buffer-modified-p)
+	    (magma-confirm-save-buffer))
+	  (magma-send-or-broadcast
+	   (format
+	    (if (equal magma-interactive-load-syntax 'load) "load \"%s\";"
+	      "Attach(\"%s\");")
+	    send-name) i))
       (magma-eval-region (point-min) (point-max) i))))
 
 (defun magma-confirm-save-buffer ()
