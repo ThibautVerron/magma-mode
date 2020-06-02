@@ -337,9 +337,12 @@ This function is meant for internal use only."
         (magma-interactive-mode)
         (when (not (comint-check-proc bufname))
           (error (format "Failed to start process '%s'" program)))
-        (magma-comint-send-string
-         (concat "ChangeDirectory(\"" directory "\");") i t)))
-    (with-current-buffer bufname (current-buffer))))
+	(let ((dir-send-name (magma-make-send-name directory)))
+	  (when dir-send-name
+	    (magma-comint-send-string
+	     (concat "ChangeDirectory(\"" dir-send-name "\");") i t)))))
+	(with-current-buffer bufname (current-buffer))))
+
 
 (defun magma-comint-int (&optional i)
   "Interrupt the magma process in buffer I."
@@ -737,7 +740,7 @@ statement otherwise"
   (interactive "P")
   (magma-eval-region (point-min) (point) i))
 
-(defun magma-load-file-strip-ssh-prefix (filename)
+(defun magma-load-file-strip-remote (filename)
   "Remove ssh prefix inserted by tramp.
 
 This function allows to edit and evaluate magma files over tramp."
@@ -747,7 +750,7 @@ This function allows to edit and evaluate magma files over tramp."
     (file-local-name filename)))
 
 (defcustom magma-load-file-transformation-functions
-  '(magma-load-file-process-ssh)
+  '(magma-load-file-strip-remote)
   "Functions to run to get the filepath to send using load or attach.
 
 The functions are run in order with the output of the previous
@@ -757,6 +760,11 @@ buffer.
 If one of the functions returns nil, the buffer is not sent using
 load or attach.")
 
+(defun magma-make-send-name (filename)
+  (let ((funs magma-load-file-transformation-functions))
+    (while (and filename funs)
+      (setq filename (funcall (car funs) filename))
+      (setq funs (cdr funs)))))
 
 (defun magma-eval-buffer ( &optional i)
   "Evaluates all code in the buffer.
@@ -771,21 +779,20 @@ If needed, confirm saving through `magma-confirm-save-buffer'.
 
 Otherwise, send the whole buffer to `magma-eval-region'."
   (interactive "P")
-  (if (and (buffer-file-name)
-	   magma-interactive-use-load)
-      (let ((send-name (f-long (buffer-file-name)))
-	    (funs magma-load-file-transformation-functions))
-	(while (and send-name funs)
-	  (setq send-name (funcall (car funs) send-name))
-	  (setq funs (cdr funs)))
+  (let ((send-name
+	 (and (buffer-file-name)
+	      magma-interactive-use-load
+	      (magma-make-send-name
+	       (f-long (buffer-file-name))))))
+    (if send-name
 	(when (buffer-modified-p)
 	  (magma-confirm-save-buffer))
-	(magma-send-or-broadcast
-         (format
-	  (if (eq magma-interactive-use-load 'load) "load \"%s\";"
-	    "Attach(\"%s\");")
-	  send-name) i))
-  (magma-eval-region (point-min) (point-max) i)))
+      (magma-send-or-broadcast
+       (format
+	(if (eq magma-interactive-use-load 'load) "load \"%s\";"
+	  "Attach(\"%s\");")
+	send-name) i)
+      (magma-eval-region (point-min) (point-max) i))))
 
 (defun magma-confirm-save-buffer ()
   "Prompt for confirmation, then save the current buffer.
