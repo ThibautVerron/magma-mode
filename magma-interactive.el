@@ -402,14 +402,15 @@ pushes `expr' onto the `magma-pending-input' queue."
             (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))
-    (or
-     ; First try for a window in same frame
-     (display-buffer-reuse-window buffer nil)
-     ; Then a window in another frame
-     (display-buffer-reuse-window buffer '((reusable-frames .  t)))
-     ; Then pop the buffer in another window
-     (pop-to-buffer buffer))
-    (select-window (get-buffer-window oldbuf))))
+    ;; (or
+    ;;  ; First try for a window in same frame
+    ;;  (display-buffer-reuse-window buffer nil)
+    ;;  ; Then a window in another frame
+    ;;  (display-buffer-reuse-window buffer '((reusable-frames .  t)))
+    ;;  ; Then pop the buffer in another window
+    ;;  (pop-to-buffer buffer))
+    ;; (select-window (get-buffer-window oldbuf))
+    ))
 
 ;; (defun magma--comint-get-old-input-before-send ()
 ;;   "Function for the variable 'comint-get-old-input
@@ -639,26 +640,26 @@ corresponding input."
       ('expr
        (save-excursion
          (goto-char beg)
-       (let ((magma-interactive-method 'whole))
-         (while (not (magma--at-end end))
-           (magma-eval-next-statement i)))))
-    ('line
-     (save-excursion
-       (goto-char beg)
-       (while (not (magma--at-end end))
-         (magma-eval-line i))))
-    ('file
-     (let ((buf (current-buffer))
-	   (tmp (magma-temp-file)))
-       (with-temp-buffer
-         (find-file-literally tmp)
-         (erase-buffer)
-         (insert-buffer-substring-no-properties buf beg end)
-         (let ((magma-interactive-use-load t)
-               (magma-interactive-auto-save 'always))
-           (magma-eval-buffer i))
-         (kill-buffer)
-	 (delete-file tmp)))))))
+	 (let ((magma-interactive-method 'whole))
+	   (while (not (magma--at-end end))
+	     (magma-eval-next-statement i)))))
+      ('line
+       (save-excursion
+	 (goto-char beg)
+	 (while (not (magma--at-end end))
+	   (magma-eval-line i))))
+      ('file
+       (let ((buf (current-buffer))
+	     (tmp (magma-temp-file)))
+	 (with-temp-buffer
+	   (find-file-literally tmp)
+	   (erase-buffer)
+	   (insert-buffer-substring-no-properties buf beg end)
+	   (let ((magma-interactive-use-load t)
+		 (magma-interactive-auto-save 'always))
+	     (magma-eval-buffer i))
+	   (kill-buffer)
+	   (delete-file tmp)))))))
 
 (defun magma-eval-line ( &optional i)
   "Evaluate current line."
