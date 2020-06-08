@@ -402,14 +402,17 @@ pushes `expr' onto the `magma-pending-input' queue."
             (setq magma-timer (current-time))
             (magma-comint-evaluate-here expr))
         (magma-q-push magma-pending-input expr)))
-    ;; (or
-    ;;  ; First try for a window in same frame
-    ;;  (display-buffer-reuse-window buffer nil)
-    ;;  ; Then a window in another frame
-    ;;  (display-buffer-reuse-window buffer '((reusable-frames .  t)))
-    ;;  ; Then pop the buffer in another window
-    ;;  (pop-to-buffer buffer))
-    ;; (select-window (get-buffer-window oldbuf))
+    (or
+     ; First try for a window in same frame
+     (display-buffer-reuse-window buffer '((reusable-frames .  nil)))
+     ; Then a window in another frame
+     (display-buffer-reuse-window buffer '((reusable-frames .  t)
+					   (inhibit-switch-frame . t)
+					   ))
+     ; Then pop the buffer in another window
+     (pop-to-buffer buffer))
+    ;; Then go back to the edition window
+    (select-window (get-buffer-window oldbuf))
     ))
 
 ;; (defun magma--comint-get-old-input-before-send ()
@@ -910,12 +913,16 @@ we should work on all buffers"
 ;;   (message output)
 ;;   output)
 
+;; FIXME: If the input line is long, the output also contains the end
+;; of the line, which may lead to broken syntax (eg emacs thinks we
+;; are in a string)
 (defun magma-comint-delete-reecho (output)
   ;(message output)
   (with-temp-buffer
     (insert output)
     (flush-lines "\" (point-min) (point-max))
-    (buffer-substring-no-properties (point-min) (point-max))))
+    (buffer-substring-no-properties (point-min) (point-max)))
+  )
 
 (defun magma-preinput-filter (input)
   (with-temp-buffer
