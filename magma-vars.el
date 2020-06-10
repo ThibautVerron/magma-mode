@@ -136,11 +136,9 @@ if in an intrinsic description or nil if somewhere else."
   (let ((string-end-pos (point))
 	(string-beg-pos (- (point) 1)))
     (let ((syntax-string
-	   (if (eq
-		(let )
-		(magma-in-literal) 'intrinsic)
+	   (if (eq (magma-in-literal) 'intrinsic)
 	       "|" "(}")))
-      (message syntax-string)
+      ;; (message syntax-string)
       (put-text-property
        string-beg-pos string-end-pos
        'syntax-table (string-to-syntax syntax-string)))))
@@ -154,7 +152,7 @@ if in an intrinsic description or nil if somewhere else."
 	     (if (and (eq (magma-in-literal) 'intrinsic)
 		      (looking-back "[^\\]" (- string-beg-pos 1)))
 		 "|" "){"))))
-      (message syntax-string)
+      ;; (message syntax-string)
       (put-text-property
        string-beg-pos string-end-pos
        'syntax-table (string-to-syntax syntax-string)))))

@@ -522,12 +522,15 @@ robust in any way."
     (message (format "kind=%s token=%s parent=%s test=%s"
                        kind token
                        (and (boundp 'smie--parent) smie--parent)
-		       (and (not (magma-smie--parent-bolp))
-			    (not (smie-rule-sibling-p))))))
+		       nil
+		       ;; (and (not (magma-smie--parent-bolp))
+		       ;; 	    (not (smie-rule-sibling-p)))
+		       )))
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
     ;; (`(:list-intro . "}") t)
     ;; (`(:list-intro . "fun)") t)
+    (`(:list-intro . "->") t)
     (`(:list-intro . ,_) nil)
     
     
@@ -551,15 +554,17 @@ robust in any way."
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
     ;; (`(:after . "->") 0)
-    (`(:before . "->")
+    (`(:after . "->")
+     (cons 'column magma-indent-basic))
+    (`(:before . "->") (cons 'column 0))
      ;; For some reason the parent is not given by the grammar but
      ;; backward-sexp works
-     (progn
-       ;; Get to the intrinsic kw
-       (backward-sexp)
-       ;; Get to the start of the intrinsics name
-       (forward-word 2) (backward-word)
-       `(column . ,(current-column))))
+     ;; (progn
+     ;;   ;; Get to the intrinsic kw
+     ;;   (backward-sexp)
+     ;;   ;; Get to the start of the intrinsics name
+     ;;   (forward-word 2) (backward-word)
+     ;;   `(column . ,(current-column)))
     (`(,_ . ",") (smie-rule-separator kind))
 
     (`(:before . ";")
@@ -600,9 +605,9 @@ robust in any way."
     (`(:before . "fun)")
      (if (not (smie-rule-bolp))
        (smie-rule-parent)))
-    (`(:before . "{")
-     magma-indent-basic)
-    (`(:after . "}") 0)
+    ;; (`(:before . "{")
+    ;;  magma-indent-basic)
+    ;; (`(:after . "}") 0)
     (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
      (if (smie-rule-prev-p ":=")
          (progn
