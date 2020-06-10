@@ -123,12 +123,12 @@
 
 (defvar magma-font-lock-keywords
   (list
-   (list
-    ;; FIXME: Allow for punctuation (eg []) in types
-    ;; FIXME: Fontify docstring even without a return type
-    (concat "->\\([[:alnum:][:space:]\n\r]*\\)"
-    	    "\\({\\(\\\\}\\|[^}]\\)*}\\)")
-    '(1 font-lock-type-face) '(2 font-lock-string-face))
+   ;; (list
+   ;;  ;; FIXME: Allow for punctuation (eg []) in types
+   ;;  ;; FIXME: Fontify docstring even without a return type
+   ;;  (concat "->\\([[:alnum:][:space:]\n\r]*\\)"
+   ;;  	    "\\({\\(\\\\}\\|[^}]\\)*}\\)")
+   ;;  '(1 font-lock-type-face) '(2 font-lock-string-face))
    (list
     (concat (regexp-opt magma-constructors 'words) "[[:space:]\n\r]*<")
     1 'font-lock-builtin-face)

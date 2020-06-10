@@ -266,37 +266,6 @@
 ;; separate these tokens.
 ;;;;;
 
-(defun magma-in-literal ()
-  "Return the type of literal point is in, if any.
-The return value is `c' if in a C-style comment, `c++' if in a
-C++ style comment, `string' if in a string literal, `intrinsic'
-if in an intrinsic description or nil if somewhere else."
-  (let ((state (parse-partial-sexp (point-min) (point))))
-    (cond
-     ((and
-       (= (elt state 0) 1)
-       (= (char-after (elt state 1)) ?{)
-       (save-match-data
-         (looking-back
-          (concat
-           "\\<intrinsic\\>[^;]*"
-           (regexp-quote
-            (buffer-substring-no-properties
-             (elt state 1) (point)))) nil )))
-      'intrinsic)
-     ((elt state 3) (cons 'string (elt state 8)))
-     ((elt state 4) (cons (if (elt state 7) 'c++ 'c) (elt state 8)))
-     (t nil))))
-
-(defun magma-not-in-comment-p ()
-  "Returns true only if we are not in a magma comment"
-  (let ((lit (car (magma-in-literal))))
-    (and (not (eq lit 'c))
-	 (not (eq lit 'c++)))))
-
-(defun magma-looking-at-end-of-line (&optional endchar)
-  "Returns t only is the point is at the end of a line."
-  (looking-at (concat endchar "[[:space:]]*$")))
 
 
 (defun magma--smie-identify-colon ()

@@ -48,6 +48,42 @@
 (defun magma--debug2-message (str)
   (when (>= magma--debug-level 2) (message str)))
 
+(defun magma-in-literal ()
+  "Return the type of literal point is in, if any.
+The return value is `c' if in a C-style comment, `c++' if in a
+C++ style comment, `string' if in a string literal, `intrinsic'
+if in an intrinsic description or nil if somewhere else."
+  (let ((state (parse-partial-sexp (point-min) (point))))
+    (cond
+     ((and
+       (= (elt state 0) 1)
+       (= (char-after (elt state 1)) ?{)
+       (save-match-data
+         (looking-back
+          (concat
+           "\\<intrinsic\\>[^;]*"
+           (regexp-quote
+            (buffer-substring-no-properties
+             (elt state 1) (point)))) nil )))
+      'intrinsic)
+     ((elt state 3)
+      (if (= (char-after (elt state 8)) ?{) 
+	'intrinsic
+	(cons 'string (elt state 8))))
+     ((elt state 4) (cons (if (elt state 7) 'c++ 'c) (elt state 8)))
+     (t nil))))
+
+(defun magma-not-in-comment-p ()
+  "Returns true only if we are not in a magma comment"
+  (let ((lit (car (magma-in-literal))))
+    (and (not (eq lit 'c))
+	 (not (eq lit 'c++)))))
+
+(defun magma-looking-at-end-of-line (&optional endchar)
+  "Returns t only is the point is at the end of a line."
+  (looking-at (concat endchar "[[:space:]]*$")))
+
+
 (defconst magma-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c :") 'magma-send-expression)
@@ -96,8 +132,44 @@
     st)
   "*Syntax table used while in `magma-mode'.")
 
+(defun magma-syntax-stringify-open-brace ()
+  (let ((string-end-pos (point))
+	(string-beg-pos (- (point) 1)))
+    (let ((syntax-string
+	   (if (eq
+		(let )
+		(magma-in-literal) 'intrinsic)
+	       "|" "(}")))
+      (message syntax-string)
+      (put-text-property
+       string-beg-pos string-end-pos
+       'syntax-table (string-to-syntax syntax-string)))))
+
+(defun magma-syntax-stringify-close-brace ()
+  (let ((string-end-pos (point))
+	(string-beg-pos (- (point) 1)))
+    (let ((syntax-string
+	   (save-excursion
+	     (goto-char string-beg-pos)
+	     (if (and (eq (magma-in-literal) 'intrinsic)
+		      (looking-back "[^\\]" (- string-beg-pos 1)))
+		 "|" "){"))))
+      (message syntax-string)
+      (put-text-property
+       string-beg-pos string-end-pos
+       'syntax-table (string-to-syntax syntax-string)))))
+
+
 (defconst magma-syntax-propertize-function 
-  (syntax-propertize-rules ("-\\(>\\)" (1 "."))))
+  (syntax-propertize-rules
+   ;; ((concat "\\<intrinsic\\>[^;]*\\({\\)"
+   ;; 	    "[\0-\377[:nonascii:]]*?" ; any char including newline
+   ;; 	    "[^\\]\\(}\\)")
+   ;;  (1 "|") (2 "|"))
+   ("-\\(>\\)" (1 "."))
+   ("{" (0 (ignore (magma-syntax-stringify-open-brace))))
+   ("}" (0 (ignore (magma-syntax-stringify-close-brace))))
+   ))
 
 ;; Helper functions, maybe we should put them in their own file in the future
 
