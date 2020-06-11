@@ -77,7 +77,7 @@
   (setq imenu-generic-expression magma-imenu-generic-expression)
   (smie-setup
    magma-smie-grammar
-   #'magma-smie-rules
+   #'magma-smie-rules-verbose
    :forward-token #'magma-smie-forward-token
    :backward-token #'magma-smie-backward-token)
   

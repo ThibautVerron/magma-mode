@@ -76,6 +76,7 @@ Feature: Magma code indentation
         /* Comment */
     end for;
     """
+
   
   Scenario: Indentation of C++ comments in blocks
     When I insert:     
@@ -760,7 +761,7 @@ Feature: Magma code indentation
                 b::BoolElt
                 : c := true,
                   d := true)
-              -> BoolElt
+               -> BoolElt
         { Docstring }
         a := 3;
         return a;

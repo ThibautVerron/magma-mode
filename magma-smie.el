@@ -514,33 +514,48 @@ robust in any way."
      (goto-char (car (cdr smie--parent)))
      (smie-rule-bolp))))
 
+(defun magma-smie-rules-verbose (kind token)
+  (if magma-smie-verbose
+      (progn
+	(message (format "kind=%s token=%s parent=%s"
+			 kind token
+			 (if (boundp 'smie--parent)
+			     smie--parent
+			   'none)))
+	(let ((res (magma-smie-rules kind token)))
+	  (message (format "-> %s" res))
+	  ;(message ")")
+	  res))
+    (magma-smie-rules kind token)))
 
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
-  (when ;(and magma-smie-verbose (not edebug-mode))
-      magma-smie-verbose
-    (message (format "kind=%s token=%s parent=%s test=%s"
-                       kind token
-                       (and (boundp 'smie--parent) smie--parent)
-		       nil
-		       ;; (and (not (magma-smie--parent-bolp))
-		       ;; 	    (not (smie-rule-sibling-p)))
-		       )))
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
     ;; (`(:list-intro . "}") t)
-    ;; (`(:list-intro . "fun)") t)
-    (`(:list-intro . "->") t)
+    (`(:list-intro . "fun)") t)
+    (`(:close-all . "fun)") t)
+    ;; (`(:list-intro . "->") nil)
     (`(:list-intro . ,_) nil)
     
     
     ;; Our grammar doesn't really define those, I guess
-    (`(:elem . 'basic) magma-indent-basic)
-    (`(:elem . 'arg)
-     (if (smie-rule-parent-p "special1" "special2")
-         (smie-rule-parent)
-       ;; This piece of code seems to never be evaluated
-       magma-indent-basic))
+    (`(:elem . basic) magma-indent-basic)
+    (`(:elem . args) 
+     (cond
+       ((smie-rule-prev-p "->") 
+       ;; For :elem we can't use ('column . ..) we need a shift
+       (let ((curcol (current-column)))
+       	 (save-excursion
+	   (up-list)
+	   (backward-sexp)
+	   (- (+ (current-column) magma-indent-basic)
+	      curcol))))
+      ((and (bound-and-true-p smie--parent)
+     	    (smie-rule-parent-p "special1" "special2"))
+       (smie-rule-parent))
+      ;; This piece of code seems to never be evaluated
+      (t magma-indent-basic)))
 
     ;; Now the real thing
     (`(:before . ":=") (smie-rule-parent))
@@ -554,18 +569,21 @@ robust in any way."
        magma-indent-basic))
     (`(:before . "|") (smie-rule-parent))
     ;; (`(:after . "->") 0)
-    (`(:after . "->")
-     (cons 'column magma-indent-basic))
-    (`(:before . "->") (cons 'column 0))
+    ;; (`(:after . "->")
+    ;;  magma-indent-basic)
+    (`(:before . "->") ;(cons 'column 0))
      ;; For some reason the parent is not given by the grammar but
      ;; backward-sexp works
-     ;; (progn
-     ;;   ;; Get to the intrinsic kw
-     ;;   (backward-sexp)
-     ;;   ;; Get to the start of the intrinsics name
-     ;;   (forward-word 2) (backward-word)
-     ;;   `(column . ,(current-column)))
-    (`(,_ . ",") (smie-rule-separator kind))
+     ;; (if (smie-rule-hanging-p)
+     (if (smie-rule-hanging-p)
+	 0
+       (progn
+	 ;; Get to the intrinsic kw
+	 (backward-sexp)
+	 ;; Get to the start of the intrinsics name
+	 (forward-word 2); (backward-word)
+	 `(column . ,(current-column)))))
+  (`(,_ . ",") (smie-rule-separator kind))
 
     (`(:before . ";")
      (when (smie-rule-parent-p "fun)")
@@ -600,7 +618,7 @@ robust in any way."
     ;;  (smie-rule-parent 7))
     
     ;; Indentation for the functions, with one syntax or the other
-    (`(:after . "fun)")
+    (`(:after . ,(or "fun)" "->" "}"))
      magma-indent-basic)
     (`(:before . "fun)")
      (if (not (smie-rule-bolp))
