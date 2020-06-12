@@ -136,7 +136,10 @@ if in an intrinsic description or nil if somewhere else."
   (let ((string-end-pos (point))
 	(string-beg-pos (- (point) 1)))
     (let ((syntax-string
-	   (if (eq (magma-in-literal) 'intrinsic)
+	   (if (and (eq (magma-in-literal) 'intrinsic)
+		    (save-excursion
+		      (goto-char string-beg-pos)
+		      (not (eq (magma-in-literal) 'intrinsic))))
 	       "|" "(}")))
       ;; (message syntax-string)
       (put-text-property

@@ -125,8 +125,19 @@ If we are not at the end of the line, preserve the comment structure."
 ID, BEG and END are arguments for the `smartparens' interface and
 the first two are ignored."
   (save-excursion
-    (goto-char (- end 1))
-    (looking-back "-" nil)))
+    (goto-char (- end 2))
+    (looking-at "-")))
+
+(defun magma-smartparens-escaped-brace-in-intrinsic (_id _beg end)
+  "Check whether seen } is escaped in intrinsic docstring.
+
+ID, BEG and END are arguments for the `smartparens' interface and
+the first two are ignored."
+  (message "%s %s" _beg end)
+  (save-excursion
+    (goto-char (- end 2))
+    (and (eq (magma-in-literal) 'intrinsic)
+	 (looking-at "\\\\"))))
 
 (declare-function sp-with-modes "ext:smartparens.el" t t)
 (declare-function sp-local-pair "ext:smartparens.el" t t)
@@ -137,10 +148,14 @@ the first two are ignored."
                       magma-comint-interactive-mode
                       magma-term-interactive-mode)
        (sp-local-pair "<" ">"
-                      :actions '(insert wrap autoskip)
+                      :actions '(insert wrap autoskip navigate)
                       :skip-match 'magma-smartparens-gt-in-an-arrow)
+       ;; (sp-local-pair "{" "}"
+       ;;                :actions '(insert wrap autoskip navigate)
+       ;;                :skip-match nil ;; 'magma-smartparens-escaped-brace-in-intrinsic
+       ;; 		      )
        (sp-local-pair "`" nil :actions '()))))
- 
+
 
 
 ;; File header
