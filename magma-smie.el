@@ -335,21 +335,21 @@ Assume the point is before \"else\". Returns:
             (error (throw 'token "else"))))
         ))))
 
-(defun magma--backward-word-strictly ()
-  "Backward-word ignoring e.g. subword-backward
+;; (defun magma--backward-word-strictly ()
+;;   "Backward-word ignoring e.g. subword-backward
 
-Poorman's implementation of the backward-word-strictly function
-added in Emacs 25.1. It is only used to move over function
-identifiers, so it does not need to take into account all
-possible word separators, only white space."
+;; Poorman's implementation of the backward-word-strictly function
+;; added in Emacs 25.1. It is only used to move over function
+;; identifiers, so it does not need to take into account all
+;; possible word separators, only white space."
 
-  (if (version< emacs-version "25.1")
-      (progn
-        (search-backward-regexp "[[:alnum:]]")
-        (search-backward-regexp "[[:space:]]"))
-    (backward-word-strictly)
-      )
-  )
+;;   (if (version< emacs-version "25.1")
+;;       (progn
+;;         (search-backward-regexp "[[:alnum:]]")
+;;         (search-backward-regexp "[[:space:]]"))
+;;     (backward-word-strictly)
+;;       )
+;;   )
 
 (defun magma--smie-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
@@ -361,7 +361,7 @@ possible word separators, only white space."
               (looking-back "\\<\\(function\\|procedure\\|intrinsic\\)[[:space:]]*"
                             (- (point) 20))
               (progn
-                (magma--backward-word-strictly)
+                (forward-symbol -1)
                 (looking-back "\\<\\(function\\|procedure\\|intrinsic\\)[[:space:]]*"
                               (- (point) 20))))))
     (error nil)))
@@ -533,7 +533,7 @@ robust in any way."
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
     ;; (`(:list-intro . "}") t)
-    (`(:list-intro . "fun)") t)
+    (`(:list-intro . "fun)") nil)
     (`(:close-all . "fun)") t)
     ;; (`(:list-intro . "->") nil)
     (`(:list-intro . ,_) nil)
@@ -543,7 +543,7 @@ robust in any way."
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args) 
      (cond
-       ((smie-rule-prev-p "->") 
+       ((smie-rule-prev-p "->" "fun)") 
        ;; For :elem we can't use ('column . ..) we need a shift
        (let ((curcol (current-column)))
        	 (save-excursion
@@ -581,10 +581,10 @@ robust in any way."
 	 ;; Get to the intrinsic kw
 	 (backward-sexp)
 	 ;; Get to the start of the intrinsics name
-	 (forward-word 2); (backward-word)
+	 (forward-symbol 2); (backward-word)
 	 `(column . ,(current-column)))))
-  (`(,_ . ",") (smie-rule-separator kind))
-
+    (`(,_ . ",") (smie-rule-separator kind))
+    
     (`(:before . ";")
      (when (smie-rule-parent-p "fun)")
        (smie-rule-parent magma-indent-basic)))

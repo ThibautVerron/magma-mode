@@ -126,7 +126,7 @@ if in an intrinsic description or nil if somewhere else."
     (modify-syntax-entry ?#  "."      st)
     (modify-syntax-entry ?`  "."      st)
     (modify-syntax-entry ?|  "."      st)
-    (modify-syntax-entry ?_  "w"      st)
+    (modify-syntax-entry ?_  "_"      st)
     (modify-syntax-entry ?%  "_"      st)
     (modify-syntax-entry ?$  "_"      st)
     st)
