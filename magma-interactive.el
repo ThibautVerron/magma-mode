@@ -751,6 +751,25 @@ statement otherwise"
   (interactive "P")
   (magma-eval-region (point-min) (point) i))
 
+
+(defvar magma-load-file-path-conversion '()
+  "Path conversions to perform before sending a path to magma.
+
+Each entry is a cons cell `(from . to)' where `old' and `new' are
+absolute paths. The effect is that any path starting by `old' is
+transformed into the same path, but starting by `new'.
+
+It can be useful when running magma over ssh with files
+synchronized outside of emacs' control.")
+
+(defun magma-load-file-convert-dir (path)
+  (dolist (conv magma-load-file-path-conversion)
+    (setq path
+	  (replace-regexp-in-string (concat "^" (regexp-quote (car conv)))
+				    (cdr conv) path)))
+  path)
+
+
 (defun magma-load-file-strip-remote (filename)
   "Remove ssh prefix inserted by tramp.
 
@@ -761,7 +780,8 @@ This function allows to edit and evaluate magma files over tramp."
     (file-local-name filename)))
 
 (defcustom magma-load-file-transformation-functions
-  '(magma-load-file-strip-remote)
+  '(magma-load-file-strip-remote
+    magma-load-file-convert-dir)
   "Functions to run to get the filepath to send using load or attach.
 
 The functions are run in order with the output of the previous
