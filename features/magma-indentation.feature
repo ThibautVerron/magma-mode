@@ -1030,3 +1030,64 @@ Feature: Magma code indentation
     XX := recformat<x : type1,
                     y : type2>;
     """
+
+  @bugfix
+  Scenario: indentation after keywords in symbols
+    When I insert:
+    """
+    function test_random(a,b)
+    return 3;
+    end function;
+    """
+    And I place the cursor before "return"
+    And I indent the buffer
+    Then I should see:
+    """
+    function test_random(a,b)
+        return 3;
+    end function;
+    """
+
+  @wishlist
+  Scenario: indentation with intrinsics with composite type
+    When I insert:
+    """
+    intrinsic test(a::SeqEnum[RngIntElt]) -> SeqEnum[BoolElt], BoolElt
+    {}
+    return [],3;
+    end intrinsic;
+
+    intrinsic test(a::SeqEnum[RngIntElt]) 
+    -> SeqEnum[BoolElt], BoolElt
+    {}
+    return [],3;
+    end intrinsic;
+
+    intrinsic test(a::SeqEnum[RngIntElt]) 
+    -> SeqEnum[BoolElt], 
+    BoolElt
+    {}
+    return [],3;
+    end intrinsic;
+    """
+    And I indent the buffer
+    Then I should see:
+    """
+    intrinsic test(a::SeqEnum[RngIntElt]) -> SeqEnum[BoolElt], BoolElt
+        {}
+        return [],3;
+    end intrinsic;
+
+    intrinsic test(a::SeqEnum[RngIntElt]) 
+                  -> SeqEnum[BoolElt], BoolElt
+        {}
+        return [],3;
+    end intrinsic;
+
+    intrinsic test(a::SeqEnum[RngIntElt]) 
+                  -> SeqEnum[BoolElt], 
+                     BoolElt
+        {}
+        return [],3;
+    end intrinsic;
+    """
