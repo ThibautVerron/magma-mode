@@ -226,13 +226,13 @@
    "\\|" 
    (regexp-opt '("for" "while" "repeat" "until" "do" "if" "else" "elif" 
                  "case" "when" "try" "catch" "function" "procedure" "intrinsic"
-                 "then" "where" "is" "select") 'words)
+                 "then" "where" "is" "select") 'symbols)
    "\\)")
   "SMIE tokens for magma keywords, except for block ends.")
 
 (defconst magma-smie-end-tokens-regexp
   (regexp-opt '("end while" "end if" "end case" "end try" "end for"
-                "end function" "end procedure" "end intrinsic") 'words)
+                "end function" "end procedure" "end intrinsic") 'symbols)
   "SMIE tokens for block ends.")
 
 (defconst magma-smie-operators-regexp
@@ -242,7 +242,7 @@
    "\\|"
    (regexp-opt '("div" "mod" "in" "notin" "cat"
                  "eq" "ne" "lt" "gt" "ge" "le"
-                 "and" "or" "not") 'words)
+                 "and" "or" "not") 'symbols)
    "\\)")
   "Regexp matching magma operators.")
 
@@ -252,11 +252,11 @@
      "error" "error if" "eval" "exit" "forward" "fprintf" "freeze" "iload"
      "import" "load" "local" "print" "printf" "quit" "random" "read" "readi"
      "require" "requirege" "requirerange" "restore" "return" "save")
-   'words)
+   'symbols)
   "Regexp matching special functions requiring no parentheses and no colon")
 
 (defconst magma-smie-special2-regexp
-  (regexp-opt '("vprint" "vprintf") 'words)
+  (regexp-opt '("vprint" "vprintf") 'symbols)
   "Regexp matching special functions requiring no parentheses but a colon")
 
 ;;;;;
