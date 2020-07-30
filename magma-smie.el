@@ -53,11 +53,11 @@
       (id)
 
       ;; Several identifiers, separated by commas
-      (idlist (id)
-              (idlist "," idlist))
+      ;; (idlist (id)
+      ;;         (idlist "," idlist))
 
       ;; Assignment
-      (assign (idlist ":=" expr))
+      (assign (id ":=" expr))
 
       ;; Instruction
       (inst (assign)
@@ -70,10 +70,11 @@
             ("try" trybody "end try")
             ("function" id "fun(" funargs "fun)" insts "end function")
             ("procedure" id "fun(" funargs "fun)" insts "end procedure")
-	    ("intrinsic" id "fun(" funargs "fun)"
-	     intrinsicbody
-	     "end intrinsic")
-            ;; ("intrinsic" id "fun(" funargs "fun)"
+	    ("intrinsic" intrinsic-block "end intrinsic")
+	    ;; ("intrinsic" id "fun(" funargs "fun)"
+	    ;;  "->" id "{" id "}" insts
+	    ;;  "end intrinsic")
+	    ;; ("intrinsic" id "fun(" funargs "fun)"
 	    ;;  "{" id "}" insts
 	    ;;  "end intrinsic")
             ("special1" specialargs)
@@ -116,8 +117,17 @@
 	    ;; For declaration ala f := function(...)
             ("function" "fun(" funargs "fun)" insts "end function")
             ("procedure" "fun(" funargs "fun)" insts "end procedure")
-	    (funcall))
+	    (funcall)
+	    )
 
+      ;; Content of an intrinsic definition
+      (intrinsic-block
+       (id "fun(" funargs "fun)"
+	   "docstring" insts)
+       (id "fun(" funargs "fun)"
+	   "intr->" funargs
+	   "docstring" insts))
+      
       ;; What appears in a list or a similar construct (basic)
       (listargs (enum)
                 (enum "paren:" listargspipe))
@@ -140,11 +150,11 @@
       ;;          (recspec "," recspec)
       ;;          )
 
-      (intrinsicbody ("->" id "{" id "}" insts)
-      		     (id "{" id "}" insts))
+      ;; (intrinsic-return-type (id)
+      ;; 			     (intrinsic-return-type "," intrinsic-return-type))
       
       ;; What appears in a function or procedure arguments
-      ;;(funbody (id "fun(" funargs "fun)" insts))
+      ;; (funbody (id "fun(" funargs "fun)" insts))
       (funcall (id "(" funargs ")"))
       (funargs (lfunargs)
                (lfunargs "paren:" rfunargs))
@@ -185,11 +195,13 @@
       (assoc "when")
       (assoc "when:"))
     '((nonassoc "end function" "end procedure" "end intrinsic")
+      (assoc ";")
       (assoc ",")
       (left "|") (left "paren:")
       (assoc ":="))
     '((assoc "special:"))
     '((assoc ";")
+      (assoc ",")
       (assoc "::")
       (assoc "select" "selectelse")
       (assoc "where" "is")
@@ -265,8 +277,6 @@
 ;; printed text. So we define here some functions to help the parser
 ;; separate these tokens.
 ;;;;;
-
-
 
 (defun magma--smie-identify-colon ()
   "Return the token type for a colon.
@@ -351,6 +361,19 @@ Assume the point is before \"else\". Returns:
 ;;       )
 ;;   )
 
+(defun magma--smie-looking-at-intrinsic-arrow (&optional back)
+  "Return t if we are currently looking at an arrow introducing the return type of an intrinsic.
+
+It relies on the assuption that arrows never appear outside of a
+parenthesed expression, e.g. with angular brackets or in a for.
+
+If BACK is t, test if we are looking back at such an arrow."
+  ;; (message "%s %s" (point) back)
+  (save-excursion
+    (when back (forward-char -2))
+    (and (looking-at "->")
+	 (equal (magma-smie-backward-token) "fun)"))))
+
 (defun magma--smie-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
   block of function arguments."
@@ -396,46 +419,54 @@ Assume the point is before \"else\". Returns:
 (defun magma-smie-forward-token ()
   "Read the next token in the magma buffer"
   (forward-comment (point-max))
-  (cond
-   ((magma--smie-looking-at-fun-openparen)
-    (forward-char)
-    "fun(")
-   ((magma--smie-looking-at-fun-closeparen)
-    (forward-char)
-    "fun)")
-   ((looking-at magma-smie-operators-regexp)
-    (goto-char (match-end 0))
-    (match-string-no-properties 0))
-   ((looking-at magma-smie-end-tokens-regexp)
-    (goto-char (match-end 0))
-    (match-string-no-properties 0))
-   ((looking-at "\\<catch [[:alnum:]]+")
-    (goto-char (match-end 0))
-    "catche")
-   ((looking-at "else")
-    (let ((elsetoken (save-match-data (magma--smie-identify-else))))
+  (let ((forward-sexp-function nil))
+    (cond
+     ((magma--smie-looking-at-fun-openparen)
+      (forward-char)
+      "fun(")
+     ((magma--smie-looking-at-fun-closeparen)
+      (forward-char)
+      "fun)")
+     ((and (looking-at "{")
+	   (eq (syntax-class (syntax-after (point))) 15))
+      (forward-sexp)
+      "docstring")
+     ((magma--smie-looking-at-intrinsic-arrow)
+      (forward-char 2)
+      "intr->")
+     ((looking-at magma-smie-operators-regexp)
       (goto-char (match-end 0))
-      elsetoken))
-   ((looking-at magma-smie-tokens-regexp)
-    (goto-char (match-end 0))
-    (match-string-no-properties 0))
-   ((looking-at magma-smie-special1-regexp)
-    (goto-char (match-end 0))
-    "special1")
-   ((looking-at magma-smie-special2-regexp)
-    (goto-char (match-end 0))
-    "special2")
-   ;; ((looking-at "then")
-   ;;  (goto-char (match-end 0))
-   ;;  (magma-identify-then))
-   ((looking-at ":[^:=]")
-    (let ((token (magma--smie-identify-colon)))
-      (forward-char 1)
-      token))
-   (t (buffer-substring-no-properties
-       (point)
-       (progn (skip-syntax-forward "w_")
-              (point))))))
+      (match-string-no-properties 0))
+     ((looking-at magma-smie-end-tokens-regexp)
+      (goto-char (match-end 0))
+      (match-string-no-properties 0))
+     ((looking-at "\\<catch [[:alnum:]]+")
+      (goto-char (match-end 0))
+      "catche")
+     ((looking-at "else")
+      (let ((elsetoken (save-match-data (magma--smie-identify-else))))
+	(goto-char (match-end 0))
+	elsetoken))
+     ((looking-at magma-smie-tokens-regexp)
+      (goto-char (match-end 0))
+      (match-string-no-properties 0))
+     ((looking-at magma-smie-special1-regexp)
+      (goto-char (match-end 0))
+      "special1")
+     ((looking-at magma-smie-special2-regexp)
+      (goto-char (match-end 0))
+      "special2")
+     ;; ((looking-at "then")
+     ;;  (goto-char (match-end 0))
+     ;;  (magma-identify-then))
+     ((looking-at ":[^:=]")
+      (let ((token (magma--smie-identify-colon)))
+	(forward-char 1)
+	token))
+     (t (buffer-substring-no-properties
+	 (point)
+	 (progn (skip-syntax-forward "w_")
+		(point)))))))
 
 (defun magma-smie-backward-token ()
   "Read the previous token in the magma buffer."
@@ -443,14 +474,27 @@ Assume the point is before \"else\". Returns:
   (let ((bolp
          (save-excursion
            (move-beginning-of-line nil)
-           (point))))
+           (point)))
+	(forward-sexp-function nil))
     (cond
+     ((bobp)
+      "")
      ((magma--smie-looking-back-fun-openparen)
       (forward-char -1)
       "fun(")
      ((magma--smie-looking-back-fun-closeparen)
       (forward-char -1)
       "fun)")
+     ((magma--smie-looking-at-intrinsic-arrow t)
+      (forward-char -2)
+      "intr->")
+     ((and (looking-back "}")
+	   ;; I'd rather have eq 0 here, but somehow sometimes the syntax is 12
+	   ;; or something else
+	   (not (eq (syntax-class (syntax-after (point))) 15))
+	   (eq (syntax-class (syntax-after (- (point) 1))) 15))
+      (forward-sexp -1)
+      "docstring")
      ((looking-back magma-smie-operators-regexp bolp)
       (goto-char (match-beginning 0))
       (match-string-no-properties 0))
@@ -533,24 +577,24 @@ robust in any way."
   (pcase (cons kind token)
     ;; Our grammar doesn't allow for unseparated lists of expressions
     ;; (`(:list-intro . "}") t)
-    (`(:list-intro . "fun)") nil)
-    (`(:close-all . "fun)") t)
+    ;; (`(:list-intro . "fun)") t)
+    ;(`(:close-all . "fun)") t)
     ;; (`(:list-intro . "->") nil)
-    (`(:list-intro . ,_) nil)
+    ;(`(:list-intro . ,_) nil)
     
     
     ;; Our grammar doesn't really define those, I guess
     (`(:elem . basic) magma-indent-basic)
     (`(:elem . args) 
      (cond
-       ((smie-rule-prev-p "->" "fun)") 
-       ;; For :elem we can't use ('column . ..) we need a shift
-       (let ((curcol (current-column)))
-       	 (save-excursion
-	   (up-list)
-	   (backward-sexp)
-	   (- (+ (current-column) magma-indent-basic)
-	      curcol))))
+       ;; ((smie-rule-prev-p "->" "fun)") 
+       ;; ;; For :elem we can't use ('column . ..) we need a shift
+       ;; (let ((curcol (current-column)))
+       ;; 	 (save-excursion
+       ;; 	   (up-list)
+       ;; 	   (backward-sexp)
+       ;; 	   (- (+ (current-column) magma-indent-basic)
+       ;; 	      curcol))))
       ((and (bound-and-true-p smie--parent)
      	    (smie-rule-parent-p "special1" "special2"))
        (smie-rule-parent))
@@ -571,25 +615,36 @@ robust in any way."
     ;; (`(:after . "->") 0)
     ;; (`(:after . "->")
     ;;  magma-indent-basic)
-    (`(:before . "->") ;(cons 'column 0))
-     ;; For some reason the parent is not given by the grammar but
-     ;; backward-sexp works
-     ;; (if (smie-rule-hanging-p)
-     (if (smie-rule-hanging-p)
-	 0
-       (progn
-	 ;; Get to the intrinsic kw
-	 (backward-sexp)
-	 ;; Get to the start of the intrinsics name
-	 (forward-symbol 2); (backward-word)
-	 `(column . ,(current-column)))))
-    (`(,_ . ",") (smie-rule-separator kind))
+    ;; (`(:before . "->") ;(cons 'column 0))
+    ;;  ;; For some reason the parent is not given by the grammar but
+    ;;  ;; backward-sexp works
+    ;;  ;; (if (smie-rule-hanging-p)
+    ;;  (if (smie-rule-hanging-p)
+    ;; 	 0
+    ;;    (progn
+    ;; 	 ;; Get to the intrinsic kw
+    ;; 	 (backward-sexp)
+    ;; 	 ;; Get to the start of the intrinsics name
+    ;; 	 (forward-symbol 2); (backward-word)
+    ;; 	 `(column . ,(current-column)))))
+    ;; (`(,_ . ",") (smie-rule-separator kind))
     
-    (`(:before . ";")
-     (when (smie-rule-parent-p "fun)")
-       (smie-rule-parent magma-indent-basic)))
+    ((and `(:before . ";")
+	  (guard (smie-rule-parent-p "fun)")))
+     (smie-rule-parent))
     (`(:after . ";") 0)
+    ;; (`(:before . ";")
+    ;;  (unless (smie-rule-sibling-p)
+    ;;    (smie-rule-parent 4)))
     ;; (`(,_ . ";") (smie-rule-separator kind))
+
+    (`(:before . "->")
+     (smie-rule-parent 4))
+    (`(:before . "docstring")
+     (save-excursion
+       (backward-up-list)
+       `(column . ,(current-column))))
+    (`(:after . "docstring") magma-indent-basic)
     
     (`(:after . ,(or `"special1" `"special2")) magma-indent-basic)
     (`(:after . "special:") magma-indent-basic)
@@ -618,23 +673,30 @@ robust in any way."
     ;;  (smie-rule-parent 7))
     
     ;; Indentation for the functions, with one syntax or the other
-    (`(:after . ,(or "fun)" "->" "}"))
-     magma-indent-basic)
+    ;; (`(:after . ,(or "fun)" ;; "->" "}"
+    ;; 		     ))
+    ;;  magma-indent-basic)
     (`(:before . "fun)")
      (if (not (smie-rule-bolp))
        (smie-rule-parent)))
-    ;; (`(:before . "{")
-    ;;  magma-indent-basic)
-    ;; (`(:after . "}") 0)
-    (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
-     (if (smie-rule-prev-p ":=")
-         (progn
-           (back-to-indentation)
-           (cons 'column (current-column)))))
-    (`(:before . ,(or `"end function"
-		      `"end procedure"
-		      `"end intrinsic"))
-     (smie-rule-parent))))
+    ; (`(:after . "}") 0)
+    ;; (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
+    ;;  (if (smie-rule-prev-p ":=")
+    ;;      (progn
+    ;;        (back-to-indentation)
+    ;;        (cons 'column (current-column)))))
+    ;; (`(:before . ,(or `"end function"
+    ;; 		      `"end procedure"
+    ;; 		      `"end intrinsic"))
+    ;;  (smie-rule-parent))
+    ;; (`(:after . ,(or `"end function"
+    ;; 		      `"end procedure"
+    ;; 		      `"end intrinsic"))
+    ;;  0)
+    ;; (`(and (:before . ,_)
+    ;; 	   (guard (smie-rule-parent-p "fun)")))
+    ;;  (smie-rule-parent magma-indent-basic))
+    ))
 
 (defun magma-indent-line ()
   "Indent a line according to the SMIE settings."
@@ -720,7 +782,7 @@ robust in any way."
                (message "Not in a function, procedure or intrinsic definition")))))
 
 (defun magma-end-of-defun ()
-  "Go to the beginning of the function, procedure or intrinsic
+  "Go to the end of the function, procedure or intrinsic
   definition at point"
   (interactive)
   (or (looking-at magma-defun-regexp)

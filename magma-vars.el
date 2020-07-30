@@ -61,7 +61,7 @@ if in an intrinsic description or nil if somewhere else."
        (save-match-data
          (looking-back
           (concat
-           "\\<intrinsic\\>[^;]*"
+           "\\<intrinsic\\>[^;]*" ;; insufficient
            (regexp-quote
             (buffer-substring-no-properties
              (elt state 1) (point)))) nil )))
@@ -72,6 +72,16 @@ if in an intrinsic description or nil if somewhere else."
 	(cons 'string (elt state 8))))
      ((elt state 4) (cons (if (elt state 7) 'c++ 'c) (elt state 8)))
      (t nil))))
+
+;; (defun magma--in-intrinsic ()
+;;   "Test if point is in the preamble of an intrinsic.
+
+;; The return value is t if and only if the point is after the
+;; arguments of an intrinsic but before the end of the docstring."
+;;   ;; If we are in the docstring, move at the beginning of it
+  
+;;   ()
+;;   )
 
 (defun magma-not-in-comment-p ()
   "Returns true only if we are not in a magma comment"
@@ -141,7 +151,6 @@ if in an intrinsic description or nil if somewhere else."
 		      (goto-char string-beg-pos)
 		      (not (eq (magma-in-literal) 'intrinsic))))
 	       "|" "(}")))
-      ;; (message syntax-string)
       (put-text-property
        string-beg-pos string-end-pos
        'syntax-table (string-to-syntax syntax-string)))))
