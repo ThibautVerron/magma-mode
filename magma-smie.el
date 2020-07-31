@@ -693,9 +693,9 @@ robust in any way."
     ;; 		      `"end procedure"
     ;; 		      `"end intrinsic"))
     ;;  0)
-    ;; (`(and (:before . ,_)
-    ;; 	   (guard (smie-rule-parent-p "fun)")))
-    ;;  (smie-rule-parent magma-indent-basic))
+    ((and `(:before . ,_)
+    	  (guard (smie-rule-parent-p "fun)")))
+     (smie-rule-parent magma-indent-basic))
     ))
 
 (defun magma-indent-line ()
