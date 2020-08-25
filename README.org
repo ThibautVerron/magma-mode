@@ -372,9 +372,16 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** 2020-05-28 (develop)
+*** 2020-08-25 (develop)
 
- - *Feature* Support for indentation of intrinsics
+ - *Feature* General support of intrinsics, including:
+   - Indentation
+   - Syntax coloring
+   - Loading in the interactive buffer using attach (not automatic so far)
+ - *Feature* Support for file-name transformation for remote execution
+ - *Bugfix* Broken indentation with function or intrinsic names matching keywords up to
+   capitalization
+ - *Bugfix* Broken indentation with function names containing keyword
  - *Bugfix* Better detection of whether we are or not in a function
  - *Bugfix* Completion not working due to misformed defvars
  - *Bugfix* Error when trying to write completion file in a non-existent directory
