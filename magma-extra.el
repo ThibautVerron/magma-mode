@@ -33,10 +33,19 @@
 
 (require 'imenu)
 
-(defvar magma-defun-regexp "^\\(function\\|procedure\\|intrinsics\\)[[:space:]]+\\(\\sw+\\)[[:space:]]*(")
+(defconst magma-imenu-defun-regexp
+  "^\\(function\\|procedure\\|intrinsic\\)[[:space:]]+\\<\\(\\sw+\\)\\>[[:space:]]*(")
+
+(defconst magma-imenu-recformat-regexp
+  "\\<\\(\\sw+\\)\\> := recformat")
+
+(defconst magma-imenu-type-regexp
+  "declare type \\<\\(\\sw+\\)\\>")
 
 (setq magma-imenu-generic-expression
-      (list (list nil magma-defun-regexp 2)))
+      (list (list "Function" magma-imenu-defun-regexp 2)
+	    (list "Record" magma-imenu-recformat-regexp 1)
+	    (list "Type" magma-imenu-type-regexp 1)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
