@@ -1048,6 +1048,27 @@ Feature: Magma code indentation
     end function;
     """
 
+  @bugfix
+  Scenario: indentation after special names in symbols
+    When I insert:
+    """
+    intrinsic Print(obj::Any)
+    { }
+    ;
+    end intrinsic;
+    """
+    And I place the cursor before "{ }"
+    And I indent the buffer
+    And I place the cursor before ";"
+    And I indent the buffer
+    Then I should see
+    """
+    intrinsic Print(obj::Any)
+    { }
+        ;
+    end intrinsic;
+    """
+
   @wishlist
   Scenario: indentation with intrinsics with composite type
     When I insert:

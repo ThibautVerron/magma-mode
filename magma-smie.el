@@ -53,6 +53,7 @@
       (id)
 
       ;; Several identifiers, separated by commas
+
       ;; (idlist (id)
       ;;         (idlist "," idlist))
 
@@ -419,7 +420,10 @@ If BACK is t, test if we are looking back at such an arrow."
 (defun magma-smie-forward-token ()
   "Read the next token in the magma buffer"
   (forward-comment (point-max))
-  (let ((forward-sexp-function nil))
+  (let (;; Avoid circular dependency
+	(forward-sexp-function nil)
+	;; Keywords are case sensitive, e.g. print vs Print
+	(case-fold-search nil))
     (cond
      ((magma--smie-looking-at-fun-openparen)
       (forward-char)
@@ -475,7 +479,9 @@ If BACK is t, test if we are looking back at such an arrow."
          (save-excursion
            (move-beginning-of-line nil)
            (point)))
-	(forward-sexp-function nil))
+	;; See the docstring of `magma-smie-forward-token'
+	(forward-sexp-function nil)
+	(case-fold-search nil))
     (cond
      ((bobp)
       "")
@@ -639,7 +645,7 @@ robust in any way."
     ;; (`(,_ . ";") (smie-rule-separator kind))
 
     (`(:before . "->")
-     (smie-rule-parent 4))
+     (smie-rule-parent magma-indent-basic))
     (`(:before . "docstring")
      (save-excursion
        (backward-up-list)
