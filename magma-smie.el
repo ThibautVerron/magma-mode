@@ -370,10 +370,12 @@ parenthesed expression, e.g. with angular brackets or in a for.
 
 If BACK is t, test if we are looking back at such an arrow."
   ;; (message "%s %s" (point) back)
-  (save-excursion
-    (when back (forward-char -2))
-    (and (looking-at "->")
-	 (equal (magma-smie-backward-token) "fun)"))))
+  (and
+   (> (point) 2)
+   (save-excursion
+     (when back (forward-char -2))
+     (and (looking-at "->")
+	  (equal (magma-smie-backward-token) "fun)")))))
 
 (defun magma--smie-looking-at-fun-openparen ()
   "Returns t if we are currently looking at the open paren of a
@@ -494,7 +496,7 @@ If BACK is t, test if we are looking back at such an arrow."
      ((magma--smie-looking-at-intrinsic-arrow t)
       (forward-char -2)
       "intr->")
-     ((and (looking-back "}")
+     ((and (looking-back "}" (- (point) 1))
 	   ;; I'd rather have eq 0 here, but somehow sometimes the syntax is 12
 	   ;; or something else
 	   (not (eq (syntax-class (syntax-after (point))) 15))

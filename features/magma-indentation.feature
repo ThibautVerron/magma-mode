@@ -691,6 +691,7 @@ Feature: Magma code indentation
     c := 1,
     d := 2)
     x := a;
+    y := b;
     end procedure;
     end for;
     """
@@ -736,7 +737,6 @@ Feature: Magma code indentation
     a := 3;
     return a;
     end intrinsic;
-    
     intrinsic f(a::BoolElt,
     b::BoolElt
     : c := true,
@@ -746,7 +746,6 @@ Feature: Magma code indentation
     a := 3;
     return a;
     end intrinsic;
-    
     intrinsic f(a::BoolElt,
     b::BoolElt
     : c := true,
@@ -765,17 +764,15 @@ Feature: Magma code indentation
         a := 3;
         return a;
     end intrinsic;
-    
     intrinsic f(a::BoolElt,
                 b::BoolElt
                 : c := true,
                   d := true)
-               -> BoolElt
+              -> BoolElt
     { Docstring }
         a := 3;
         return a;
     end intrinsic;
-    
     intrinsic f(a::BoolElt,
                 b::BoolElt
                 : c := true,
