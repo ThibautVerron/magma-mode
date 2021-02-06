@@ -637,7 +637,7 @@ robust in any way."
     
     ((and `(:before . ";")
 	  (guard (smie-rule-parent-p "fun)")))
-     (smie-rule-parent))
+     (smie-rule-parent magma-indent-basic))
     (`(:after . ";") 0)
     ;; (`(:before . ";")
     ;;  (unless (smie-rule-sibling-p)
