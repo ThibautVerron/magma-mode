@@ -319,10 +319,6 @@ Feature: Magma code indentation
     And I indent the buffer
     Then I should see:
     """
-    function test (x,y : z := 5)
-    x:=3+3;
-    return z;
-    end function;
     for x in l do
         function test (x,y : z := 5)
             x:=3+3;
@@ -761,7 +757,7 @@ Feature: Magma code indentation
     """
     intrinsic f(a::BoolElt, b::BoolElt
                 : c := true, d := true) -> BoolElt
-        { Docstring }
+    { Docstring }
         a := 3;
         return a;
     end intrinsic;
@@ -771,7 +767,7 @@ Feature: Magma code indentation
                 : c := true,
                   d := true)
                -> BoolElt
-        { Docstring }
+    { Docstring }
         a := 3;
         return a;
     end intrinsic;
@@ -780,7 +776,7 @@ Feature: Magma code indentation
                 b::BoolElt
                 : c := true,
                   d := true)
-        { Docstring }
+    { Docstring }
         a := 3;
         return a;
     end intrinsic;
@@ -1070,7 +1066,7 @@ Feature: Magma code indentation
     And I indent the buffer
     And I place the cursor before ";"
     And I indent the buffer
-    Then I should see
+    Then I should see:
     """
     intrinsic Print(obj::Any)
     { }

@@ -4,24 +4,20 @@ function test1 (res)
     return res3;
 end function;
 
-function test2 (res)
-    res2 := res;
-res3 := res2 + res2;
-return res3;
-end function;
-
-function test (x,y : z := 5)
-    x:=3+3;
-y := 4;
-    return z;
-end function;
-for x in l do
-    function test (x,y : z := 5)
-	x:=3+3;
-    y := 4;
-    return z;
+for x in [] do
+    function test2 (res)
+	res2 := res;
+	res3 := res2 + res2;
+	return res3;
     end function;
 end for;
+
+toto := function(test)
+    a := 2+2;
+    b := 2+2;
+    return a+b;
+end function;
+;
 
 
 procedure test3 (res)
@@ -40,3 +36,5 @@ intrinsic test5(res::Test) -> Test
     res3 := res;
     return res;
 end intrinsic;
+
+

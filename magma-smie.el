@@ -578,6 +578,12 @@ robust in any way."
 	  res))
     (magma-smie-rules kind token)))
 
+(defun magma--smie-shift (col)
+  "Return the shift from current column to col
+
+This is for rules where the 'column construction cannot be used."
+  (- col (current-column)))
+
 (defun magma-smie-rules (kind token)
   "SMIE indentation rules."
   (pcase (cons kind token)
@@ -590,7 +596,11 @@ robust in any way."
     
     
     ;; Our grammar doesn't really define those, I guess
-    (`(:elem . basic) magma-indent-basic)
+    (`(:elem . basic)
+     ;; (if (smie-rule-prev-p ":=")
+     ;; 	 (magma--smie-shift
+     ;; 	  (save-ex)))
+     magma-indent-basic)
     (`(:elem . args) 
      (cond
        ;; ((smie-rule-prev-p "->" "fun)") 
@@ -686,11 +696,11 @@ robust in any way."
      (if (not (smie-rule-bolp))
        (smie-rule-parent)))
     ; (`(:after . "}") 0)
-    ;; (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
-    ;;  (if (smie-rule-prev-p ":=")
-    ;;      (progn
-    ;;        (back-to-indentation)
-    ;;        (cons 'column (current-column)))))
+    (`(:before . ,(or `"function" `"procedure" `"intrinsic"))
+     (if (smie-rule-prev-p ":=")
+         (progn
+           (back-to-indentation)
+           (cons 'column (current-column)))))
     ;; (`(:before . ,(or `"end function"
     ;; 		      `"end procedure"
     ;; 		      `"end intrinsic"))

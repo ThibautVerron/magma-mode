@@ -142,7 +142,7 @@ the first two are ignored."
 
 ID, BEG and END are arguments for the `smartparens' interface and
 the first two are ignored."
-  (message "%s %s" _beg end)
+  ;;(message "%s %s" _beg end)
   (save-excursion
     (goto-char (- end 2))
     (and (eq (magma-in-literal) 'intrinsic)
