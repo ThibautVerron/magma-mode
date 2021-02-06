@@ -4,7 +4,7 @@ Feature: Magma code indentation
   In order to edit magma code
   As a user
   I want to have properly indented code
-  
+ 
   Background:
     Given I am in buffer "*magma-test*"
     And the buffer is empty
@@ -311,6 +311,7 @@ Feature: Magma code indentation
     for x in l do
     function test (x,y : z := 5)
     x:=3+3;
+    y:=4;
     return z;
     end function;
     end for;
@@ -318,9 +319,14 @@ Feature: Magma code indentation
     And I indent the buffer
     Then I should see:
     """
+    function test (x,y : z := 5)
+    x:=3+3;
+    return z;
+    end function;
     for x in l do
         function test (x,y : z := 5)
             x:=3+3;
+            y:=4;
             return z;
         end function;
     end for;
@@ -596,32 +602,32 @@ Feature: Magma code indentation
                   >;
     """
 
-  Scenario: Indentation of function definitions 
+  Scenario: Indentation of function definitions
     When I insert:
     """
     for x in l do
-    function toto (a, 
-    b : 
-    c := 1, 
+    function toto (a,
+    b :
+    c := 1,
     d := 2)
     x := a;
     return x;
     end function;
-    toto := function (a, 
-    b : 
-    c := 1, 
+    toto := function (a,
+    b :
+    c := 1,
     d := 2)
     x := a;
     return x;
     end function;
-    toto := function (a, b : 
-    c := 1, 
+    toto := function (a, b :
+    c := 1,
     d := 2)
     x := a;
     return x;
     end function;
-    toto := function (a, b : 
-    c := 1, 
+    toto := function (a, b :
+    c := 1,
     d := 2)
     x := a;
     return x;
@@ -632,28 +638,28 @@ Feature: Magma code indentation
     Then I should see:
     """
     for x in l do
-        function toto (a, 
-                       b : 
-                       c := 1, 
+        function toto (a,
+                       b :
+                       c := 1,
                        d := 2)
             x := a;
             return x;
         end function;
-        toto := function (a, 
-                          b : 
-                          c := 1, 
+        toto := function (a,
+                          b :
+                          c := 1,
                           d := 2)
             x := a;
             return x;
         end function;
-        toto := function (a, b : 
-                          c := 1, 
+        toto := function (a, b :
+                          c := 1,
                           d := 2)
             x := a;
             return x;
         end function;
-        toto := function (a, b : 
-                          c := 1, 
+        toto := function (a, b :
+                          c := 1,
                           d := 2)
             x := a;
             return x;
@@ -665,25 +671,28 @@ Feature: Magma code indentation
     When I insert:
     """
     for x in l do
-    procedure toto (~a, 
-    b : 
-    c := 1, 
+    procedure toto (~a,
+    b :
+    c := 1,
     d := 2)
     x := a;
+    y := b;
     end procedure;
-    toto := procedure (~a, 
-    b : 
-    c := 1, 
+    toto := procedure (~a,
+    b :
+    c := 1,
     d := 2)
     x := a;
+    y := b;
     end procedure;
-    procedure toto (~a, b : 
-    c := 1, 
+    procedure toto (~a, b :
+    c := 1,
     d := 2)
     x := a;
+    y := b;
     end procedure;
-    toto := procedure (~a, b : 
-    c := 1, 
+    toto := procedure (~a, b :
+    c := 1,
     d := 2)
     x := a;
     end procedure;
@@ -693,25 +702,25 @@ Feature: Magma code indentation
     Then I should see:
     """
     for x in l do
-        procedure toto (~a, 
-                        b : 
-                        c := 1, 
+        procedure toto (~a,
+                        b :
+                        c := 1,
                         d := 2)
             x := a;
         end procedure;
-        toto := procedure (~a, 
-                           b : 
-                           c := 1, 
+        toto := procedure (~a,
+                           b :
+                           c := 1,
                            d := 2)
             x := a;
         end procedure;
-        procedure toto (~a, b : 
-                        c := 1, 
+        procedure toto (~a, b :
+                        c := 1,
                         d := 2)
             x := a;
         end procedure;
-        toto := procedure (~a, b : 
-                           c := 1, 
+        toto := procedure (~a, b :
+                           c := 1,
                            d := 2)
             x := a;
         end procedure;
