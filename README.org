@@ -372,7 +372,7 @@ The header inserted by the default functions looks like this:
 #+end_src
 
 ** Changelog
-*** 2020-08-25 (develop)
+*** 2021-10-18
 
  - *Feature* General support of intrinsics, including:
    - Indentation
@@ -380,6 +380,7 @@ The header inserted by the default functions looks like this:
    - Loading in the interactive buffer using attach (not automatic so far)
  - *Feature* Entries for types and record formats in =imenu=
  - *Feature* Support for file-name transformation for remote execution
+ - *Feature* Support for =beginning-of-defun= and =end-of-defun=
  - *Bugfix* Broken indentation with function or intrinsic names matching keywords up to
    capitalization
  - *Bugfix* Broken indentation with function names containing keyword
