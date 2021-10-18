@@ -76,6 +76,8 @@
   (setq-local comment-start "/* ")
   (setq-local comment-end " */")
   (setq imenu-generic-expression magma-imenu-generic-expression)
+  (setq-local beginning-of-defun-function #'magma-beginning-of-defun)
+  (setq-local end-of-defun-function #'magma-end-of-defun)
   (smie-setup
    magma-smie-grammar
    #'magma-smie-rules-verbose
